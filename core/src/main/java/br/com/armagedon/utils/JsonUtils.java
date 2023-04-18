@@ -1,4 +1,4 @@
-package br.com.armagedon.util;
+package br.com.armagedon.utils;
 
 import com.google.gson.JsonElement;
 
@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public class JsonUtils {
 
-    public static void setFieldFromJson(Field field, Object object, JsonElement jsonElement) {
+    public static void setFieldFromJson(Field field, JsonElement jsonElement, Object object) {
         try {
             field.setAccessible(true);
 

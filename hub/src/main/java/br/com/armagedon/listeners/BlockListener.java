@@ -1,6 +1,7 @@
 package br.com.armagedon.listeners;
 
-import br.com.armagedon.lobby.main.gui.ServerGUI;
+import br.com.armagedon.gui.ServerGUI;
+import br.com.armagedon.util.bungee.BungeeUtils;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
@@ -11,18 +12,18 @@ public class BlockListener implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
        // event.setCancelled(true);
-
         //TODO: fazer as properties dessa conta também
     }
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         //event.setCancelled(true);
+        BungeeUtils.connect(event.getPlayer(), "test");
     }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
-        ServerGUI.INVENTORY.open(event.getPlayer());
+        //ServerGUI.INVENTORY.open(event.getPlayer());
     }
 
     @EventHandler

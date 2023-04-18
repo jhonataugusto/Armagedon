@@ -1,53 +1,52 @@
-package br.com.armagedon.user;
+package br.com.armagedon.account;
 
-import br.com.armagedon.Hub;
-import br.com.armagedon.data.UserData;
+import br.com.armagedon.crud.mongo.AccountMongoCRUD;
+import br.com.armagedon.crud.redis.AccountRedisCRUD;
+import br.com.armagedon.data.AccountData;
 import lombok.Data;
 
 import java.util.UUID;
 
 @Data
-public class User {
+public class Account {
     private String name;
     private UUID uuid;
     private int blocks;
-    private UserData userData;
+    private AccountData accountData;
 
-    public User(String name, UUID uuid) {
+    public Account(String name, UUID uuid) {
         setName(name);
         setUuid(uuid);
-        setUserData(createUserDataOrGet());
+        setAccountData(createUserDataOrGet());
     }
 
-    public UserData getUserData() {
-        return userData;
+    public AccountData getAccountData() {
+        return accountData;
     }
 
-    public void setUserData(UserData userData) {
-        this.userData = userData;
+    public void setAccountData(AccountData accountData) {
+        this.accountData = accountData;
     }
 
-    public UserData createUserDataOrGet() {
-        UserData data = Hub.getInstance().getUserRedisCRUD().findByUuid(this.getUuid());
+    public AccountData createUserDataOrGet() {
+        AccountData data = AccountRedisCRUD.findByUuid(this.getUuid());
 
         if (data == null) {
-            data = Hub.getInstance().getUserMongoCRUD().get(this.getUuid());
+            data = AccountMongoCRUD.get(this.getUuid());
 
             if (data != null) {
-                Hub.getInstance().getUserRedisCRUD().save(data);
+                AccountRedisCRUD.save(data);
             }
         }
 
         if (data == null) {
-            data = new UserData().setDefaultData(getName(), getUuid());
-            Hub.getInstance().getUserRedisCRUD().save(data);
-            Hub.getInstance().getUserMongoCRUD().create(data);
+            data = new AccountData().setDefaultData(getName(), getUuid());
+            AccountRedisCRUD.save(data);
+            AccountMongoCRUD.create(data);
         }
 
         return data;
     }
 
-    public static User fetch(UUID uuid) {
-        return Hub.getInstance().getUserStorage().getUser(uuid);
-    }
+
 }

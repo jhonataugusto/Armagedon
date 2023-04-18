@@ -1,24 +1,24 @@
-package br.com.armagedon.database.redis;
+package br.com.armagedon.crud.redis;
 
 import br.com.armagedon.Core;
-import br.com.armagedon.database.mongo.collections.CollectionProps;
-import br.com.armagedon.server.data.ServerData;
+import br.com.armagedon.data.ServerData;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-import java.util.UUID;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ServerRedisCRUD {
-    private final JedisPool JEDIS_POOL = Core.JEDIS_POOL;
-    private final String SERVER_CACHE = Core.REDIS_CACHE.SERVER_DATABASE_CACHE;
+    private static final JedisPool JEDIS_POOL = Core.JEDIS_POOL;
+    private static final String SERVER_CACHE = Core.REDIS_CACHE.SERVER_DATABASE_CACHE;
 
-    public void save(ServerData data) {
+    public static void save(ServerData data) {
         try (Jedis jedis = JEDIS_POOL.getResource()) {
             jedis.hset(SERVER_CACHE, data.getName(), data.toJson());
         }
     }
 
-    public ServerData findByName(String name) {
+    public static ServerData findByName(String name) {
         try (Jedis jedis = JEDIS_POOL.getResource()) {
             String json = jedis.hget(SERVER_CACHE, name);
             if (json != null) {
@@ -28,9 +28,16 @@ public class ServerRedisCRUD {
         }
     }
 
-    public void delete(String name) {
+    public static void delete(String name) {
         try (Jedis jedis = JEDIS_POOL.getResource()) {
             jedis.hdel(SERVER_CACHE, name);
+        }
+    }
+
+    public static List<ServerData> getServers() {
+        try (Jedis jedis = JEDIS_POOL.getResource()) {
+            List<String> jsonList = jedis.hvals(SERVER_CACHE);
+            return jsonList.stream().map(ServerData::fromJson).collect(Collectors.toList());
         }
     }
 }

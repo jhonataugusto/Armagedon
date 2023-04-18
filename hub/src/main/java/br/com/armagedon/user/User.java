@@ -4,6 +4,8 @@ import br.com.armagedon.Hub;
 import br.com.armagedon.account.Account;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -11,19 +13,23 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class QueueProperties {
+public class User {
 
     private Account account;
 
-    public static QueueProperties fetch(UUID uuid) {
+    public static User fetch(UUID uuid) {
         return Hub.getInstance().getUserStorage().getUser(uuid);
+    }
+
+    public Player getPlayer() {
+        return Bukkit.getPlayer(getAccount().getUuid());
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        QueueProperties queueProperties = (QueueProperties) o;
-        return Objects.equals(account, queueProperties.account);
+        User user = (User) o;
+        return Objects.equals(account, user.account);
     }
 }

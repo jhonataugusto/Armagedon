@@ -9,22 +9,24 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 @Getter
 @NoArgsConstructor
-public enum LobbyItem {
-    COMPASS("Clique para selecionar o Servidor", Material.COMPASS, 0, 1, "MAIN_COMPASS");
+public enum LobbyItems {
+    SERVER_LIST("Clique para selecionar o Servidor", Material.COMPASS, 0, 1, "SERVER_LIST"),
+    PROFILE("Seu perfil", Material.SKULL_ITEM, 4, 1, "PROFILE"),
+    CONFIGURATIONS("Configurações", Material.COMMAND, 8, 1, "CONFIGURATIONS");
 
     private String displayName;
     private Material material;
     private int position;
     private int amount;
-    private String id;
-    public final String KEY = "id";
+    private String value;
+    public final String key = "id";
 
-    LobbyItem(String name, Material material, int position, int amount, String id) {
+    LobbyItems(String name, Material material, int position, int amount, String value) {
         this.displayName = name;
         this.material = material;
         this.position = position;
         this.amount = amount;
-        this.id = id;
+        this.value = value;
     }
 
     public ItemStack toItemStack() {
@@ -38,7 +40,7 @@ public enum LobbyItem {
         itemStack.setDurability((short) 0);
 
         NBT.modify(itemStack, nbt -> {
-            nbt.setString(KEY, getId());
+            nbt.setString(key, getValue());
         });
         return itemStack;
     }

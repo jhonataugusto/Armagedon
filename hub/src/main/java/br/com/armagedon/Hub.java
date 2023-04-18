@@ -1,15 +1,17 @@
 package br.com.armagedon;
 
-import br.com.armagedon.database.redis.UserRedisCRUD;
-import br.com.armagedon.database.mongo.UserMongoCRUD;
 import br.com.armagedon.lobby.Lobby;
 import br.com.armagedon.lobby.storage.LobbyStorage;
+import br.com.armagedon.util.bungee.BungeeUtils;
 import fr.minuskube.inv.InventoryManager;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import br.com.armagedon.user.storage.UserStorage;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.util.logging.Level;
 
 @Getter
@@ -17,10 +19,10 @@ public class Hub extends JavaPlugin {
 
     private static Hub instance;
     private UserStorage userStorage;
-    private UserMongoCRUD userMongoCRUD;
-    private UserRedisCRUD userRedisCRUD;
     private InventoryManager inventoryManager;
     private Lobby lobby;
+
+    private String CHANNEL = "REDIRECT";
 
     @Override
     public void onLoad() {
@@ -34,8 +36,6 @@ public class Hub extends JavaPlugin {
         instance = this;
 
         userStorage = new UserStorage();
-        userMongoCRUD = new UserMongoCRUD();
-        userRedisCRUD = new UserRedisCRUD();
 
         inventoryManager = new InventoryManager(this);
         inventoryManager.init();
@@ -58,6 +58,8 @@ public class Hub extends JavaPlugin {
             Lobby lobby = (Lobby) LobbyStorage.getLobby(Hub.getInstance().getConfig().getString("lobby.mode")).getConstructor(Hub.class).newInstance(this);
 
             lobby.loadListeners();
+            lobby.registerCommands();
+            lobby.registerPluginChannels();
             lobby.removeRecipes();
 
             return lobby;

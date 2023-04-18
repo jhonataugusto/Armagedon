@@ -2,27 +2,28 @@ package br.com.armagedon.crud.redis;
 
 import br.com.armagedon.Core;
 import br.com.armagedon.database.mongo.collections.CollectionProps;
-import br.com.armagedon.data.UserData;
+import br.com.armagedon.data.AccountData;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.util.UUID;
 
-public class UserRedisCRUD {
+public class AccountRedisCRUD {
 
     private static final JedisPool JEDIS_POOL = Core.JEDIS_POOL;
+    private static final String ACCOUNT_CACHE = Core.REDIS_CACHE.ACCOUNT_DATABASE_CACHE;
 
-    public static void save(UserData data) {
+    public static void save(AccountData data) {
         try (Jedis jedis = JEDIS_POOL.getResource()) {
-            jedis.hset(CollectionProps.USERS.getName(), data.getUuid().toString(), data.toJson());
+            jedis.hset(ACCOUNT_CACHE, data.getUuid().toString(), data.toJson());
         }
     }
 
-    public static UserData findByUuid(UUID uuid) {
+    public static AccountData findByUuid(UUID uuid) {
         try (Jedis jedis = JEDIS_POOL.getResource()) {
-            String json = jedis.hget(CollectionProps.USERS.getName(), uuid.toString());
+            String json = jedis.hget(ACCOUNT_CACHE, uuid.toString());
             if (json != null) {
-                return UserData.fromJson(json);
+                return AccountData.fromJson(json);
             }
             return null;
         }
@@ -30,7 +31,7 @@ public class UserRedisCRUD {
 
     public static void delete(UUID uuid) {
         try (Jedis jedis = JEDIS_POOL.getResource()) {
-            jedis.hdel(CollectionProps.USERS.getName(), uuid.toString());
+            jedis.hdel(ACCOUNT_CACHE, uuid.toString());
         }
     }
 }
