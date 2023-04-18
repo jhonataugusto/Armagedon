@@ -2,8 +2,11 @@
 Este é um projeto que visa implementar uma network de Minecraft, utilizando BungeeCord e Bukkit, além de tecnologias como Redis e MongoDB. O projeto é dividido em módulos, sendo eles:
 
 Core: módulo principal da rede, contendo as configurações globais e comuns a todos os servidores;
+
 Bungee: módulo responsável pelo servidor proxy, gerenciando as conexões dos jogadores aos diferentes servidores da rede;
+
 Practice: módulo responsável pela implementação de um sistema de duelos e partidas rápidas;
+
 Hub: módulo que implementa um lobby central, onde os jogadores podem se encontrar e se preparar para acessar outros servidores da rede.
 
 # Dependências
