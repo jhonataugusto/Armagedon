@@ -1,13 +1,12 @@
 package br.com.armagedon.user.storage;
 
-import br.com.armagedon.crud.mongo.AccountMongoCRUD;
-import br.com.armagedon.crud.redis.AccountRedisCRUD;
-import br.com.armagedon.data.AccountData;
 import br.com.armagedon.user.User;
+import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.UUID;
 
+@Getter
 public class UserStorage {
 
     public HashMap<UUID, User> users = new HashMap<>();
@@ -18,11 +17,6 @@ public class UserStorage {
 
     public void unregister(UUID uuid) {
         getUsers().remove(uuid);
-        AccountData accountData = AccountRedisCRUD.findByUuid(uuid);
-        if(accountData != null) {
-            AccountMongoCRUD.save(accountData);
-        }
-        AccountRedisCRUD.delete(uuid);
     }
 
     public User getUser(UUID uuid) {

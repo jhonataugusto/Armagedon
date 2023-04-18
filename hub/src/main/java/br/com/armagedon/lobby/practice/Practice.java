@@ -1,27 +1,30 @@
 package br.com.armagedon.lobby.practice;
 
 import br.com.armagedon.Hub;
-import br.com.armagedon.items.PracticeItems;
 import br.com.armagedon.lobby.Lobby;
 import br.com.armagedon.lobby.practice.queue.Queue;
 import br.com.armagedon.util.cuboid.Cuboid;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.WorldBorder;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.reflections.Reflections;
+
+import java.util.Set;
 
 import static br.com.armagedon.util.cuboid.Cuboid.loadProperties;
 
 @Getter
-public class Practice extends Lobby implements Listener {
+public class Practice extends Lobby {
 
     private Queue queue;
     private Cuboid cuboid;
 
+
     public Practice(Hub instance) {
         super(instance);
+
+        registerListeners();
 
         setSpawn(new Location(getWorld(), 0.5, 60, 0.5, 0, 0));
 
@@ -31,15 +34,19 @@ public class Practice extends Lobby implements Listener {
         border.setCenter(getSpawn());
         border.setSize(450);
 
-        getInstance().getServer().getPluginManager().registerEvents(this, getInstance());
-
         queue = new Queue();
     }
 
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        for (PracticeItems items : PracticeItems.values()) {
-            event.getPlayer().getInventory().setItem(items.getPosition(), items.toItemStack());
+    public void registerListeners(){
+        Reflections reflections = new Reflections("br.com.armagedon.lobby.practice");
+        Set<Class<? extends Listener>> classes = reflections.getSubTypesOf(Listener.class);
+
+        for (Class<? extends Listener> clazz : classes) {
+            try {
+                getInstance().getServer().getPluginManager().registerEvents(clazz.newInstance(), getInstance());
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
         }
     }
 }

@@ -90,4 +90,8 @@ public class Queue {
             Hub.getInstance().getServer().getPluginManager().callEvent(new QueueMatchEvent(player1, player2, properties));
         }
     }
+
+    public boolean inQueue(User user) {
+        return getUsers().containsKey(user);
+    }
 }

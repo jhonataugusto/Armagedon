@@ -56,7 +56,7 @@ public abstract class Lobby {
 
         task = new ServerHeartBeatTask(getInstance());
 
-        task.runTaskTimer(getInstance(),0,TimeUnit.MILLISECONDS.toSeconds(1));
+        task.runTaskTimer(getInstance(),0,20L);
     }
 
     public void loadListeners() {

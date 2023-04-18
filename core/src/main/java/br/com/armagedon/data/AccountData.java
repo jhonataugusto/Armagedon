@@ -1,6 +1,7 @@
 package br.com.armagedon.data;
 
 import br.com.armagedon.Core;
+import br.com.armagedon.crud.mongo.AccountMongoCRUD;
 import br.com.armagedon.crud.redis.AccountRedisCRUD;
 import br.com.armagedon.utils.JsonUtils;
 import com.google.gson.*;
@@ -20,14 +21,12 @@ public class AccountData {
     private UUID uuid;
     private int blocks;
 
-    public AccountData setDefaultData(String name, UUID uuid) {
-        return new AccountData(name, uuid, 0);
+    public AccountData setDefaultData(UUID uuid) {
+        return new AccountData(uuid);
     }
 
-    private AccountData(String name, UUID uuid, int blocks) {
-        this.name = name;
+    public AccountData(UUID uuid) {
         this.uuid = uuid;
-        this.blocks = blocks;
     }
 
     public AccountData(String json) {
@@ -47,6 +46,26 @@ public class AccountData {
                 e.printStackTrace();
             }
         }
+    }
+
+    public AccountData createDataOrGet(UUID uuid) {
+        AccountData data = AccountRedisCRUD.findByUuid(uuid);
+
+        if (data == null) {
+            data = AccountMongoCRUD.get(uuid);
+
+            if (data != null) {
+                AccountRedisCRUD.save(data);
+            }
+        }
+
+        if (data == null) {
+            data = new AccountData().setDefaultData(getUuid());
+            AccountRedisCRUD.save(data);
+            AccountMongoCRUD.create(data);
+        }
+
+        return data;
     }
 
     public void saveData() {

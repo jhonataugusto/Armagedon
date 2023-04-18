@@ -15,7 +15,8 @@ public enum PracticeIcons {
     NODEBUFF("nodebuff", "NoDebuff", Material.DIAMOND_SWORD, true),
     SKYWARS("skywars", "Skywars" , Material.GRASS, true),
 
-    RANKED_SWITCHER("ranked_switcher", "Ativar Ranked?", Material.COMMAND, true);
+    RANKED_MODE("ranked_mode", "Modo Ranqueado Ativado", Material.SLIME_BLOCK, true),
+    UNRANKED_MODE("unranked_mode", "Modo Ranqueado Desativado", Material.REDSTONE, true);
 
     private String name;
     private String fancyName;

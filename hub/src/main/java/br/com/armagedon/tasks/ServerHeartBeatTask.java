@@ -17,6 +17,5 @@ public class ServerHeartBeatTask extends BukkitRunnable {
     public void run() {
         ServerHeartBeatEvent event = new ServerHeartBeatEvent();
         instance.getServer().getPluginManager().callEvent(event);
-
     }
 }

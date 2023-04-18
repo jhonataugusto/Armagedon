@@ -1,6 +1,5 @@
 package br.com.armagedon.account;
 
-import br.com.armagedon.crud.mongo.AccountMongoCRUD;
 import br.com.armagedon.crud.redis.AccountRedisCRUD;
 import br.com.armagedon.data.AccountData;
 import lombok.Data;
@@ -9,44 +8,32 @@ import java.util.UUID;
 
 @Data
 public class Account {
-    private String name;
-    private UUID uuid;
-    private int blocks;
-    private AccountData accountData;
+    private AccountData data;
 
-    public Account(String name, UUID uuid) {
-        setName(name);
-        setUuid(uuid);
-        setAccountData(createUserDataOrGet());
+    public String getName(){
+        return getData().getName();
     }
 
-    public AccountData getAccountData() {
-        return accountData;
+    public UUID getUuid() {
+        return getData().getUuid();
     }
 
-    public void setAccountData(AccountData accountData) {
-        this.accountData = accountData;
+    public Account(UUID uuid) {
+        data = new AccountData(uuid);
+        setData(data.createDataOrGet(uuid));
     }
 
-    public AccountData createUserDataOrGet() {
-        AccountData data = AccountRedisCRUD.findByUuid(this.getUuid());
-
-        if (data == null) {
-            data = AccountMongoCRUD.get(this.getUuid());
-
-            if (data != null) {
-                AccountRedisCRUD.save(data);
-            }
-        }
-
-        if (data == null) {
-            data = new AccountData().setDefaultData(getName(), getUuid());
-            AccountRedisCRUD.save(data);
-            AccountMongoCRUD.create(data);
-        }
-
+    public AccountData getData() {
         return data;
     }
 
+    public void setData(AccountData data) {
+        this.data = data;
+    }
 
+    public static Account fetch(UUID uuid) {
+        Account account = new Account(uuid);
+        account.setData(AccountRedisCRUD.findByUuid(uuid));
+        return account;
+    }
 }

@@ -15,6 +15,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
@@ -39,16 +40,9 @@ public class HubListener implements Listener {
             player.removePotionEffect(effect.getType());
         }
 
-        PlayerInventory playerInventory = player.getInventory();
-
-        playerInventory.clear();
-        playerInventory.setArmorContents(null);
+        PlayerInventory inventory = player.getInventory();
+        inventory.setArmorContents(null);
     }
-
-//    @EventHandler
-//    public void onDefineSpawn(PlayerInitialSpawnEvent event) {
-//        //TODO: fazer o rapaz spawnar em algum lugar depois
-//    }
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {

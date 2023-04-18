@@ -14,8 +14,18 @@ import java.util.UUID;
 @Getter
 @Setter
 public class User {
-
     private Account account;
+    public User(UUID uuid) {
+        account = new Account(uuid);
+    }
+
+    public String getName() {
+        return getAccount().getName();
+    }
+
+    public UUID getUuid() {
+        return getAccount().getUuid();
+    }
 
     public static User fetch(UUID uuid) {
         return Hub.getInstance().getUserStorage().getUser(uuid);

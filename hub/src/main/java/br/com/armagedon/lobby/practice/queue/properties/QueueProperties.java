@@ -1,8 +1,10 @@
 package br.com.armagedon.lobby.practice.queue.properties;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class QueueProperties {
     private String mode;
     private boolean ranked;

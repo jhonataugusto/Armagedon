@@ -1,10 +1,29 @@
 package br.com.armagedon.listeners;
 
+import br.com.armagedon.Hub;
+import br.com.armagedon.user.User;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 
 public class PlayerListener implements Listener {
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        User user = new User(player.getUniqueId());
+
+        Hub.getInstance().getUserStorage().register(user.getUuid(), user);
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        User user = User.fetch(player.getUniqueId());
+
+        Hub.getInstance().getUserStorage().unregister(user.getUuid());
+    }
 
     @EventHandler
     public void onPlayerPickupItem(PlayerPickupItemEvent event) {

@@ -1,6 +1,8 @@
 package br.com.armagedon.items;
 
+import br.com.armagedon.lobby.practice.queue.Queue;
 import de.tr7zw.changeme.nbtapi.NBT;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bukkit.Material;
@@ -9,10 +11,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 @Getter
 @NoArgsConstructor
-public enum LobbyItems {
-    SERVER_LIST("Clique para selecionar o Servidor", Material.COMPASS, 0, 1, "SERVER_LIST"),
-    PROFILE("Seu perfil", Material.NETHER_STAR, 4, 1, "PROFILE"),
-    CONFIGURATIONS("Configurações", Material.PISTON_BASE, 8, 1, "CONFIGURATIONS");
+public enum QueueItems {
+    QUIT_QUEUE("Sair da queue", Material.REDSTONE, 0, 1, "QUIT_QUEUE");
 
     private String displayName;
     private Material material;
@@ -21,7 +21,7 @@ public enum LobbyItems {
     private String value;
     public final String key = "id";
 
-    LobbyItems(String name, Material material, int position, int amount, String value) {
+    QueueItems(String name, Material material, int position, int amount, String value) {
         this.displayName = name;
         this.material = material;
         this.position = position;

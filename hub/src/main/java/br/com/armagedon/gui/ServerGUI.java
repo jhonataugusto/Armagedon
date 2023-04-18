@@ -128,6 +128,10 @@ public class ServerGUI implements InventoryProvider {
         for (ServerIcons item : ServerIcons.values()) {
             ServerData data = ServerRedisCRUD.findByName(item.getName());
 
+            if (data == null || serversLoaded.get(item) == null) {
+                return;
+            }
+
             boolean dataChanged = !serversLoaded.get(item).equals(data);
 
             if (dataChanged) {
