@@ -1,5 +1,6 @@
 package br.com.armagedon.events;
 
+import br.com.armagedon.lobby.practice.queue.properties.QueueProperties;
 import br.com.armagedon.user.User;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,9 +13,9 @@ public class PlayerEnterQueueEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
 
     private User user;
-    private br.com.armagedon.lobby.practice.queue.properties.QueueProperties properties;
+    private QueueProperties properties;
 
-    public PlayerEnterQueueEvent(User user, br.com.armagedon.lobby.practice.queue.properties.QueueProperties properties) {
+    public PlayerEnterQueueEvent(User user, QueueProperties properties) {
         this.user = user;
         this.properties = properties;
     }

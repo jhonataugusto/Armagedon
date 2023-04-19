@@ -14,6 +14,9 @@ import fr.minuskube.inv.content.SlotPos;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Getter
 public class PracticeGUI implements InventoryProvider {
     private static final String ID = "PRACTICE_GAMES_GUI";
@@ -21,7 +24,9 @@ public class PracticeGUI implements InventoryProvider {
     private static final int MAX_ROWS = 6;
     private static final int MAX_COLUMNS = 9;
 
-    SlotPos lastPos = new SlotPos(MAX_ROWS, MAX_COLUMNS);
+    SlotPos lastPos = new SlotPos(MAX_ROWS - 1, MAX_COLUMNS - 1);
+
+    private final Map<Player, Boolean> rankedMap = new HashMap<>();
 
     public static final SmartInventory INVENTORY = SmartInventory.builder()
             .id(ID)
@@ -33,14 +38,20 @@ public class PracticeGUI implements InventoryProvider {
 
     @Override
     public void init(Player player, InventoryContents contents) {
-        boolean ranked = contents.property("ranked", false);
+
+        //TODO: aqui carregar as preferencias do jogador!
+        getRankedMap().put(player, false);
+
+        boolean ranked = getRankedMap().get(player);
+
         int row = 1;
         int column = 1;
 
 
         for (PracticeIcons item : PracticeIcons.getValues()) {
 
-            if (item.equals(PracticeIcons.UNRANKED_MODE)) {
+
+            if (item.equals(PracticeIcons.RANKED_MODE) || item.equals(PracticeIcons.UNRANKED_MODE)) {
                 continue;
             }
 
@@ -54,16 +65,20 @@ public class PracticeGUI implements InventoryProvider {
                 boolean inQueue = instance.getQueue().inQueue(user);
 
                 if (!inQueue) {
-                    instance.getQueue().enter(user, new QueueProperties(item.getName(), contents.property("ranked")));
+                    instance.getQueue().enter(user, new QueueProperties(item.getName(), ranked));
+
+                    getRankedMap().remove(player);
+
+                    player.closeInventory();
                 }
 
-                event.getWhoClicked().sendMessage("Entrou na fila de duelo.");
             }));
 
             item.setRow(row);
             item.setColumn(column);
 
             column++;
+
             if (column >= MAX_COLUMNS) {
                 column = 1;
                 row++;
@@ -74,30 +89,26 @@ public class PracticeGUI implements InventoryProvider {
             }
         }
 
-        //TODO: fazer o usuário mudar de ranqueada ao abrir o inventário nas configurações: "on_open_inventory_mode_default_ranked_or_unranked" algo assim
         if (ranked) {
-            contents.set(lastPos, ClickableItem.of(PracticeIcons.RANKED_MODE.toItemStack(), event1 -> contents.setProperty("ranked", false)));
+            contents.set(lastPos, ClickableItem.of(PracticeIcons.RANKED_MODE.toItemStack(), event1 -> getRankedMap().put(player, false)));
         } else {
-            contents.set(lastPos, ClickableItem.of(PracticeIcons.UNRANKED_MODE.toItemStack(), event2 -> contents.setProperty("ranked", true)));
+            contents.set(lastPos, ClickableItem.of(PracticeIcons.UNRANKED_MODE.toItemStack(), event2 -> getRankedMap().put(player, true)));
         }
     }
 
     @Override
     public void update(Player player, InventoryContents contents) {
 
-        boolean ranked = contents.property("ranked");
+        boolean ranked = rankedMap.get(player);
 
-        contents.set(lastPos, ClickableItem.of(PracticeIcons.UNRANKED_MODE.toItemStack(), event -> {
-
-            if (ranked) {
-                contents.set(lastPos, ClickableItem.of(PracticeIcons.RANKED_MODE.toItemStack(), event2 -> {
-                    contents.setProperty("ranked", false);
-                }));
-            } else {
-                contents.set(lastPos, ClickableItem.of(PracticeIcons.UNRANKED_MODE.toItemStack(), event2 -> {
-                    contents.setProperty("ranked", true);
-                }));
-            }
-        }));
+        if (ranked) {
+            contents.set(lastPos, ClickableItem.of(PracticeIcons.RANKED_MODE.toItemStack(), event2 -> {
+                getRankedMap().put(player, false);
+            }));
+        } else {
+            contents.set(lastPos, ClickableItem.of(PracticeIcons.UNRANKED_MODE.toItemStack(), event2 -> {
+                getRankedMap().put(player, true);
+            }));
+        }
     }
 }

@@ -14,20 +14,20 @@ import java.util.UUID;
 
 
 @Data
-@NoArgsConstructor
 public class AccountData {
     private Object _id;
     private String name;
     private UUID uuid;
     private int blocks;
 
-    public AccountData setDefaultData(UUID uuid) {
-        return new AccountData(uuid);
+    public AccountData setDefaultData() {
+        return new AccountData(getUuid());
     }
 
     public AccountData(UUID uuid) {
         this.uuid = uuid;
     }
+
 
     public AccountData(String json) {
         JsonParser parser = new JsonParser();
@@ -48,11 +48,11 @@ public class AccountData {
         }
     }
 
-    public AccountData createDataOrGet(UUID uuid) {
-        AccountData data = AccountRedisCRUD.findByUuid(uuid);
+    public AccountData createDataOrGet() {
+        AccountData data = AccountRedisCRUD.findByUuid(getUuid());
 
         if (data == null) {
-            data = AccountMongoCRUD.get(uuid);
+            data = AccountMongoCRUD.get(getUuid());
 
             if (data != null) {
                 AccountRedisCRUD.save(data);
@@ -60,7 +60,7 @@ public class AccountData {
         }
 
         if (data == null) {
-            data = new AccountData().setDefaultData(getUuid());
+            data = new AccountData(getUuid()).setDefaultData();
             AccountRedisCRUD.save(data);
             AccountMongoCRUD.create(data);
         }

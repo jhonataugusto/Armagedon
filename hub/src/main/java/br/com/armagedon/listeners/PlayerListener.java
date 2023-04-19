@@ -2,10 +2,13 @@ package br.com.armagedon.listeners;
 
 import br.com.armagedon.Hub;
 import br.com.armagedon.user.User;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemStack;
 
 public class PlayerListener implements Listener {
 

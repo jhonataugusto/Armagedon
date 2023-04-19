@@ -11,7 +11,7 @@ public class QueueProperties {
 
     public boolean compareProperties(Object obj) {
 
-        if(obj == this) {
+        if (obj == this) {
             return false;
         }
 
@@ -19,7 +19,7 @@ public class QueueProperties {
 
         QueueProperties otherProperties = (QueueProperties) obj;
 
-        if(otherProperties.getMode() == null) return false;
+        if (otherProperties.getMode() == null) return false;
 
         return this.getMode().equals(otherProperties.getMode()) && (this.isRanked() && otherProperties.isRanked());
     }
@@ -29,10 +29,14 @@ public class QueueProperties {
 
         QueueProperties otherProperties = (QueueProperties) obj;
 
-        if(otherProperties.getMode() == null) return -1;
+        if (otherProperties.getMode() == null) return -1;
 
-        if(this.getMode().equals(otherProperties.getMode()) && (this.isRanked() && otherProperties.isRanked())){
+        boolean modeAreEquals = this.getMode().equals(otherProperties.getMode());
+        boolean isSameRankedMode = this.isRanked() == otherProperties.isRanked();
+
+        if (modeAreEquals && isSameRankedMode) {
             return 0;
         }
         return -1;
-    }}
+    }
+}

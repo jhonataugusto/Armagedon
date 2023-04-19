@@ -12,6 +12,7 @@
         <module>core</module>
         <module>hub</module>
         <module>bungee</module>
+        <module>practice</module>
     </modules>
 
     <properties>

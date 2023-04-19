@@ -2,9 +2,6 @@ package br.com.armagedon.listeners;
 
 import br.com.armagedon.Hub;
 
-import br.com.armagedon.gui.ServerGUI;
-import br.com.armagedon.items.LobbyItems;
-import de.tr7zw.changeme.nbtapi.NBT;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.BlockFace;
@@ -53,6 +50,17 @@ public class HubListener implements Listener {
 
             player.setVelocity(vector);
             player.playSound(player.getLocation(), Sound.LEVEL_UP, 2.5F, 2.5F);
+        }
+    }
+
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onInteractEvent(PlayerInteractEvent event) {
+        ItemStack item = event.getItem();
+
+        if (item == null || item.getType() == Material.AIR || item.getAmount() == 0) {
+            event.setCancelled(true);
+            return;
         }
     }
 }

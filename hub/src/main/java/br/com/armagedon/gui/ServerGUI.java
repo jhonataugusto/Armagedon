@@ -128,18 +128,17 @@ public class ServerGUI implements InventoryProvider {
         for (ServerIcons item : ServerIcons.values()) {
             ServerData data = ServerRedisCRUD.findByName(item.getName());
 
-            if (data == null || serversLoaded.get(item) == null) {
-                return;
+            if (data == null) {
+                throw new RuntimeException("Servidor não encontrado no redis");
             }
+
+            serversLoaded.putIfAbsent(item, data);
 
             boolean dataChanged = !serversLoaded.get(item).equals(data);
 
             if (dataChanged) {
                 serversLoaded.replace(item, data);
-                continue;
             }
-
-            serversLoaded.putIfAbsent(item, data);
         }
     }
 }

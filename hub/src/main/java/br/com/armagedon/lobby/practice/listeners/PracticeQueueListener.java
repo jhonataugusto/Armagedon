@@ -12,9 +12,11 @@ import br.com.armagedon.lobby.practice.Practice;
 import br.com.armagedon.user.User;
 import de.tr7zw.changeme.nbtapi.NBT;
 import lombok.Getter;
+import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 
 @Getter
 public class PracticeQueueListener implements Listener {
@@ -63,6 +65,13 @@ public class PracticeQueueListener implements Listener {
 
         Practice instance = (Practice) Hub.getInstance().getLobby();
 
+        ItemStack item = event.getItem();
+
+        if (item == null || item.getType() == Material.AIR || item.getAmount() == 0) {
+            event.setCancelled(true);
+            return;
+        }
+
         NBT.modify(event.getItem(), nbt -> {
             if (nbt.hasCustomNbtData()) {
 
@@ -80,7 +89,6 @@ public class PracticeQueueListener implements Listener {
                     User user = User.fetch(event.getPlayer().getUniqueId());
                     if (!instance.getQueue().inQueue(user)) {
                         PracticeGUI.INVENTORY.open(user.getPlayer());
-                        System.out.println("inventario aberto");
                     }
 
                 }

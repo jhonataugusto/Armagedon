@@ -11,9 +11,7 @@ import java.util.UUID;
 
 @Getter
 public class AccountStorage {
-
     public HashMap<UUID, Account> accounts = new HashMap<>();
-
     public void register(UUID uuid, Account account) {
         getAccounts().put(uuid, account);
     }

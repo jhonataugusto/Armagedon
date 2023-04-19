@@ -4,6 +4,7 @@ import br.com.armagedon.gui.ServerGUI;
 import br.com.armagedon.items.LobbyItems;
 import de.tr7zw.changeme.nbtapi.NBT;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,10 +33,13 @@ public class MainPlayerListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        for (LobbyItems items : LobbyItems.values()) {
-            ItemStack itemStack = items.toItemStack();
-            int position = items.getPosition();
-            event.getPlayer().getInventory().setItem(position, itemStack);
+
+        Player player = event.getPlayer();
+
+        player.getInventory().clear();
+
+        for (LobbyItems item : LobbyItems.values()) {
+            event.getPlayer().getInventory().setItem(item.getPosition(), item.toItemStack());
         }
     }
 }

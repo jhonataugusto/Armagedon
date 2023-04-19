@@ -10,21 +10,10 @@ import org.bukkit.event.player.PlayerInteractEvent;
 public class BlockListener implements Listener {
 
     @EventHandler
-    public void onBlockPlace(BlockPlaceEvent event) {
-       // event.setCancelled(true);
-        //TODO: fazer as properties dessa conta também
-    }
+    public void onBlockPlace(BlockPlaceEvent event) {event.setCancelled(true);}
 
     @EventHandler
-    public void onBlockBreak(BlockBreakEvent event) {
-        //event.setCancelled(true);
-        BungeeUtils.connect(event.getPlayer(), "test");
-    }
-
-    @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        //ServerGUI.INVENTORY.open(event.getPlayer());
-    }
+    public void onBlockBreak(BlockBreakEvent event) {event.setCancelled(true);}
 
     @EventHandler
     public void onBlockBurnEvent(BlockBurnEvent event) {
