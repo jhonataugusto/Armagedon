@@ -1,6 +1,8 @@
 package br.com.armagedon;
 
 import br.com.armagedon.arena.storage.ArenaStorage;
+import br.com.armagedon.enums.game.GameMode;
+import br.com.armagedon.enums.map.Maps;
 import br.com.armagedon.game.storage.GameStorage;
 import br.com.armagedon.user.storage.UserStorage;
 import lombok.Getter;
@@ -8,7 +10,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.reflections.Reflections;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Set;
+
+import static br.com.armagedon.util.async.AsyncUtils.async;
 
 @Getter
 public class Practice extends JavaPlugin {
@@ -51,14 +57,14 @@ public class Practice extends JavaPlugin {
         return instance;
     }
 
-    public void registerEvents(){
+    public void registerEvents() {
         Reflections reflections = new Reflections("br.com.armagedon.listener");
 
         Set<Class<? extends Listener>> listeners = reflections.getSubTypesOf(Listener.class);
 
-        for(Class<? extends Listener> clazz: listeners) {
+        for (Class<? extends Listener> clazz : listeners) {
             try {
-                this.getServer().getPluginManager().registerEvents(clazz.newInstance(),this);
+                this.getServer().getPluginManager().registerEvents(clazz.newInstance(), this);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

@@ -26,26 +26,20 @@ public abstract class Game {
     private final GameMode mode;
     private final Practice plugin;
     private final Integer MIN_ARENAS;
-    private final String mapDirectory;
+    private final String presetMapDirectory;
 
-    public Game(Practice plugin, Integer minArenas, String mapDirectory) {
+    public Game(Practice plugin, Integer minArenas, String presetMapDirectory) {
         this.mode = GameMode.getByName(this.getClass().getSimpleName());
         this.plugin = plugin;
         this.MIN_ARENAS = minArenas;
-        this.mapDirectory = mapDirectory;
-
-        File file = new File(mapDirectory);
-
-        if(!file.exists()) {
-            file.mkdirs();
-        }
+        this.presetMapDirectory = presetMapDirectory;
     }
 
     public void load() {
         int actualArenas = plugin.getArenaStorage().getArenas().size();
 
         if (actualArenas != 0) {
-            unload();
+            unload(); //TODO: esse unload apaga os arquivos do nodebuff
         }
 
         int arenaSizedByFivePercent = (int) Math.round(MIN_ARENAS * 0.5);
@@ -56,7 +50,7 @@ public abstract class Game {
     }
 
     public void unload() {
-        getPlugin().getArenaStorage().getArenas().forEach((key, value) -> CompressionUtil.delete(value.getMap().getFile()));
+        getPlugin().getArenaStorage().getArenas().forEach((key, value) -> CompressionUtil.delete(value.getMap().getDirectory()));
     }
 
     public void handleJoin(Player player) {
@@ -87,11 +81,13 @@ public abstract class Game {
 
     public Arena handleArena(DuelContextData data) {
 
-        //TODO: Verificar se o mapa está sendo carregado corretamente
+        //TODO: arrumar o método handleArena com o DuelContext!
 
         String mapName = data.getMapName();
 
-        ArenaMap map = new ArenaMap(mapName, getMapDirectory());
+        File arenaDirectory = new File("arenas");
+
+        ArenaMap map = new ArenaMap(mapName, getPresetMapDirectory(), arenaDirectory);
 
         WorldCreator creator = new WorldCreator(map.getId());
 
@@ -115,31 +111,24 @@ public abstract class Game {
     public Arena handleArena() {
 
         //TODO: Verificar se o mapa está sendo carregado corretamente
+        //TODO: sim, está carregando normalmente
 
         String mapName = Maps.getRandomMap(getMode()).getName();
+        File arenaDirectory = new File("arenas");
+        ArenaMap map = new ArenaMap(mapName, getPresetMapDirectory(), arenaDirectory);
 
-        ArenaMap map = new ArenaMap(mapName, getMapDirectory());
-
-        File arenaDirectory = new File("arenas", map.getId());
-
-        if(!arenaDirectory.exists()) {
-            arenaDirectory.mkdirs();
-        }
+        WorldCreator creator = new WorldCreator(map.getDirectory().getPath());
+        creator.generateStructures(false);
+        creator.generator(VoidGenerator.getInstance());
 
         try {
-            CompressionUtil.copy(new File(getMapDirectory(), mapName), arenaDirectory, null);
+            CompressionUtil.copy(new File(getPresetMapDirectory(), mapName), map.getDirectory(), null);
         } catch (Exception exception) {
             exception.printStackTrace();
         }
 
-        WorldCreator creator = new WorldCreator(arenaDirectory.getAbsolutePath());
-
-        creator.generateStructures(false);
-        creator.generator(VoidGenerator.getInstance());
-
         World world = Bukkit.createWorld(creator);
-
-        WorldHandler.adjust(world, map.getArea().getChunks(world));
+        WorldHandler.adjust(world, map.getArea().getChunks(world)); //pode causar nullPointerException
 
         Arena arena = new Arena(this, world, map);
 

@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 public class CompressionUtil {
 
     public static void copy(final File source, final File destination, Predicate<Path> predicate) throws IOException {
+
         if (source.isDirectory()) {
             if (!destination.exists()) {
                 destination.mkdir();

@@ -61,21 +61,29 @@ public class Cuboid {
     }
 
     public static Cuboid loadProperties(File directory) {
-        Cuboid cuboid = new Cuboid();
-        File file = new File(directory, "cuboid.json");
 
-        if (file.exists()) {
-            try (FileReader reader = new FileReader(file)) {
-                return cuboid = Core.GSON.fromJson(reader, Cuboid.class);
+        Cuboid cuboid = new Cuboid();
+
+        File children = new File(directory, "cuboid.json");
+
+        if (children.exists()) {
+
+            try (FileReader reader = new FileReader(children)) {
+
+                return Core.GSON.fromJson(reader, Cuboid.class);
+
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
 
         } else {
 
-            try (FileWriter writer = new FileWriter(file)) {
-                file.createNewFile();
+            try (FileWriter writer = new FileWriter(children)) {
+
+                children.createNewFile();
+
                 writer.write(Core.GSON.toJson(cuboid));
+
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
