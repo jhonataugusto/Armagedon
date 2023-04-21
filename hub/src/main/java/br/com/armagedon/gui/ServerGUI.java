@@ -3,6 +3,7 @@ package br.com.armagedon.gui;
 import br.com.armagedon.Hub;
 import br.com.armagedon.crud.redis.ServerRedisCRUD;
 import br.com.armagedon.data.ServerData;
+import br.com.armagedon.enums.server.Server;
 import br.com.armagedon.icons.ServerIcons;
 import br.com.armagedon.util.bungee.BungeeUtils;
 import fr.minuskube.inv.ClickableItem;
@@ -62,10 +63,10 @@ public class ServerGUI implements InventoryProvider {
 
             contents.set(pos, ClickableItem.of(item.toItemStack(material), event -> {
 
-                String serverName = item.getName();
+                Server server = Server.getByName(item.getName());
 
                 if (online) {
-                    BungeeUtils.connect((Player) event.getWhoClicked(), serverName);
+                    BungeeUtils.connect((Player) event.getWhoClicked(), server);
                 } else {
                     event.getWhoClicked().sendMessage(ChatColor.RED + "Este servidor está desligado.");
                 }
@@ -109,10 +110,10 @@ public class ServerGUI implements InventoryProvider {
 
             contents.set(pos, ClickableItem.of(item.toItemStack(material), event -> {
 
-                String serverName = item.getName();
+                Server server = Server.getByName(item.getName());
 
                 if (online) {
-                    BungeeUtils.connect((Player) event.getWhoClicked(), serverName);
+                    BungeeUtils.connect((Player) event.getWhoClicked(), server);
                 } else {
                     event.getWhoClicked().sendMessage(ChatColor.RED + "Este servidor está desligado.");
                 }
@@ -129,7 +130,7 @@ public class ServerGUI implements InventoryProvider {
             ServerData data = ServerRedisCRUD.findByName(item.getName());
 
             if (data == null) {
-                throw new RuntimeException("Servidor não encontrado no redis");
+                return;
             }
 
             serversLoaded.putIfAbsent(item, data);

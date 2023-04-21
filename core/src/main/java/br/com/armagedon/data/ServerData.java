@@ -15,21 +15,17 @@ import java.util.Map;
 @Data
 public class ServerData {
 
-    private Object _id;
-    private String name;
-    private boolean online;
-    private int currentPlayers;
+    private Object _id = null;
+    private String name = "...";
+    private boolean online = false;
+    private int currentPlayers = 0;
 
-    public ServerData(String name, boolean online, int currentPlayers) {
-        this.name = name;
-        this.online = online;
-        this.currentPlayers = currentPlayers;
-    }
+    public ServerData(){}
 
     public ServerData(String json) {
+
         JsonParser jsonParser = new JsonParser();
         JsonObject jsonObject = jsonParser.parse(json).getAsJsonObject();
-
 
         for(Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
             String fieldName = entry.getKey();

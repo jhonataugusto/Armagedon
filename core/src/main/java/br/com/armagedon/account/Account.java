@@ -19,7 +19,7 @@ public class Account {
     }
 
     public Account(UUID uuid) {
-        setData(new AccountData(uuid).createDataOrGet());
+        setData(new AccountData(uuid).createOrGetAccountData());
     }
 
     public AccountData getData() {

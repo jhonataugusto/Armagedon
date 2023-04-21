@@ -1,6 +1,6 @@
 package br.com.armagedon.icons;
 
-import br.com.armagedon.map.Maps;
+import br.com.armagedon.enums.map.Maps;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,8 +12,8 @@ import java.util.Arrays;
 @AllArgsConstructor
 @NoArgsConstructor
 public enum MapIcons {
-    GRASS(Maps.GRASS.getName(), "Grass", Material.GRASS),
-    STONE(Maps.STONE.getName(), "Stone", Material.STONE);
+    GRASS(Maps.GRASS.getName(), Maps.GRASS.getDisplayName(), Material.GRASS),
+    STONE(Maps.CASTLE.getName(), Maps.CASTLE.getDisplayName(), Material.STONE);
     private String name, displayName;
     private Material material;
 

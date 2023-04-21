@@ -28,7 +28,7 @@ public class Practice extends Lobby {
 
         setSpawn(new Location(getWorld(), 0.5, 60, 0.5, 0, 0));
 
-        cuboid = loadProperties();
+        cuboid = Cuboid.loadProperties();
         WorldBorder border = getWorld().getWorldBorder();
 
         border.setCenter(getSpawn());

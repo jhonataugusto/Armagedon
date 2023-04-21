@@ -6,7 +6,6 @@ import br.com.armagedon.crud.redis.AccountRedisCRUD;
 import br.com.armagedon.utils.JsonUtils;
 import com.google.gson.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -15,19 +14,14 @@ import java.util.UUID;
 
 @Data
 public class AccountData {
-    private Object _id;
-    private String name;
+    private Object _id = null;
+    private String name = "...";
     private UUID uuid;
-    private int blocks;
-
-    public AccountData setDefaultData() {
-        return new AccountData(getUuid());
-    }
+    private int blocks = 0;
 
     public AccountData(UUID uuid) {
         this.uuid = uuid;
     }
-
 
     public AccountData(String json) {
         JsonParser parser = new JsonParser();
@@ -48,7 +42,7 @@ public class AccountData {
         }
     }
 
-    public AccountData createDataOrGet() {
+    public AccountData createOrGetAccountData() {
         AccountData data = AccountRedisCRUD.findByUuid(getUuid());
 
         if (data == null) {
@@ -60,7 +54,7 @@ public class AccountData {
         }
 
         if (data == null) {
-            data = new AccountData(getUuid()).setDefaultData();
+            data = new AccountData(getUuid());
             AccountRedisCRUD.save(data);
             AccountMongoCRUD.create(data);
         }

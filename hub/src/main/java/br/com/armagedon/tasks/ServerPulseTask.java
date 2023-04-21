@@ -1,21 +1,20 @@
 package br.com.armagedon.tasks;
 
 import br.com.armagedon.Hub;
-import br.com.armagedon.events.ServerHeartBeatEvent;
+import br.com.armagedon.events.ServerPulseEvent;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
-public class ServerHeartBeatTask extends BukkitRunnable {
+public class ServerPulseTask extends BukkitRunnable {
 
     private final Hub instance;
 
-    public ServerHeartBeatTask(Hub instance) {
+    public ServerPulseTask(Hub instance) {
         this.instance = instance;
     }
 
     @Override
     public void run() {
-        ServerHeartBeatEvent event = new ServerHeartBeatEvent();
+        ServerPulseEvent event = new ServerPulseEvent();
         instance.getServer().getPluginManager().callEvent(event);
     }
 }

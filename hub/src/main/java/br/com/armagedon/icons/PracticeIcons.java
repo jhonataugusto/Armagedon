@@ -1,5 +1,6 @@
 package br.com.armagedon.icons;
 
+import br.com.armagedon.enums.game.GameMode;
 import de.tr7zw.changeme.nbtapi.NBT;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,9 +13,8 @@ import java.util.Arrays;
 @Getter
 @NoArgsConstructor
 public enum PracticeIcons {
-    NODEBUFF("nodebuff", "NoDebuff", Material.DIAMOND_SWORD, true),
-    SKYWARS("skywars", "Skywars" , Material.GRASS, true),
-
+    NODEBUFF(GameMode.NODEBUFF.getName(), GameMode.NODEBUFF.getDisplayName(), Material.DIAMOND_SWORD, true),
+    SKYWARS(GameMode.SKYWARS.getName(), GameMode.SKYWARS.getDisplayName() , Material.GRASS, true),
     RANKED_MODE("ranked_mode", "Modo Ranqueado Ativado", Material.SLIME_BLOCK, true),
     UNRANKED_MODE("unranked_mode", "Modo Ranqueado Desativado", Material.REDSTONE, true);
 

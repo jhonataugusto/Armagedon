@@ -1,6 +1,6 @@
 package br.com.armagedon.user;
 
-import br.com.armagedon.Hub;
+import br.com.armagedon.Practice;
 import br.com.armagedon.account.Account;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +32,7 @@ public class User {
     }
 
     public static User fetch(UUID uuid) {
-        return Hub.getInstance().getUserStorage().getUser(uuid);
+        return Practice.getInstance().getUserStorage().getUser(uuid);
     }
 
     public Player getPlayer() {

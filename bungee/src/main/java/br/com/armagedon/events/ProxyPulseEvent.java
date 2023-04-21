@@ -11,12 +11,12 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class HeartBeatEvent extends Event {
+public class ProxyPulseEvent extends Event {
 
     Map<String, ServerInfo> serverInfoMap;
 
 
-    public HeartBeatEvent() {
+    public ProxyPulseEvent() {
         serverInfoMap = ProxyServer.getInstance().getServers();
     }
 

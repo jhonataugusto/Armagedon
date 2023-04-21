@@ -2,6 +2,7 @@ package br.com.armagedon.util.bungee;
 
 import br.com.armagedon.Core;
 import br.com.armagedon.Hub;
+import br.com.armagedon.enums.server.Server;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -18,11 +19,11 @@ public class BungeeUtils implements PluginMessageListener {
         String subchannel = input.readUTF();
     }
 
-    public static void connect(Player player, String server) {
+    public static void connect(Player player, Server server) {
         ByteArrayDataOutput output = ByteStreams.newDataOutput();
 
         output.writeUTF("Connect");
-        output.writeUTF(server);
+        output.writeUTF(server.getName());
 
         player.sendPluginMessage(Hub.getInstance(),Core.BUNGEECORD_MESSAGING_CHANNEL, output.toByteArray());
     }

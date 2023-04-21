@@ -1,7 +1,7 @@
 package br.com.armagedon.util.cuboid;
 
 import br.com.armagedon.Core;
-import br.com.armagedon.Hub;
+import br.com.armagedon.Practice;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Chunk;
@@ -60,9 +60,9 @@ public class Cuboid {
         return (x >= minX && x <= maxX) && (y >= minY && y <= maxY) && (z >= minZ && z <= maxZ);
     }
 
-    public static Cuboid loadProperties() {
+    public static Cuboid loadProperties(File directory) {
         Cuboid cuboid = new Cuboid();
-        File file = new File(Hub.getInstance().getConfig().getCurrentPath(), "cuboid.json");
+        File file = new File(directory, "cuboid.json");
 
         if (file.exists()) {
             try (FileReader reader = new FileReader(file)) {
@@ -73,10 +73,8 @@ public class Cuboid {
 
         } else {
 
-            file.mkdirs();
-            file.mkdir();
-
             try (FileWriter writer = new FileWriter(file)) {
+                file.createNewFile();
                 writer.write(Core.GSON.toJson(cuboid));
             } catch (Exception exception) {
                 exception.printStackTrace();

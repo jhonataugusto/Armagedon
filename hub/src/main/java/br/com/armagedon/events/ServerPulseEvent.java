@@ -5,11 +5,10 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 @Getter
-public class ServerHeartBeatEvent extends Event {
+public class ServerPulseEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
 
-    public ServerHeartBeatEvent() {
-
+    public ServerPulseEvent() {
     }
 
     @Override

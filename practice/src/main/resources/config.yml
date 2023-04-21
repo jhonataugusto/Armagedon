@@ -1,0 +1,7 @@
+modes:
+  Nodebuff:
+    min_rooms: 5
+    directory: "nodebuff/maps/"
+  Skywars:
+    min_rooms: 5
+    directory: "skywars/maps"

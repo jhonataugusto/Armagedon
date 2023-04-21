@@ -4,7 +4,7 @@ import br.com.armagedon.Core;
 import br.com.armagedon.Hub;
 import br.com.armagedon.commands.ACommand;
 import br.com.armagedon.lobby.mode.LobbyMode;
-import br.com.armagedon.tasks.ServerHeartBeatTask;
+import br.com.armagedon.tasks.ServerPulseTask;
 import br.com.armagedon.util.bungee.BungeeUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +19,6 @@ import org.reflections.Reflections;
 
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 @Getter
 @Setter
@@ -30,12 +29,12 @@ public abstract class Lobby {
     private final World world;
     private Location spawn;
 
-    private ServerHeartBeatTask task;
+    private ServerPulseTask task;
 
     public Lobby(Hub instance) {
 
         this.instance = instance;
-        this.mode = LobbyMode.fromString(instance.getConfig().getString("lobby.mode"));
+        this.mode = LobbyMode.getByName(instance.getConfig().getString("lobby.mode"));
         this.id = instance.getConfig().getInt("lobby.id");
         this.world = instance.getServer().getWorlds().get(0);
 
@@ -54,7 +53,7 @@ public abstract class Lobby {
 
         this.spawn = world.getSpawnLocation();
 
-        task = new ServerHeartBeatTask(getInstance());
+        task = new ServerPulseTask(getInstance());
 
         task.runTaskTimer(getInstance(),0,20L);
     }

@@ -1,6 +1,6 @@
 package br.com.armagedon.task;
 
-import br.com.armagedon.events.HeartBeatEvent;
+import br.com.armagedon.events.ProxyPulseEvent;
 import lombok.Getter;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -17,7 +17,7 @@ public class HeartBeatTask implements Runnable {
 
     @Override
     public void run() {
-        HeartBeatEvent heartBeatEvent = new HeartBeatEvent();
-        ProxyServer.getInstance().getPluginManager().callEvent(heartBeatEvent);
+        ProxyPulseEvent proxyPulseEvent = new ProxyPulseEvent();
+        ProxyServer.getInstance().getPluginManager().callEvent(proxyPulseEvent);
     }
 }

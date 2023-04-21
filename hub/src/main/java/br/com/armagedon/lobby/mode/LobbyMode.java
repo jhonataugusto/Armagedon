@@ -24,8 +24,7 @@ public enum LobbyMode {
         values = values();
     }
 
-    public static LobbyMode fromString(String name) {
+    public static LobbyMode getByName(String name) {
         return Arrays.stream(getValues()).filter(mode -> mode.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
-
 }
