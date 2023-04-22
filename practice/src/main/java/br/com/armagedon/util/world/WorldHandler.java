@@ -9,6 +9,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Set;
 
+import static br.com.armagedon.util.async.AsyncUtils.async;
+
 public class WorldHandler {
     public static void adjust(World world, Set<Chunk> chunks) {
 
@@ -29,20 +31,16 @@ public class WorldHandler {
 
         world.setAutoSave(false);
 
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                for (Chunk chunk : chunks) {
+        async(function -> {
+            for (Chunk chunk : chunks) {
 
-                    if (chunk.isLoaded()) {
-                        continue;
-                    }
-
-                    world.loadChunk(chunk.getX(), chunk.getZ(), true);
+                if (chunk.isLoaded()) {
+                    continue;
                 }
-            }
-        }.runTaskAsynchronously(Practice.getInstance());
 
+                world.loadChunk(chunk.getX(), chunk.getZ(), true);
+            }
+        });
 
         world.getEntities().forEach(Entity::remove);
     }

@@ -1,5 +1,6 @@
 package br.com.armagedon.arena.map;
 
+import br.com.armagedon.Practice;
 import br.com.armagedon.util.cuboid.Cuboid;
 import lombok.Data;
 
@@ -8,14 +9,17 @@ import java.util.UUID;
 
 @Data
 public class ArenaMap {
-    private final String id = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 6);
+    private String id = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 6);
     private String name;
     private File directory;
     private File presetFile;
     private Cuboid area;
 
-    //TODO: resolver as dependencias do arenaMap (está dando um NullException Cabuloso!)
     public ArenaMap(String name, String presetFilePath, File arenaDirectory) {
+
+        while (Practice.getInstance().getArenaStorage().getArenas().containsKey(getId())) {
+            setId(UUID.randomUUID().toString().replaceAll("-", "").substring(0, 6));
+        }
 
         setName(name);
         setDirectory(new File(arenaDirectory, getId()));
@@ -26,7 +30,7 @@ public class ArenaMap {
 
         File presetFile = new File(presetFilePath, name);
 
-        if(!presetFile.exists()) {
+        if (!presetFile.exists()) {
             presetFile.mkdirs();
         }
 

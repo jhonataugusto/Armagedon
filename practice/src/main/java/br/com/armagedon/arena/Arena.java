@@ -10,6 +10,7 @@ import br.com.armagedon.user.User;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -76,16 +77,13 @@ public class Arena {
             getTeams().get(1).add(user);
         }
 
-        //TODO: teleportar todos os jogadores para o canto certo do mapa
+        //TODO: teleportar esse jogador para o canto certo do mapa
 
-        getTeams().get(0).getMembers().forEach(users -> {
-            users.getPlayer().teleport(getMap().getArea().getTeamLocation1(getWorld()));
-        });
-
-        getTeams().get(1).getMembers().forEach(users -> {
-            users.getPlayer().teleport(getMap().getArea().getTeamLocation2(getWorld()));
-        });
-
+        if(getTeams().get(0).getMembers().contains(user)) {
+            user.getPlayer().teleport(new Location(getWorld(), getMap().getArea().getTeam1X(), getMap().getArea().getTeam1Y(), getMap().getArea().getTeam1Z(), (int) getMap().getArea().getTeam1Pitch(), (int) getMap().getArea().getTeam1Yaw()));
+        } else {
+            user.getPlayer().teleport(new Location(getWorld(), getMap().getArea().getTeam2X(), getMap().getArea().getTeam2Y(), getMap().getArea().getTeam2Z(), (int) getMap().getArea().getTeam2Pitch(), (int) getMap().getArea().getTeam2Yaw()));
+        }
 
         int maxUsersWaited = getData().getTeam1().size() + getData().getTeam2().size();
         int actualUsers = getTeams().get(0).getMembers().size() + getTeams().get(1).getMembers().size();

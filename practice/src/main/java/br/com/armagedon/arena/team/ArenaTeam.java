@@ -21,6 +21,7 @@ public class ArenaTeam {
         this.name = name;
         this.color = color;
         this.arena = arena;
+        this.members = new HashSet<>();
     }
 
     public void add(User user) {

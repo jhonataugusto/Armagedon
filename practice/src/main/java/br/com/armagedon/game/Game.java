@@ -9,7 +9,6 @@ import br.com.armagedon.enums.game.GameMode;
 import br.com.armagedon.enums.map.Maps;
 import br.com.armagedon.user.User;
 import br.com.armagedon.util.file.CompressionUtil;
-import br.com.armagedon.util.world.VoidGenerator;
 import br.com.armagedon.util.world.WorldHandler;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -27,6 +26,7 @@ public abstract class Game {
     private final Practice plugin;
     private final Integer MIN_ARENAS;
     private final String presetMapDirectory;
+    private final File arenaDirectory = new File("arenas");
 
     public Game(Practice plugin, Integer minArenas, String presetMapDirectory) {
         this.mode = GameMode.getByName(this.getClass().getSimpleName());
@@ -81,26 +81,23 @@ public abstract class Game {
 
     public Arena handleArena(DuelContextData data) {
 
-        //TODO: arrumar o método handleArena com o DuelContext!
-
         String mapName = data.getMapName();
+        ArenaMap map = new ArenaMap(mapName, getPresetMapDirectory(), getArenaDirectory());
 
-        File arenaDirectory = new File("arenas");
-
-        ArenaMap map = new ArenaMap(mapName, getPresetMapDirectory(), arenaDirectory);
-
-        WorldCreator creator = new WorldCreator(map.getId());
-
+        WorldCreator creator = new WorldCreator(map.getDirectory().getPath());
         creator.generateStructures(false);
-        //creator.generator(VoidGenerator.getInstance());
+
+        try {
+            CompressionUtil.copy(new File(getPresetMapDirectory(), mapName), map.getDirectory(), null);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
 
         World world = Bukkit.createWorld(creator);
-
         WorldHandler.adjust(world, map.getArea().getChunks(world));
 
-        Arena arena = new Arena(this, world, map, data);
+        Arena arena = new Arena(this, world, map);
 
-        //referencia de metadados, peguei do saturn, não sei pra que vou usar, mas posso usar pra algo mais pra frente
         world.setMetadata("arena", new FixedMetadataValue(Practice.getInstance(), arena));
 
         getPlugin().getArenaStorage().load(arena);
@@ -110,16 +107,11 @@ public abstract class Game {
 
     public Arena handleArena() {
 
-        //TODO: Verificar se o mapa está sendo carregado corretamente
-        //TODO: sim, está carregando normalmente
-
         String mapName = Maps.getRandomMap(getMode()).getName();
-        File arenaDirectory = new File("arenas");
-        ArenaMap map = new ArenaMap(mapName, getPresetMapDirectory(), arenaDirectory);
+        ArenaMap map = new ArenaMap(mapName, getPresetMapDirectory(), getArenaDirectory());
 
         WorldCreator creator = new WorldCreator(map.getDirectory().getPath());
         creator.generateStructures(false);
-        creator.generator(VoidGenerator.getInstance());
 
         try {
             CompressionUtil.copy(new File(getPresetMapDirectory(), mapName), map.getDirectory(), null);
@@ -128,11 +120,10 @@ public abstract class Game {
         }
 
         World world = Bukkit.createWorld(creator);
-        WorldHandler.adjust(world, map.getArea().getChunks(world)); //pode causar nullPointerException
+        WorldHandler.adjust(world, map.getArea().getChunks(world));
 
         Arena arena = new Arena(this, world, map);
 
-        //referencia de metadados, peguei do saturn, não sei pra que vou usar, mas posso usar pra algo mais pra frente
         world.setMetadata("arena", new FixedMetadataValue(Practice.getInstance(), arena));
 
         getPlugin().getArenaStorage().load(arena);

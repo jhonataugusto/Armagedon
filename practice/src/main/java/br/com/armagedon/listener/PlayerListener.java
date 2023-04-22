@@ -27,28 +27,20 @@ public class PlayerListener implements Listener {
             return;
         }
 
-        Arena arena = Practice.getInstance().getArenaStorage().getArenaByContextData(duelContext);
-        boolean arenaAlreadyExists = arena != null;
-
         GameMode gamemode = GameMode.getByName(duelContext.getGameMode());
-        Game game = Practice.getInstance().getGameStorage().getGame(gamemode); //game == null
+        Game game = Practice.getInstance().getGameStorage().getGame(gamemode);
 
-        if (!arenaAlreadyExists) {
+        Arena arena = Practice.getInstance().getArenaStorage().getFreeArena(game);
 
-            Arena freeArena = Practice.getInstance().getArenaStorage().getFreeArena(game);
+        if (arena == null) {
 
-            if (freeArena != null) {
+            Arena newArena = game.handleArena();
+            newArena.setData(duelContext);
+            newArena.redirect(player);
 
-                freeArena.setData(duelContext);
-                freeArena.redirect(player);
-            } else {
-
-                Arena newArena = game.handleArena(duelContext);
-                newArena.setData(duelContext);
-                newArena.redirect(player);
-            }
         } else {
 
+            arena.setData(duelContext);
             arena.redirect(player);
         }
     }
