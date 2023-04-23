@@ -1,15 +1,10 @@
 package br.com.armagedon.util.world;
 
-import br.com.armagedon.Practice;
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Set;
-
-import static br.com.armagedon.util.async.AsyncUtils.async;
 
 public class WorldHandler {
     public static void adjust(World world, Set<Chunk> chunks) {
@@ -26,21 +21,21 @@ public class WorldHandler {
         world.setWeatherDuration(Integer.MIN_VALUE);
         world.setThunderDuration(Integer.MIN_VALUE);
 
-        world.setSpawnLocation(0, 71, 0);
+        world.setSpawnLocation(0, 60, 0);
         world.setTime(6000);
 
         world.setAutoSave(false);
 
-        async(function -> {
-            for (Chunk chunk : chunks) {
 
-                if (chunk.isLoaded()) {
-                    continue;
-                }
+        for (Chunk chunk : chunks) {
 
-                world.loadChunk(chunk.getX(), chunk.getZ(), true);
+            if (chunk.isLoaded()) {
+                continue;
             }
-        });
+
+            world.loadChunk(chunk.getX(), chunk.getZ(), true);
+        }
+
 
         world.getEntities().forEach(Entity::remove);
     }

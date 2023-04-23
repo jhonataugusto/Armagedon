@@ -11,41 +11,32 @@ import java.util.function.Predicate;
 public class CompressionUtil {
 
     public static void copy(final File source, final File destination, Predicate<Path> predicate) throws IOException {
-
         if (source.isDirectory()) {
             if (!destination.exists()) {
+                Files.createDirectories(destination.getParentFile().toPath());
                 destination.mkdir();
             }
 
             String[] files = source.list();
-
             if (files == null) return;
 
             for (String file : files) {
-
                 File newSource = new File(source, file);
-
                 if (predicate != null && !predicate.test(newSource.toPath())) {
                     continue;
                 }
-
                 File newDestination = new File(destination, file);
                 copy(newSource, newDestination, predicate);
             }
         } else {
-            InputStream inputStream = Files.newInputStream(source.toPath());
-            OutputStream outputStream = Files.newOutputStream(destination.toPath());
-
-            byte[] buffer = new byte[1024];
-
-            int i;
-
-            while ((i = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, i);
+            try (InputStream inputStream = Files.newInputStream(source.toPath());
+                 OutputStream outputStream = Files.newOutputStream(destination.toPath())) {
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = inputStream.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, length);
+                }
             }
-
-            inputStream.close();
-            outputStream.close();
         }
     }
 

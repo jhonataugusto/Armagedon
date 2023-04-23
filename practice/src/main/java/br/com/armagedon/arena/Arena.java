@@ -1,22 +1,23 @@
 package br.com.armagedon.arena;
 
-import br.com.armagedon.Practice;
 import br.com.armagedon.account.Account;
 import br.com.armagedon.arena.map.ArenaMap;
 import br.com.armagedon.arena.team.ArenaTeam;
 import br.com.armagedon.data.DuelContextData;
+import br.com.armagedon.events.arena.ArenaChangeStateEvent;
 import br.com.armagedon.game.Game;
 import br.com.armagedon.user.User;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -57,19 +58,14 @@ public class Arena {
         return getGame().getMode() + "-" + getMap().getId();
     }
 
-    public void redirect(Player player) {
+    public void handleJoin(User user) {
 
-        Account account = Account.fetch(player.getUniqueId());
-
-        //TODO: colocar no time certo
+        Account account = Account.fetch(user.getUuid());
 
         if (!(getData().getTeam1().contains(account.getUuid()) || getData().getTeam2().contains(account.getUuid()))) {
-            player.kickPlayer(ChatColor.RED + "Jogador não faz parte dessa partida");
+            user.getPlayer().kickPlayer(ChatColor.RED + "Jogador não faz parte dessa partida");
             return;
         }
-
-        User user = new User(account.getUuid());
-        Practice.getInstance().getUserStorage().register(user.getUuid(), user);
 
         if (getData().getTeam1().contains(account.getUuid())) {
             getTeams().get(0).add(user);
@@ -77,20 +73,26 @@ public class Arena {
             getTeams().get(1).add(user);
         }
 
-        //TODO: teleportar esse jogador para o canto certo do mapa
+        Location locationTeam1 = new Location(getWorld(), getMap().getArea().getTeam1X(), getMap().getArea().getTeam1Y(), getMap().getArea().getTeam1Z(), (int) getMap().getArea().getTeam1Pitch(), (int) getMap().getArea().getTeam1Yaw());
+        Location locationTeam2 = new Location(getWorld(), getMap().getArea().getTeam2X(), getMap().getArea().getTeam2Y(), getMap().getArea().getTeam2Z(), (int) getMap().getArea().getTeam2Pitch(), (int) getMap().getArea().getTeam2Yaw());
 
-        if(getTeams().get(0).getMembers().contains(user)) {
-            user.getPlayer().teleport(new Location(getWorld(), getMap().getArea().getTeam1X(), getMap().getArea().getTeam1Y(), getMap().getArea().getTeam1Z(), (int) getMap().getArea().getTeam1Pitch(), (int) getMap().getArea().getTeam1Yaw()));
+        if (getTeams().get(0).getMembers().contains(user)) {
+            user.getPlayer().teleport(locationTeam1);
         } else {
-            user.getPlayer().teleport(new Location(getWorld(), getMap().getArea().getTeam2X(), getMap().getArea().getTeam2Y(), getMap().getArea().getTeam2Z(), (int) getMap().getArea().getTeam2Pitch(), (int) getMap().getArea().getTeam2Yaw()));
+            user.getPlayer().teleport(locationTeam2);
         }
 
-        int maxUsersWaited = getData().getTeam1().size() + getData().getTeam2().size();
+        user.setArena(this);
+
+        int maxUsersExpected = getData().getTeam1().size() + getData().getTeam2().size();
         int actualUsers = getTeams().get(0).getMembers().size() + getTeams().get(1).getMembers().size();
 
-        setStage(actualUsers == maxUsersWaited ? ArenaStage.STARTING : ArenaStage.WAITING);
+        setStage(actualUsers == maxUsersExpected ? ArenaStage.STARTING : ArenaStage.WAITING);
+        if (getStage() == ArenaStage.STARTING) {
+            Bukkit.getServer().getPluginManager().callEvent(new ArenaChangeStateEvent(this, this.getStage()));
+        }
 
-        game.handleJoin(player);
+        game.handleJoin(user.getPlayer());
     }
 
     public String getId() {
@@ -99,5 +101,13 @@ public class Arena {
 
     public List<ArenaTeam> getTeams() {
         return Arrays.asList(teams);
+    }
+
+    public List<User> getAllTeamMembers() {
+
+        /* Aqui, flatMap é usado para transformar a lista de jogadores de cada equipe em um único fluxo
+         * de jogadores. Em seguida, collect é usado para coletar esses jogadores em uma única lista.*/
+
+        return getTeams().stream().flatMap(team -> team.getMembers().stream()).collect(Collectors.toList());
     }
 }

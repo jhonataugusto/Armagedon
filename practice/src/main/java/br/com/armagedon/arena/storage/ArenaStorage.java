@@ -18,7 +18,6 @@ public class ArenaStorage {
         getArenas().put(arena.getId(), arena);
     }
 
-
     public void unload(String arenaId) {
         getArenas().remove(arenaId);
     }
@@ -40,7 +39,7 @@ public class ArenaStorage {
         int arenaSizeByFortyPercent = (int) Math.round(arenaSize * 0.4);
 
         for (int i = 0; i <= arenaSizeByFortyPercent; i++) {
-            game.handleArena();
+            game.createArena();
         }
     }
 

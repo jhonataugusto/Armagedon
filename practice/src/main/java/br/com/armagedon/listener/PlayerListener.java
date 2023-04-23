@@ -6,6 +6,7 @@ import br.com.armagedon.arena.Arena;
 import br.com.armagedon.data.DuelContextData;
 import br.com.armagedon.enums.game.GameMode;
 import br.com.armagedon.game.Game;
+import br.com.armagedon.user.User;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -27,6 +28,9 @@ public class PlayerListener implements Listener {
             return;
         }
 
+        User user = new User(account.getUuid());
+        Practice.getInstance().getUserStorage().register(user.getUuid(), user);
+
         GameMode gamemode = GameMode.getByName(duelContext.getGameMode());
         Game game = Practice.getInstance().getGameStorage().getGame(gamemode);
 
@@ -34,14 +38,14 @@ public class PlayerListener implements Listener {
 
         if (arena == null) {
 
-            Arena newArena = game.handleArena();
+            Arena newArena = game.createArena();
             newArena.setData(duelContext);
-            newArena.redirect(player);
+            newArena.handleJoin(user);
 
         } else {
 
             arena.setData(duelContext);
-            arena.redirect(player);
+            arena.handleJoin(user);
         }
     }
 }

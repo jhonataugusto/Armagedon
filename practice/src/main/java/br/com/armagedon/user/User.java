@@ -2,6 +2,8 @@ package br.com.armagedon.user;
 
 import br.com.armagedon.Practice;
 import br.com.armagedon.account.Account;
+import br.com.armagedon.arena.Arena;
+import br.com.armagedon.arena.team.ArenaTeam;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -17,6 +19,8 @@ public class User {
     private Account account;
 
     private Player player;
+
+    private Arena arena;
 
     public User(UUID uuid) {
         account = new Account(uuid);
@@ -37,6 +41,10 @@ public class User {
 
     public Player getPlayer() {
         return Bukkit.getPlayer(getAccount().getUuid());
+    }
+
+    public ArenaTeam getTeam(){
+        return getArena().getTeams().stream().filter(team -> team.getMembers().contains(this)).findFirst().orElse(null);
     }
 
     @Override

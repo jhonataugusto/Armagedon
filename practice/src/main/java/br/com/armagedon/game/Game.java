@@ -7,7 +7,9 @@ import br.com.armagedon.arena.map.ArenaMap;
 import br.com.armagedon.data.DuelContextData;
 import br.com.armagedon.enums.game.GameMode;
 import br.com.armagedon.enums.map.Maps;
+import br.com.armagedon.enums.server.Server;
 import br.com.armagedon.user.User;
+import br.com.armagedon.util.bungee.BungeeUtils;
 import br.com.armagedon.util.file.CompressionUtil;
 import br.com.armagedon.util.world.WorldHandler;
 import lombok.Getter;
@@ -15,13 +17,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 
 import java.io.File;
 
+import static br.com.armagedon.util.scheduler.SchedulerUtils.delay;
+
 @Getter
-public abstract class Game {
+public abstract class Game implements Listener {
     private final GameMode mode;
     private final Practice plugin;
     private final Integer MIN_ARENAS;
@@ -33,19 +38,21 @@ public abstract class Game {
         this.plugin = plugin;
         this.MIN_ARENAS = minArenas;
         this.presetMapDirectory = presetMapDirectory;
+
+        getPlugin().getServer().getPluginManager().registerEvents(this, Practice.getInstance());
     }
 
     public void load() {
         int actualArenas = plugin.getArenaStorage().getArenas().size();
 
         if (actualArenas != 0) {
-            unload(); //TODO: esse unload apaga os arquivos do nodebuff
+            unload();
         }
 
         int arenaSizedByFivePercent = (int) Math.round(MIN_ARENAS * 0.5);
 
         for (int i = 0; i <= arenaSizedByFivePercent; i++) {
-            handleArena();
+            createArena();
         }
     }
 
@@ -56,6 +63,10 @@ public abstract class Game {
     public void handleJoin(Player player) {
         User user = User.fetch(player.getUniqueId());
 
+        if(user == null) {
+            return;
+        }
+
         Account account = user.getAccount();
 
         player.setHealth(player.getMaxHealth());
@@ -65,27 +76,30 @@ public abstract class Game {
         player.getOpenInventory().getTopInventory().clear();
         player.setLevel(0);
         player.setExp(0);
+        player.setSaturation(14);
     }
 
-    public void handleQuit(Player player) {
+    public void handleQuit(User user) {
 
-        for (PotionEffect effect : player.getActivePotionEffects()) {
-            player.removePotionEffect(effect.getType());
+        if(user == null) {
+            return;
         }
 
-        player.setFireTicks(0);
+        Player player = user.getPlayer();
+
+        user.setArena(null);
+
+        BungeeUtils.connect(player, Server.LOBBY_PRACTICE);
     }
 
     public void handleScoreboard() {
     }
 
-    public Arena handleArena(DuelContextData data) {
+    public Arena createArena(DuelContextData data) {
 
         String mapName = data.getMapName();
         ArenaMap map = new ArenaMap(mapName, getPresetMapDirectory(), getArenaDirectory());
-
-        WorldCreator creator = new WorldCreator(map.getDirectory().getPath());
-        creator.generateStructures(false);
+        final Arena[] arena = new Arena[1];
 
         try {
             CompressionUtil.copy(new File(getPresetMapDirectory(), mapName), map.getDirectory(), null);
@@ -93,25 +107,28 @@ public abstract class Game {
             exception.printStackTrace();
         }
 
-        World world = Bukkit.createWorld(creator);
-        WorldHandler.adjust(world, map.getArea().getChunks(world));
+        delay(() -> {
 
-        Arena arena = new Arena(this, world, map);
+            WorldCreator creator = new WorldCreator(map.getDirectory().getPath());
+            creator.generateStructures(false);
 
-        world.setMetadata("arena", new FixedMetadataValue(Practice.getInstance(), arena));
+            World world = Bukkit.getServer().createWorld(creator);
+            WorldHandler.adjust(world, map.getArea().getChunks(world));
 
-        getPlugin().getArenaStorage().load(arena);
+            arena[0] = new Arena(this, world, map);
 
-        return arena;
+            world.setMetadata("arena", new FixedMetadataValue(Practice.getInstance(), arena[0]));
+            getPlugin().getArenaStorage().load(arena[0]);
+        }, 1L);
+
+        return arena[0];
     }
 
-    public Arena handleArena() {
+    public Arena createArena() {
 
         String mapName = Maps.getRandomMap(getMode()).getName();
         ArenaMap map = new ArenaMap(mapName, getPresetMapDirectory(), getArenaDirectory());
-
-        WorldCreator creator = new WorldCreator(map.getDirectory().getPath());
-        creator.generateStructures(false);
+        final Arena[] arena = new Arena[1];
 
         try {
             CompressionUtil.copy(new File(getPresetMapDirectory(), mapName), map.getDirectory(), null);
@@ -119,15 +136,20 @@ public abstract class Game {
             exception.printStackTrace();
         }
 
-        World world = Bukkit.createWorld(creator);
-        WorldHandler.adjust(world, map.getArea().getChunks(world));
+        delay(() -> {
 
-        Arena arena = new Arena(this, world, map);
+            WorldCreator creator = new WorldCreator(map.getDirectory().getPath());
+            creator.generateStructures(false);
 
-        world.setMetadata("arena", new FixedMetadataValue(Practice.getInstance(), arena));
+            World world = Bukkit.getServer().createWorld(creator);
+            WorldHandler.adjust(world, map.getArea().getChunks(world));
 
-        getPlugin().getArenaStorage().load(arena);
+            arena[0] = new Arena(this, world, map);
 
-        return arena;
+            world.setMetadata("arena", new FixedMetadataValue(Practice.getInstance(), arena[0]));
+            getPlugin().getArenaStorage().load(arena[0]);
+        }, 1L);
+
+        return arena[0];
     }
 }

@@ -1,8 +1,6 @@
 package br.com.armagedon;
 
 import br.com.armagedon.arena.storage.ArenaStorage;
-import br.com.armagedon.enums.game.GameMode;
-import br.com.armagedon.enums.map.Maps;
 import br.com.armagedon.game.storage.GameStorage;
 import br.com.armagedon.user.storage.UserStorage;
 import lombok.Getter;
@@ -10,11 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.reflections.Reflections;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Set;
-
-import static br.com.armagedon.util.async.AsyncUtils.async;
 
 @Getter
 public class Practice extends JavaPlugin {
