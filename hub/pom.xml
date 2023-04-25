@@ -79,6 +79,14 @@
             <version>2.11.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.pandamc</groupId>
+            <artifactId>panda-api</artifactId>
+            <version>1.8.8-R0.1-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>D:/projetos/intellij/armagedon/libs/paper.jar</systemPath>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -108,7 +116,7 @@
                             <finalName>hub</finalName>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>br.com.armagedon.Hub</mainClass>
+                                    <mainClass>br.com.hub.Hub</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

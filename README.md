@@ -5,7 +5,7 @@ Core: módulo principal da rede, contendo as configurações globais e comuns a 
 
 Bungee: módulo responsável pelo servidor proxy, gerenciando as conexões dos jogadores aos diferentes servidores da rede;
 
-br.com.armagedon.Practice: módulo responsável pela implementação de um sistema de duelos e partidas rápidas;
+br.com.bungee.Practice: módulo responsável pela implementação de um sistema de duelos e partidas rápidas;
 
 Hub: módulo que implementa um lobby central, onde os jogadores podem se encontrar e se preparar para acessar outros servidores da rede.
 
