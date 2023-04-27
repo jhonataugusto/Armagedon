@@ -1,5 +1,6 @@
 package br.com.core.database.mongo.collections;
 
+import br.com.core.account.Account;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -7,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public enum CollectionProps {
     USERS("users"),
-    KITS("practice_kits");
+    DUELS("duels");
 
     private String name;
 

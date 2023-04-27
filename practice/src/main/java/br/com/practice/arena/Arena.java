@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 
 import java.util.Arrays;
 import java.util.List;
@@ -104,6 +105,7 @@ public class Arena {
         setStage(ArenaStage.WAITING);
         setCurrentTime(0L);
         getTeams().forEach(ArenaTeam::clear);
+        getWorld().getEntities().forEach(Entity::remove);
     }
 
     public String getId() {
@@ -116,11 +118,19 @@ public class Arena {
 
     public List<User> getAllTeamMembers() {
 
-        List<User> allMembers = getTeams().stream().flatMap(team -> team.getMembers().stream()).collect(Collectors.toList());
-        List<User> allDeadMembers = getTeams().stream().flatMap(team -> team.getDeadMembers().stream()).collect(Collectors.toList());
+        List<User> allDeadMembers = getAllDeadMembers();
+        List<User> allMembers = getAllLiveMembers();
 
         allMembers.addAll(allDeadMembers);
 
         return allMembers;
+    }
+
+    public List<User> getAllLiveMembers() {
+        return getTeams().stream().flatMap(team -> team.getMembers().stream()).collect(Collectors.toList());
+    }
+
+    public List<User> getAllDeadMembers() {
+        return getTeams().stream().flatMap(team -> team.getDeadMembers().stream()).collect(Collectors.toList());
     }
 }

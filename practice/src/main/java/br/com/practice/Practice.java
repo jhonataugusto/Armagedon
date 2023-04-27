@@ -6,6 +6,7 @@ import br.com.core.holder.command.ACommand;
 import br.com.practice.game.storage.GameStorage;
 import br.com.practice.user.storage.UserStorage;
 import br.com.practice.util.bungee.BungeeUtils;
+import fr.minuskube.inv.InventoryManager;
 import lombok.Getter;
 import me.saiintbrisson.bukkit.command.BukkitFrame;
 import org.bukkit.event.Listener;
@@ -23,6 +24,7 @@ public class Practice extends JavaPlugin {
     private GameStorage gameStorage;
 
     private BukkitFrame commandFramework;
+    private InventoryManager inventoryManager;
 
     @Override
     public void onLoad() {
@@ -50,6 +52,9 @@ public class Practice extends JavaPlugin {
         gameStorage = new GameStorage();
 
         gameStorage.load();
+
+        inventoryManager = new InventoryManager(this);
+        inventoryManager.init();
     }
 
     @Override

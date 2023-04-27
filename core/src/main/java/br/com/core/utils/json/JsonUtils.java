@@ -1,12 +1,14 @@
 package br.com.core.utils.json;
 
 import br.com.core.Core;
+import br.com.core.data.AccountData;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,8 +35,29 @@ public class JsonUtils {
                 Type keyType = typeArgs[0];
                 Type valueType = typeArgs[1];
                 if (keyType.equals(String.class) && valueType.equals(String.class)) {
-                    Map<String, String> mapValue = Core.GSON.fromJson(jsonElement, new TypeToken<Map<String, String>>(){}.getType());
+                    Map<String, String> mapValue = Core.GSON.fromJson(jsonElement, new TypeToken<Map<String, String>>() {
+                    }.getType());
                     field.set(object, mapValue);
+                } else if (keyType.equals(String.class) && valueType.equals(Integer.class)) {
+                    Map<String, Integer> mapValue = Core.GSON.fromJson(jsonElement, new TypeToken<Map<String, Integer>>() {
+                    }.getType());
+                    field.set(object, mapValue);
+                } else if (keyType.equals(AccountData.class) && valueType.equals(String.class)) {
+                    Map<AccountData, String> mapValue = Core.GSON.fromJson(jsonElement, new TypeToken<Map<AccountData, String>>() {
+                    }.getType());
+                    field.set(object, mapValue);
+                }
+            } else if (field.getType() == List.class) {
+                Type genericType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                if (genericType.equals(String.class)) {
+                    List<String> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<List<String>>() {
+                    }.getType());
+                    field.set(object, listValue);
+                }
+                if (genericType.equals(UUID.class)) {
+                    List<UUID> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<List<UUID>>() {
+                    }.getType());
+                    field.set(object, listValue);
                 }
             }
         } catch (IllegalAccessException e) {

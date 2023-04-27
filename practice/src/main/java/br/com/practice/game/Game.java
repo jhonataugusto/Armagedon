@@ -1,5 +1,6 @@
 package br.com.practice.game;
 
+import br.com.core.data.AccountData;
 import br.com.practice.Practice;
 import br.com.core.account.Account;
 import br.com.practice.arena.Arena;
@@ -11,6 +12,7 @@ import br.com.core.enums.server.Server;
 import br.com.practice.user.User;
 import br.com.practice.util.bungee.BungeeUtils;
 import br.com.practice.util.file.CompressionUtil;
+import br.com.practice.util.serializer.SerializerUtils;
 import br.com.practice.util.world.VoidGenerator;
 import br.com.practice.util.world.WorldHandler;
 import br.com.practice.util.scheduler.SchedulerUtils;
@@ -20,6 +22,7 @@ import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffectType;
 
@@ -27,6 +30,7 @@ import java.io.File;
 import java.util.Map;
 
 import static br.com.practice.util.scheduler.SchedulerUtils.async;
+import static br.com.practice.util.scheduler.SchedulerUtils.sync;
 
 @Getter
 public abstract class Game implements Listener {
@@ -84,7 +88,7 @@ public abstract class Game implements Listener {
         player.setGameMode(org.bukkit.GameMode.SURVIVAL);
 
         player.getActivePotionEffects().forEach(potionEffect -> {
-            if(potionEffect.getType() != PotionEffectType.SLOW) {
+            if (potionEffect.getType() != PotionEffectType.SLOW) {
                 player.removePotionEffect(potionEffect.getType());
             }
         });
@@ -98,6 +102,10 @@ public abstract class Game implements Listener {
 
         Player player = user.getPlayer();
 
+        DuelContextData.removeAllDuelContextsFromAccount(user.getAccount());
+
+        user.getAccount().getData().setCurrentDuelUuid(user.getArena().getData().getUuid().toString());
+        user.getAccount().getData().saveData();
         user.setArena(null);
         user.setLastDamager(null);
 
@@ -107,11 +115,47 @@ public abstract class Game implements Listener {
     public void handleScoreboard() {
     }
 
+    public void handleInventory(User user) {
+
+        if (user.getArena() == null) {
+            return;
+        }
+
+        AccountData data = user.getAccount().getData();
+        GameMode mode = user.getArena().getGame().getMode();
+
+        Inventory customInventory = null;
+        if (!data.getInventories().containsKey(mode.getName())) {
+            customInventory = SerializerUtils.deserializeInventory(mode.getDefaultInventoryEncoded(), user.getPlayer());
+        } else {
+            customInventory = SerializerUtils.deserializeInventory(data.getInventories().get(mode.getName()), user.getPlayer());
+        }
+
+        user.getPlayer().getInventory().setContents(customInventory.getContents());
+
+    }
+
+    public void handlePostMatchInventory(User user) {
+
+        Inventory inventory = user.createPostMatchInventory();
+
+        String base64 = SerializerUtils.serializeInventory(inventory);
+
+        if (user.getArena() == null) {
+            return;
+        }
+
+        Arena arena = user.getArena();
+
+        arena.getData().getInventories().put(user.getAccount().getName() + "_" + user.getAccount().getUuid(), base64);
+        arena.getData().saveData();
+    }
+
     public Arena createArena(DuelContextData data) {
 
         final Arena[] arena = new Arena[1];
 
-        SchedulerUtils.sync(() -> {
+        sync(() -> {
             String mapName = data == null ? Maps.getRandomMap(getMode()).getName() : data.getMapName();
             ArenaMap map = new ArenaMap(mapName, getPresetMapDirectory(), getArenaDirectory());
 
@@ -138,7 +182,6 @@ public abstract class Game implements Listener {
                 plugin.getArenaStorage().unload(arena[0].getId());
                 arena[0] = createArena(data);
             }
-
         });
 
         return arena[0];

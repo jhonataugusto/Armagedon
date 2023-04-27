@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static br.com.practice.util.scheduler.SchedulerUtils.async;
+import static br.com.practice.util.scheduler.SchedulerUtils.sync;
+
 @Getter
 public class ArenaStorage {
     Map<String, Arena> arenas = new HashMap<>();
@@ -21,15 +24,20 @@ public class ArenaStorage {
     }
 
     public void unload(String arenaId) {
+
         Arena arena = getArena(arenaId);
 
         if (arena == null) {
             return;
         }
 
-        getArenas().remove(arenaId);
-        Bukkit.unloadWorld(arenaId, false);
-        CompressionUtil.delete(arena.getMap().getDirectory());
+        sync(() -> {
+            getArenas().remove(arenaId);
+
+            Bukkit.unloadWorld(arenaId, false);
+
+            CompressionUtil.delete(arena.getMap().getDirectory());
+        });
     }
 
     public Arena getArena(String id) {

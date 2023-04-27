@@ -4,6 +4,7 @@ import br.com.core.enums.game.GameMode;
 import br.com.hub.user.User;
 import br.com.hub.util.serializer.SerializerUtils;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -19,8 +20,9 @@ import java.util.Map;
 
 import static br.com.hub.util.scheduler.SchedulerUtils.async;
 
+@Getter
+@Setter
 public class KitEditorGUI implements Listener {
-
 
     @Getter
     private static final KitEditorGUI instance = new KitEditorGUI();
@@ -31,9 +33,6 @@ public class KitEditorGUI implements Listener {
     protected final int MAXIMUM_INVENTORY_EDITOR_SLOT = 44;
 
     private final Map<Player, GameMode> editMode = new HashMap<>();
-
-
-    //TODO: terminar isso aqui mais tarde!
 
     public void open(Player player, GameMode gameMode) {
         this.player = player;
@@ -147,7 +146,7 @@ public class KitEditorGUI implements Listener {
         async(() -> {
             String inventorySerialized = SerializerUtils.serializeInventory(event.getInventory());
 
-            user.getAccount().getData().getInventories().put(editMode.get(player).getName(), inventorySerialized);
+            user.getAccount().getData().getInventories().put(event.getInventory().getName(), inventorySerialized);
             user.getAccount().getData().saveData();
             editMode.remove(player);
 

@@ -5,6 +5,7 @@ import br.com.hub.gui.ModeSelectorGUI;
 import br.com.hub.gui.ServerGUI;
 import br.com.hub.items.LobbyItems;
 import br.com.hub.items.PracticeItems;
+import br.com.hub.user.User;
 import de.tr7zw.changeme.nbtapi.NBT;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -24,6 +25,7 @@ public class PracticePlayerListener implements Listener {
         for (PracticeItems item : PracticeItems.values()) {
             player.getInventory().setItem(item.getPosition(), item.toItemStack());
         }
+
     }
 
     @EventHandler

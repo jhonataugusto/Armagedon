@@ -82,10 +82,9 @@ public class PracticeQueueListener implements Listener {
 
         DuelContextRedisCRUD.save(duelContext);
 
-        sync(() -> {
-            BungeeUtils.connect(user1.getPlayer(), Server.PRACTICE);
-            BungeeUtils.connect(user2.getPlayer(), Server.PRACTICE);
-        });
+
+        BungeeUtils.connect(user1.getPlayer(), Server.PRACTICE);
+        BungeeUtils.connect(user2.getPlayer(), Server.PRACTICE);
     }
 
 

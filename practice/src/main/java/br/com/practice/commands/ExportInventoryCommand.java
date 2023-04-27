@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 import static br.com.core.utils.hastebin.HasteBinUtils.post;
 import static br.com.practice.util.scheduler.SchedulerUtils.async;
 
-public class ExportInventoryCommand implements ACommand {
+public class ExportInventoryCommand extends ACommand {
 
     @Command(name = "exportinventory", target = CommandTarget.PLAYER)
     public void handleCommand(Context<Player> context) {

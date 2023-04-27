@@ -1,6 +1,7 @@
 package br.com.core.crud.redis;
 
 import br.com.core.Core;
+import br.com.core.account.Account;
 import br.com.core.data.DuelContextData;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;

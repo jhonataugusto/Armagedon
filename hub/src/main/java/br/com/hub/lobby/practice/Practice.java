@@ -6,6 +6,7 @@ import br.com.hub.gui.ModeSelectorGUI;
 import br.com.hub.lobby.Lobby;
 import br.com.hub.lobby.practice.queue.Queue;
 import br.com.hub.util.cuboid.Cuboid;
+import co.aikar.commands.BaseCommand;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -20,7 +21,6 @@ public class Practice extends Lobby {
 
     private Queue queue;
     private Cuboid cuboid;
-
     private KitEditorGUI kitEditorGUI;
     private ModeSelectorGUI modeSelectorGUI;
 
@@ -28,6 +28,7 @@ public class Practice extends Lobby {
         super(instance);
 
         registerListeners();
+        registerCustomCommands();
 
         setSpawn(new Location(getWorld(), 0.5, 60, 0.5, 0, 0));
 
@@ -38,11 +39,22 @@ public class Practice extends Lobby {
         border.setSize(450);
 
         queue = new Queue();
-
-
     }
 
-    public void registerListeners(){
+    public void registerCustomCommands() {
+        Reflections reflections = new Reflections("br.com.hub.lobby.practice.commands");
+        Set<Class<? extends BaseCommand>> commands = reflections.getSubTypesOf(BaseCommand.class);
+
+        for (Class<?> clazz : commands) {
+            try {
+                getInstance().getBukkitCommandManager().registerCommand((BaseCommand) clazz.newInstance());
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+    }
+
+    public void registerListeners() {
         Reflections reflections = new Reflections("br.com.hub.lobby.practice");
         Set<Class<? extends Listener>> classes = reflections.getSubTypesOf(Listener.class);
 

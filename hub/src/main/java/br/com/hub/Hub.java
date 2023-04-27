@@ -4,19 +4,24 @@ import br.com.core.Core;
 import br.com.hub.lobby.Lobby;
 import br.com.hub.lobby.storage.LobbyStorage;
 import br.com.hub.user.storage.UserStorage;
+import co.aikar.commands.BukkitCommandManager;
 import fr.minuskube.inv.InventoryManager;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+
 
 import java.util.logging.Level;
 
 @Getter
+@Setter
 public class Hub extends JavaPlugin {
 
     private static Hub instance;
     private UserStorage userStorage;
     private InventoryManager inventoryManager;
+    private BukkitCommandManager bukkitCommandManager;
     private Lobby lobby;
 
     private String CHANNEL = "REDIRECT";
@@ -37,6 +42,8 @@ public class Hub extends JavaPlugin {
         inventoryManager = new InventoryManager(this);
         inventoryManager.init();
 
+        bukkitCommandManager = new BukkitCommandManager(instance);
+
         lobby = loadLobby();
 
         saveDefaultConfig();
@@ -55,7 +62,6 @@ public class Hub extends JavaPlugin {
             Lobby lobby = (Lobby) LobbyStorage.getLobby(Hub.getInstance().getConfig().getString("lobby.mode")).getConstructor(Hub.class).newInstance(this);
 
             lobby.loadListeners();
-            lobby.registerCommands();
             lobby.registerPluginChannels();
             lobby.removeRecipes();
 
@@ -67,4 +73,6 @@ public class Hub extends JavaPlugin {
         }
         return null;
     }
+
+
 }

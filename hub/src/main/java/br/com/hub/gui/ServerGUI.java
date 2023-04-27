@@ -66,7 +66,7 @@ public class ServerGUI implements InventoryProvider {
                 Server server = Server.getByName(item.getName());
 
                 if (online) {
-                    sync(() -> BungeeUtils.connect((Player) event.getWhoClicked(), server));
+                    BungeeUtils.connect((Player) event.getWhoClicked(), server);
                 } else {
                     event.getWhoClicked().sendMessage(ChatColor.RED + "Este servidor está desligado.");
                 }

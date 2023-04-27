@@ -26,10 +26,6 @@ public class WorldHandler {
 
         world.setAutoSave(false);
 
-
-        //TODO: ele tá dando erro de session.lock, não sei muito bem como resolver, mas acredito que seja por conta do carregamento de chunks.
-        //TODO: possível resolução: talvez deixar síncrono? ou fazer o Cuboid funcionar?
-
         for (Chunk chunk : chunks) {
 
             if (chunk.isLoaded()) {

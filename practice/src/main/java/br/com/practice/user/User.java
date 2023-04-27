@@ -4,10 +4,13 @@ import br.com.practice.Practice;
 import br.com.core.account.Account;
 import br.com.practice.arena.Arena;
 import br.com.practice.arena.team.ArenaTeam;
+import br.com.practice.gui.PostMatchGUI;
+import fr.minuskube.inv.SmartInventory;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,12 +20,20 @@ import java.util.stream.Collectors;
 @Setter
 public class User {
     private Account account;
-
     private Player player;
-
     private Arena arena;
-
+    private Inventory postMatchInventory; //TODO
     private User lastDamager;
+
+    private int blockedHits, hits, criticalHits;
+    private int maxCombo, currentCombo;
+
+    private int throwedPotions; //TODO
+    private double accuracyPotions; //TODO
+
+    private double range, maxRange; //TODO
+    private int clicksPerSecond, maxClicksPerSecond; //TODO
+    private long lastClickTime;
 
     public User(UUID uuid) {
         account = new Account(uuid);
@@ -49,14 +60,17 @@ public class User {
         return getArena().getTeams().stream().filter(team -> team.getMembers().contains(this)).findFirst().orElse(null);
     }
 
-    //TODO: amanhã ver o bug do lastMember e checar o por que da conta do Tringed dar mais dano '-'
-    public boolean lastMember() {
+    public boolean isLastMember() {
 
         List<User> members = getTeam().getMembers().stream()
                 .map(member -> (User) member)
                 .collect(Collectors.toList());
 
         return members.size() == 1 && members.contains(this);
+    }
+
+    public Inventory createPostMatchInventory() {
+        return new PostMatchGUI(this).getInventory();
     }
 
     @Override

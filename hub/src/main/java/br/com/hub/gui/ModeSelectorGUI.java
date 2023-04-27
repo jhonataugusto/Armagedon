@@ -11,11 +11,15 @@ import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import fr.minuskube.inv.content.SlotPos;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
+@Setter
 public class ModeSelectorGUI implements InventoryProvider {
 
     private static final String ID = "MODE_SELECTOR_GUI";

@@ -2,6 +2,7 @@ package br.com.core.data;
 
 import br.com.core.Core;
 import br.com.core.account.Account;
+import br.com.core.crud.mongo.DuelContextMongoCRUD;
 import br.com.core.crud.redis.DuelContextRedisCRUD;
 import br.com.core.utils.json.JsonUtils;
 import com.google.gson.JsonElement;
@@ -9,19 +10,22 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
-public class DuelContextData {
+public class DuelContextData implements Serializable {
+    private Object _id;
     private final UUID uuid = UUID.randomUUID();
     private List<UUID> team1 = new ArrayList<>(), team2 = new ArrayList<>();
     private boolean custom = false;
     private String gameMode = null;
     private String mapName = null;
+    private String arenaId = null;
+    private List<UUID> spectators = new ArrayList<>();
+    private Map<String, String> inventories = new HashMap<>();
     private boolean ranked = false;
 
     public DuelContextData() {
@@ -47,15 +51,24 @@ public class DuelContextData {
         }
     }
 
-    public void save() {
+    public void saveData() {
         DuelContextRedisCRUD.save(this);
+
+        DuelContextData data = DuelContextMongoCRUD.get(this.getUuid());
+
+        if (data == null) {
+            DuelContextMongoCRUD.create(this);
+        } else {
+            DuelContextMongoCRUD.save(this);
+        }
+
     }
 
-    public DuelContextData update() {
+    public DuelContextData updateData() {
         return DuelContextRedisCRUD.findByUuid(uuid);
     }
 
-    public void delete() {
+    public void deleteData() {
         DuelContextRedisCRUD.delete(getUuid());
     }
 
@@ -71,4 +84,30 @@ public class DuelContextData {
         return DuelContextRedisCRUD.getDuels().stream().filter(duel -> duel.getTeam1().contains(account.getUuid()) || duel.getTeam2().contains(account.getUuid())).findFirst().orElse(null);
     }
 
+    public static DuelContextData getSpectatorContext(Account account) {
+        return DuelContextRedisCRUD.getDuels().stream().filter(duel -> duel.getSpectators().contains(account.getUuid())).findFirst().orElse(null);
+    }
+
+    public static void removeAllDuelContextsFromAccount(Account account) {
+        List<DuelContextData> duels = DuelContextRedisCRUD.getDuels().stream().filter(duel -> duel.getTeam1().contains(account.getUuid()) || duel.getTeam2().contains(account.getUuid())).collect(Collectors.toList());
+        duels.forEach(duel -> {
+            duel.saveData();
+            duel.deleteData();
+        });
+    }
+
+    public String getNameAndUuidKey(String uuid) {
+
+        for (Map.Entry<String, String> entry : getInventories().entrySet()) {
+            String[] split = entry.getKey().split("_");
+            String name = split[0];
+            String uniqueId = split[1];
+
+            if(uniqueId.contains(uuid)) {
+                return name + "_" + uniqueId;
+            }
+
+        }
+        return null;
+    }
 }

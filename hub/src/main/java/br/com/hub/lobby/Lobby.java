@@ -1,14 +1,14 @@
 package br.com.hub.lobby;
 
 import br.com.core.Core;
-import br.com.core.holder.command.ACommand;
 import br.com.hub.Hub;
 import br.com.hub.lobby.mode.LobbyMode;
 import br.com.hub.tasks.ServerPulseTask;
 import br.com.hub.util.bungee.BungeeUtils;
+import co.aikar.commands.BaseCommand;
+import co.aikar.commands.BukkitCommandManager;
 import lombok.Getter;
 import lombok.Setter;
-import me.saiintbrisson.bukkit.command.BukkitFrame;
 import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
 import org.bukkit.Location;
@@ -28,7 +28,7 @@ public abstract class Lobby {
     private final int id;
     private final World world;
     private Location spawn;
-
+    private BukkitCommandManager bukkitCommandManager;
     private ServerPulseTask task;
 
     public Lobby(Hub instance) {
@@ -55,7 +55,7 @@ public abstract class Lobby {
 
         task = new ServerPulseTask(getInstance());
 
-        task.runTaskTimer(getInstance(),0,20L);
+        task.runTaskTimer(getInstance(), 0, 20L);
     }
 
     public void loadListeners() {
@@ -65,21 +65,6 @@ public abstract class Lobby {
         for (Class<? extends Listener> clazz : classes) {
             try {
                 getInstance().getServer().getPluginManager().registerEvents(clazz.newInstance(), getInstance());
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
-        }
-    }
-
-    public void registerCommands() {
-
-        BukkitFrame bukkitFrame = new BukkitFrame(getInstance());
-        Reflections reflections = new Reflections("br.com.hub.commands");
-        Set<Class<? extends ACommand>> commands = reflections.getSubTypesOf(ACommand.class);
-
-        for (Class<?> clazz : commands) {
-            try {
-                bukkitFrame.registerCommands(clazz.newInstance());
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
@@ -99,7 +84,7 @@ public abstract class Lobby {
         }
     }
 
-    public void registerPluginChannels(){
+    public void registerPluginChannels() {
         getInstance().getServer().getMessenger().registerOutgoingPluginChannel(getInstance(), Core.BUNGEECORD_MESSAGING_CHANNEL);
         getInstance().getServer().getMessenger().registerIncomingPluginChannel(getInstance(), Core.BUNGEECORD_MESSAGING_CHANNEL, new BungeeUtils());
     }
