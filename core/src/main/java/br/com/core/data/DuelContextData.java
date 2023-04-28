@@ -61,7 +61,6 @@ public class DuelContextData implements Serializable {
         } else {
             DuelContextMongoCRUD.save(this);
         }
-
     }
 
     public DuelContextData updateData() {

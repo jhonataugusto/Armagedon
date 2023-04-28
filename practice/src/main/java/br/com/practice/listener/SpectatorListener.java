@@ -27,13 +27,13 @@ public class SpectatorListener implements Listener {
 
         boolean isPresent = arena.getAllTeamMembers().stream().findAny().isPresent();
 
-        if(!isPresent) {
+        if (!isPresent) {
             return;
         }
 
         User anyUserOnThisArena = arena.getAllTeamMembers().stream().findAny().get();
 
-        spectator.teleport(anyUserOnThisArena.getPlayer());
+        spectator.teleport(anyUserOnThisArena.getPlayer().getLocation());
 
         Visibility.invisible(spectator, arena.getAllTeamMembers());
 
@@ -41,6 +41,10 @@ public class SpectatorListener implements Listener {
         spectator.setFlying(true);
         spectator.setHealth(20);
         spectator.sendMessage("Assistindo a arena: " + arena.getDisplayArenaId());
+
+        for (SpectatorItems items : SpectatorItems.values()) {
+            spectator.getInventory().setItem(items.getPosition(), items.toItemStack());
+        }
     }
 
     @EventHandler

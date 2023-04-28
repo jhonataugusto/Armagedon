@@ -38,12 +38,20 @@ public class PlayerListener implements Listener {
 
         Account account = Account.fetch(player.getUniqueId());
 
+        User user = User.fetch(account.getUuid());
+
+        if (user == null) {
+            User newUser = new User(account.getUuid(), player);
+            Practice.getInstance().getUserStorage().register(newUser.getUuid(), newUser);
+            user = newUser;
+        }
+
         DuelContextData duelContextSpectator = DuelContextData.getSpectatorContext(account);
 
         if (duelContextSpectator != null && duelContextSpectator.getArenaId() != null) {
             Arena arena = Practice.getInstance().getArenaStorage().getArena(duelContextSpectator.getArenaId());
 
-            Spectator.spectate(player,arena);
+            Spectator.spectate(player, arena);
             return;
         }
 
@@ -53,9 +61,6 @@ public class PlayerListener implements Listener {
             player.kickPlayer(ChatColor.RED + "Não há nenhum duelo reservado para essa conta");
             return;
         }
-
-        User user = new User(account.getUuid());
-        Practice.getInstance().getUserStorage().register(user.getUuid(), user);
 
         GameMode gamemode = GameMode.getByName(duelContext.getGameMode());
         Game game = Practice.getInstance().getGameStorage().getGame(gamemode);

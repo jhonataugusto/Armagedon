@@ -1,5 +1,6 @@
 package br.com.hub.gui;
 
+import br.com.core.enums.game.GameMode;
 import br.com.hub.Hub;
 import br.com.hub.icons.PracticeIcons;
 import br.com.hub.lobby.practice.Practice;
@@ -65,7 +66,8 @@ public class PracticeGUI implements InventoryProvider {
                 boolean inQueue = instance.getQueue().inQueue(user);
 
                 if (!inQueue) {
-                    instance.getQueue().enter(user, new QueueProperties(item.getName(), getRankedMap().get(player)));
+                    QueueProperties queueProperties = new QueueProperties(item.getName(), getRankedMap().get(player), user.getAccount().getData().getElo(GameMode.getByName(item.getName())));
+                    instance.getQueue().enter(user, queueProperties);
 
                     getRankedMap().remove(player);
 

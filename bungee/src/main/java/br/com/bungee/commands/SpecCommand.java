@@ -21,7 +21,7 @@ public class SpecCommand extends BaseCommand {
 
         ProxiedPlayer target = ProxyServer.getInstance().getPlayer(playerName);
 
-        if (!sender.getServer().getInfo().getName().equals(br.com.core.enums.server.Server.PRACTICE.getName())) {
+        if (!sender.getServer().getInfo().getName().equals(br.com.core.enums.server.Server.LOBBY_PRACTICE.getName())) {
             return;
         }
 

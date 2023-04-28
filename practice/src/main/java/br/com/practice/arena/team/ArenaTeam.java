@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 public class ArenaTeam {
@@ -42,7 +43,7 @@ public class ArenaTeam {
     }
 
     public void addDeadMember(User user) {
-        if(getMembers().contains(user)) {
+        if (getMembers().contains(user)) {
             getDeadMembers().add(user);
             getMembers().remove(user);
         }
@@ -51,5 +52,28 @@ public class ArenaTeam {
     public void clear() {
         getMembers().clear();
         getDeadMembers().clear();
+    }
+
+    public Set<User> getAllMembers() {
+        Set<User> allMembers = new HashSet<>(getMembers());
+        allMembers.addAll(getDeadMembers());
+        return allMembers;
+    }
+    public int getAverageRating() {
+        int totalRating = 0;
+
+        for (User user : getAllMembers()) {
+            totalRating += user.getAccount().getData().getElo(getArena().getGame().getMode());
+        }
+        int totalMembers = getAllMembers().size();
+        return totalRating / totalMembers;
+    }
+
+    public void setAverageRating(int newRating) {
+        getAllMembers().forEach(member -> {
+            String gameModeName = getArena().getGame().getMode().getName();
+            member.getAccount().getData().getElo().replace(gameModeName, newRating);
+            member.getAccount().getData().saveData();
+        });
     }
 }

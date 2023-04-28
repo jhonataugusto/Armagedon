@@ -15,7 +15,6 @@ import br.com.practice.util.file.CompressionUtil;
 import br.com.practice.util.serializer.SerializerUtils;
 import br.com.practice.util.world.VoidGenerator;
 import br.com.practice.util.world.WorldHandler;
-import br.com.practice.util.scheduler.SchedulerUtils;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -27,9 +26,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffectType;
 
 import java.io.File;
-import java.util.Map;
 
-import static br.com.practice.util.scheduler.SchedulerUtils.async;
 import static br.com.practice.util.scheduler.SchedulerUtils.sync;
 
 @Getter
@@ -76,6 +73,7 @@ public abstract class Game implements Listener {
 
         Account account = user.getAccount();
 
+        player.setFireTicks(0);
         player.setHealth(player.getMaxHealth());
         player.setFoodLevel(20);
         player.getInventory().clear();
@@ -104,9 +102,10 @@ public abstract class Game implements Listener {
 
         DuelContextData.removeAllDuelContextsFromAccount(user.getAccount());
 
-        user.getAccount().getData().setCurrentDuelUuid(user.getArena().getData().getUuid().toString());
+        user.getAccount().getData().setCurrentDuelContextUuid(user.getArena().getData().getUuid().toString());
         user.getAccount().getData().saveData();
         user.setArena(null);
+        user.setTeam(null);
         user.setLastDamager(null);
 
         BungeeUtils.connect(player, Server.LOBBY_PRACTICE);
@@ -149,6 +148,17 @@ public abstract class Game implements Listener {
 
         arena.getData().getInventories().put(user.getAccount().getName() + "_" + user.getAccount().getUuid(), base64);
         arena.getData().saveData();
+
+        user.setHits(0);
+        user.setCriticalHits(0);
+        user.setBlockedHits(0);
+        user.setMaxCombo(0);
+        user.setThrowedPotions(0);
+        user.setSumAccuracyPotions(0);
+        user.setAverageAccuracyPotions(0);
+        user.setMaxClicksPerSecond(0);
+        user.setRange(0);
+        user.setMaxRange(0);
     }
 
     public Arena createArena(DuelContextData data) {

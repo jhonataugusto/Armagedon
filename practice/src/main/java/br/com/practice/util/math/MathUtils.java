@@ -1,9 +1,10 @@
 package br.com.practice.util.math;
 
-import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
 
 public class MathUtils {
-    public static double getEuclideanDistance(Location location1, Location location2){
-        return location1.distance(location2);
+    public static double getEuclideanDistance(Player player, Player target) {
+        return player.getEyeLocation().distance(target.getEyeLocation());
     }
 }

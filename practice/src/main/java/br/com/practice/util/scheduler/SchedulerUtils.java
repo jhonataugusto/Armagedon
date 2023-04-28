@@ -18,9 +18,9 @@ public class SchedulerUtils {
         Bukkit.getScheduler().runTaskLater(Practice.getInstance(), runnable, tick * seconds_delay);
     }
 
-    public static void repeat(Runnable runnable, long initial_delay, long seconds_delay) {
+    public static void repeat(Runnable runnable, long initial_delay, long seconds_repeat) {
         int tick = 20;
-        Bukkit.getScheduler().runTaskTimer(Practice.getInstance(), runnable, tick * initial_delay, tick * seconds_delay);
+        Bukkit.getScheduler().runTaskTimer(Practice.getInstance(), runnable, tick * initial_delay, tick * seconds_repeat);
 
     }
 }

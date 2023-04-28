@@ -86,9 +86,9 @@ public class ServerListener implements Listener {
         }
 
         Account account = Account.fetch(event.getPlayer().getUniqueId());
-        if (event.getFrom().getName().equals(br.com.core.enums.server.Server.PRACTICE.getName()) && account.getData().getCurrentDuelUuid() != null) {
+        if (event.getFrom().getName().equals(br.com.core.enums.server.Server.PRACTICE.getName()) && account.getData().getCurrentDuelContextUuid() != null) {
 
-            DuelContextData data = DuelContextMongoCRUD.get(UUID.fromString(account.getData().getCurrentDuelUuid()));
+            DuelContextData data = DuelContextMongoCRUD.get(UUID.fromString(account.getData().getCurrentDuelContextUuid()));
 
             if (data == null) {
                 return;
@@ -100,7 +100,7 @@ public class ServerListener implements Listener {
             component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + command));
             event.getPlayer().sendMessage(component);
 
-            account.getData().setCurrentDuelUuid(null);
+            account.getData().setCurrentDuelContextUuid(null);
             account.getData().saveData();
         }
     }

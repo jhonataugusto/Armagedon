@@ -51,12 +51,9 @@ public class PlayerChooseGUI implements InventoryProvider {
         Pagination pagination = contents.pagination();
 
         ClickableItem[] items = new ClickableItem[users.size()];
-
         Map<UUID, ItemStack> userItemStackMap = new HashMap<>();
 
         for (UUID userUuid : users) {
-
-
             String[] userNameAndUuid = data.getNameAndUuidKey(userUuid.toString()).split("_");
 
             if (userNameAndUuid.length == 0) {
@@ -65,24 +62,11 @@ public class PlayerChooseGUI implements InventoryProvider {
 
             String userName = userNameAndUuid[0];
 
-
             ItemStack itemStack = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
-            SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
-            GameProfile profile = new GameProfile(UUID.randomUUID(), null);
 
-            profile.getProperties().put("textures", new Property("textures", new String(Base64.encodeBase64(String.format("{textures:{SKIN:{url:\"%s\"}}}", MojangAPI.getSkinUrl(userName)).getBytes()))));
-
-            try {
-                Field f = meta.getClass().getDeclaredField("profile");
-                f.setAccessible(true);
-                f.set(meta, profile);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-            itemStack.getItemMeta().setDisplayName(userName);
-
-            itemStack.setItemMeta(meta);
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            itemMeta.setDisplayName(userName);
+            itemStack.setItemMeta(itemMeta);
 
             userItemStackMap.put(userUuid, itemStack);
         }

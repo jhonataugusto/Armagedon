@@ -5,7 +5,6 @@ import br.com.core.account.Account;
 import br.com.practice.arena.Arena;
 import br.com.practice.arena.team.ArenaTeam;
 import br.com.practice.gui.PostMatchGUI;
-import fr.minuskube.inv.SmartInventory;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -22,26 +21,26 @@ public class User {
     private Account account;
     private Player player;
     private Arena arena;
+    private ArenaTeam team;
     private Inventory postMatchInventory; //TODO
     private User lastDamager;
 
     private int blockedHits, hits, criticalHits;
     private int maxCombo, currentCombo;
 
-    private int throwedPotions; //TODO
-    private double accuracyPotions; //TODO
+    private int throwedPotions, missedPotions, stealedPotions, successfulPotions; //TODO
+    private double sumAccuracyPotions, averageAccuracyPotions; //TODO
 
     private double range, maxRange; //TODO
-    private int clicksPerSecond, maxClicksPerSecond; //TODO
-    private long lastClickTime;
+    private double clicksPerSecond, maxClicksPerSecond; //TODO
 
-    public User(UUID uuid) {
+    public User(UUID uuid, Player player) {
         account = new Account(uuid);
-        player = Bukkit.getPlayer(uuid);
+        this.player = player;
     }
 
     public String getName() {
-        return getAccount().getName();
+        return getPlayer().getDisplayName();
     }
 
     public UUID getUuid() {
@@ -54,10 +53,6 @@ public class User {
 
     public Player getPlayer() {
         return Bukkit.getPlayer(getAccount().getUuid());
-    }
-
-    public ArenaTeam getTeam() {
-        return getArena().getTeams().stream().filter(team -> team.getMembers().contains(this)).findFirst().orElse(null);
     }
 
     public boolean isLastMember() {

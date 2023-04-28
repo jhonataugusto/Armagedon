@@ -1,28 +1,24 @@
 package br.com.practice.listener;
 
-import br.com.core.data.AccountData;
-import br.com.core.enums.game.GameMode;
-import br.com.core.utils.serialization.GenericSerialization;
 import br.com.practice.Practice;
 import br.com.practice.arena.Arena;
 import br.com.practice.arena.stage.ArenaStage;
 import br.com.practice.arena.team.ArenaTeam;
-import br.com.practice.events.arena.ArenaChangeStateEvent;
-import br.com.practice.events.arena.ArenaEndEvent;
-import br.com.practice.events.arena.ArenaStartEvent;
+import br.com.practice.events.arena.state.ArenaChangeStateEvent;
+import br.com.practice.events.arena.state.ArenaEndEvent;
+import br.com.practice.events.arena.pulse.ArenaPulseEvent;
+import br.com.practice.events.arena.state.ArenaStartEvent;
+import br.com.practice.events.arena.statistic.ArenaWinEvent;
 import br.com.practice.events.user.UserExitArenaBoundsEvent;
 import br.com.practice.events.user.UserDeathEvent;
-import br.com.practice.gui.PostMatchGUI;
 import br.com.practice.user.User;
 import br.com.practice.util.cuboid.Cuboid;
 import br.com.practice.util.math.MathUtils;
-import br.com.practice.util.scheduler.SchedulerUtils;
-import br.com.practice.util.serializer.SerializerUtils;
-import fr.minuskube.inv.SmartInventory;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutEntityStatus;
-import net.minecraft.server.v1_8_R3.PacketPlayOutEntityVelocity;
+import br.com.practice.util.rating.RatingUtil;
+import br.com.practice.util.visibility.Visibility;
+import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -35,15 +31,18 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
-import static br.com.practice.util.scheduler.SchedulerUtils.delay;
-import static br.com.practice.util.scheduler.SchedulerUtils.sync;
+import static br.com.practice.util.scheduler.SchedulerUtils.*;
 
 public class ArenaListener implements Listener {
+
+    private static final double DECIMAL_NERF_DAMAGE = 0.5;
+    private static final double DECIMAL_NERF_KNOCKBACK = 2;
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerDamageArena(EntityDamageByEntityEvent event) {
@@ -80,28 +79,52 @@ public class ArenaListener implements Listener {
             damager.setMaxRange(damager.getRange());
         }
 
-        damager.setRange(MathUtils.getEuclideanDistance(damager.getPlayer().getLocation(), entity.getPlayer().getLocation()));
+        if (damager.getClicksPerSecond() >= 16) {
+            double newDamage = event.getDamage() - (event.getDamage() * DECIMAL_NERF_DAMAGE);
+            event.setDamage(newDamage);
+        }
+
+        if (damager.getRange() >= 5) {
+            double newDamage = event.getDamage() - (event.getDamage() * DECIMAL_NERF_DAMAGE * 2);
+            event.setDamage(newDamage);
+        }
+
+        if (entity.getClicksPerSecond() >= 16) {
+            double newDamage = event.getDamage() - (event.getDamage() * DECIMAL_NERF_DAMAGE);
+            event.setDamage(newDamage);
+        }
+
+        damager.setRange(MathUtils.getEuclideanDistance(damager.getPlayer(), entity.getPlayer()));
 
         if (event.getFinalDamage() >= entity.getPlayer().getHealth()) {
 
             event.setCancelled(true);
+            damager.getPlayer().setHealth(20);
 
             EntityDamageEvent.DamageCause cause = event.getCause();
             User lastDamager = entity.getLastDamager();
 
-            UserDeathEvent userDeathEvent = new UserDeathEvent(entity.getArena(), entity, lastDamager, entity.isLastMember());
+            UserDeathEvent userDeathEvent = new UserDeathEvent(entity.getArena(), entity, lastDamager, entity.isLastMember(), event);
 
             if (cause == EntityDamageEvent.DamageCause.FIRE_TICK || cause == EntityDamageEvent.DamageCause.FALL) {
                 Practice.getInstance().getServer().getPluginManager().callEvent(userDeathEvent);
             } else {
-                Practice.getInstance().getServer().getPluginManager().callEvent(new UserDeathEvent(entity.getArena(), entity, damager, entity.isLastMember()));
+                Practice.getInstance().getServer().getPluginManager().callEvent(new UserDeathEvent(entity.getArena(), entity, damager, entity.isLastMember(), event));
             }
         }
     }
 
     @EventHandler
-    public void onGetCPSPlayer(PlayerInteractEvent event) {
+    public void onArenaPulse(ArenaPulseEvent event) {
+        event.getArenas().forEach((id, arena) -> {
+            arena.getAllTeamMembers().forEach(members -> {
+                members.setClicksPerSecond(0);
+            });
+        });
+    }
 
+    @EventHandler
+    public void onGetCPSPlayer(PlayerInteractEvent event) {
         if (event.getAction() != Action.LEFT_CLICK_AIR && event.getAction() != Action.LEFT_CLICK_BLOCK) {
             return;
         }
@@ -118,17 +141,35 @@ public class ArenaListener implements Listener {
             return;
         }
 
-        long currentTime = System.currentTimeMillis();
-        long lastTime = user.getLastClickTime();
-        double cps = 1000.0 / (currentTime - lastTime);
-
-        user.setClicksPerSecond((int) cps);
+        user.setClicksPerSecond(user.getClicksPerSecond() + 1);
 
         if (user.getClicksPerSecond() > user.getMaxClicksPerSecond()) {
             user.setMaxClicksPerSecond(user.getClicksPerSecond());
         }
+    }
 
-        user.setLastClickTime(System.currentTimeMillis());
+    @EventHandler
+    public void playerDisconnect(PlayerQuitEvent event) {
+
+        if (event.getPlayer() == null) {
+            return;
+        }
+
+        User user = User.fetch(event.getPlayer().getUniqueId());
+
+        if (user == null) {
+            return;
+        }
+
+        if (user.getArena() == null) {
+            return;
+        }
+
+        Arena arena = user.getArena();
+
+        UserDeathEvent userDeathEvent = new UserDeathEvent(arena, user, user.getLastDamager(), user.isLastMember());
+        Practice.getInstance().getServer().getPluginManager().callEvent(userDeathEvent);
+
     }
 
     @EventHandler
@@ -235,7 +276,7 @@ public class ArenaListener implements Listener {
     @EventHandler
     public void onArenaStart(ArenaStartEvent event) {
 
-        if(event.getArena() == null) {
+        if (event.getArena() == null) {
             return;
         }
 
@@ -274,6 +315,11 @@ public class ArenaListener implements Listener {
                 arena.getGame().handleQuit(members);
             });
 
+            arena.getData().getSpectators().forEach(uuid -> {
+                User user = User.fetch(uuid);
+                user.getArena().getGame().handleQuit(user);
+            });
+
             if (arena.getData().isCustom()) {
                 Practice.getInstance().getArenaStorage().unload(arena.getId());
             } else {
@@ -295,38 +341,36 @@ public class ArenaListener implements Listener {
 
         arena.getGame().handlePostMatchInventory(dead);
 
-        sync(() -> {
 
-            EntityPlayer entityPlayer = ((CraftPlayer) dead.getPlayer()).getHandle();
+        EntityPlayer entityPlayer = ((CraftPlayer) dead.getPlayer()).getHandle();
 
-            double x = -Math.sin(Math.toRadians(dead.getPlayer().getLocation().getYaw())) * 1.5;
-            double y = 0.35;
-            double z = Math.cos(Math.toRadians(dead.getPlayer().getLocation().getYaw())) * 1.5;
-            entityPlayer.motX = x;
-            entityPlayer.motY = y;
-            entityPlayer.motZ = z;
+        double x = -Math.sin(Math.toRadians(event.getKiller().getPlayer().getLocation().getYaw()));
+        double y = 0.35;
+        double z = Math.cos(Math.toRadians(event.getKiller().getPlayer().getLocation().getYaw()));
+        entityPlayer.motX = x;
+        entityPlayer.motY = y;
+        entityPlayer.motZ = z;
 
-            PacketPlayOutEntityVelocity velocityPacket = new PacketPlayOutEntityVelocity(entityPlayer.getId(), entityPlayer.motX, entityPlayer.motY, entityPlayer.motZ);
-            ((CraftPlayer) dead.getPlayer()).getHandle().playerConnection.sendPacket(velocityPacket);
+        PacketPlayOutEntityVelocity velocityPacket = new PacketPlayOutEntityVelocity(entityPlayer.getId(), entityPlayer.motX, entityPlayer.motY, entityPlayer.motZ);
+        ((CraftPlayer) dead.getPlayer()).getHandle().playerConnection.sendPacket(velocityPacket);
 
-            PacketPlayOutEntityStatus entityStatus = new PacketPlayOutEntityStatus(entityPlayer, (byte) 3);
+        PacketPlayOutEntityStatus entityStatus = new PacketPlayOutEntityStatus(entityPlayer, (byte) 3);
 
-            Bukkit.getOnlinePlayers().forEach(Other -> {
-                if (Other != dead.getPlayer()) {
-                    ((CraftPlayer) Other).getHandle().playerConnection.sendPacket(entityStatus);
-                }
-            });
-
-            dead.getPlayer().setFireTicks(0);
-            dead.getPlayer().setAllowFlight(true);
-            dead.getPlayer().setFlying(true);
-
-            dead.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 2, 5, false));
-            dead.getPlayer().playSound(event.getDead().getPlayer().getLocation(), Sound.ZOMBIE_UNFECT, 3.5F, 3.5F);
-
+        Bukkit.getOnlinePlayers().forEach(Other -> {
+            if (Other != dead.getPlayer()) {
+                ((CraftPlayer) Other).getHandle().playerConnection.sendPacket(entityStatus);
+            }
         });
 
-        //TODO: CONFIGURAR MODO SPECTADOR AQUI!
+        dead.getPlayer().setFireTicks(0);
+        dead.getPlayer().setAllowFlight(true);
+
+        dead.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 2, 5, false));
+        dead.getPlayer().playSound(event.getDead().getPlayer().getLocation(), Sound.ZOMBIE_UNFECT, 3.5F, 3.5F);
+
+        delay(() -> {
+            Visibility.invisible(dead.getPlayer(), dead.getArena().getAllTeamMembers());
+        }, 1);
 
         if (event.getKiller() == null) {
 
@@ -350,8 +394,47 @@ public class ArenaListener implements Listener {
 
         if (event.isLastMember()) {
 
+            ArenaTeam winnersTeam = event.getKiller().getTeam();
+            ArenaTeam losersTeam = event.getDead().getTeam();
+
+            ArenaWinEvent arenaWinEvent = new ArenaWinEvent(arena, winnersTeam, losersTeam);
+            Bukkit.getServer().getPluginManager().callEvent(arenaWinEvent);
+
             arena.setStage(ArenaStage.ENDING);
             Bukkit.getServer().getPluginManager().callEvent(new ArenaChangeStateEvent(arena, arena.getStage()));
+        }
+    }
+
+    @EventHandler
+    public void onArenaWin(ArenaWinEvent event) {
+
+        if (event.getArena() == null) {
+            return;
+        }
+
+        Arena arena = event.getArena();
+
+        if (event.getWinnerTeam() == null || event.getLoserTeam() == null) {
+            return;
+        }
+
+        if (arena.getData().isRanked()) {
+            int oldRatingWinnerTeam = event.getWinnerTeam().getAverageRating();
+            int oldRatingLoserTeam = event.getLoserTeam().getAverageRating();
+
+            int newRatingWinnerTeam = RatingUtil.calculateRating(event.getWinnerTeam().getAverageRating(), event.getLoserTeam().getAverageRating(), 1);
+            int newRatingLoserTeam = RatingUtil.calculateRating(event.getLoserTeam().getAverageRating(), event.getWinnerTeam().getAverageRating(), 0);
+
+            async(() -> {
+                event.getWinnerTeam().setAverageRating(newRatingWinnerTeam);
+                event.getLoserTeam().setAverageRating(newRatingLoserTeam);
+            });
+
+            int differenceRatingWinnerTeam = newRatingWinnerTeam - oldRatingWinnerTeam;
+            int differenceRatingLoserTeam = oldRatingLoserTeam - newRatingLoserTeam;
+
+            event.getWinnerTeam().getAllMembers().forEach(member -> member.getPlayer().sendMessage(ChatColor.GREEN + "+" + differenceRatingWinnerTeam));
+            event.getLoserTeam().getAllMembers().forEach(member -> member.getPlayer().sendMessage(ChatColor.RED + "-" + differenceRatingLoserTeam));
         }
     }
 }

@@ -4,8 +4,10 @@ import br.com.core.Core;
 import br.com.practice.arena.storage.ArenaStorage;
 import br.com.core.holder.command.ACommand;
 import br.com.practice.game.storage.GameStorage;
+import br.com.practice.task.ArenaPulseTask;
 import br.com.practice.user.storage.UserStorage;
 import br.com.practice.util.bungee.BungeeUtils;
+import br.com.practice.util.scheduler.SchedulerUtils;
 import fr.minuskube.inv.InventoryManager;
 import lombok.Getter;
 import me.saiintbrisson.bukkit.command.BukkitFrame;
@@ -14,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.reflections.Reflections;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 @Getter
 public class Practice extends JavaPlugin {
@@ -44,6 +47,7 @@ public class Practice extends JavaPlugin {
 
         registerEvents();
         registerPluginChannels();
+        registerSchedulers();
 
         userStorage = new UserStorage();
 
@@ -92,6 +96,10 @@ public class Practice extends JavaPlugin {
                 throw new RuntimeException(exception);
             }
         }
+    }
+
+    public void registerSchedulers() {
+        this.getServer().getScheduler().runTaskTimerAsynchronously(this, new ArenaPulseTask(this), 0, 20);
     }
 
     public void registerPluginChannels() {

@@ -14,6 +14,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Data
@@ -21,7 +22,7 @@ public class AccountData implements Serializable {
     private Object _id = null;
     private String name;
     private UUID uuid;
-    private String currentDuelUuid;
+    private String currentDuelContextUuid;
     private Map<String, String> inventories = new HashMap<>();
 
     private Map<String, Integer> elo = new HashMap<>();
@@ -50,8 +51,10 @@ public class AccountData implements Serializable {
             }
         }
 
-        for (GameMode mode : GameMode.values()) {
-            elo.put(mode.getName(), 1000);
+        if(elo.isEmpty()) {
+            for (GameMode mode : GameMode.values()) {
+                elo.put(mode.getName(), 1000);
+            }
         }
     }
 
@@ -103,5 +106,10 @@ public class AccountData implements Serializable {
 
     public String tobase64() {
         return GenericSerialization.serializeToBase64(this);
+    }
+
+    public int getElo(GameMode gameMode) {
+        String gameModeName = gameMode.getName();
+        return getElo().entrySet().stream().filter(entry -> entry.getKey().equalsIgnoreCase(gameModeName)).findFirst().map(Map.Entry::getValue).orElse(0);
     }
 }

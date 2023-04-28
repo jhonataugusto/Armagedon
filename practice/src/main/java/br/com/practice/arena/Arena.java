@@ -1,11 +1,10 @@
 package br.com.practice.arena;
 
-import br.com.core.account.Account;
 import br.com.practice.arena.map.ArenaMap;
 import br.com.practice.arena.stage.ArenaStage;
 import br.com.practice.arena.team.ArenaTeam;
 import br.com.core.data.DuelContextData;
-import br.com.practice.events.arena.ArenaChangeStateEvent;
+import br.com.practice.events.arena.state.ArenaChangeStateEvent;
 import br.com.practice.game.Game;
 import br.com.practice.user.User;
 import lombok.Getter;
@@ -65,14 +64,12 @@ public class Arena {
 
     public void handleJoin(User user) {
 
-        Account account = Account.fetch(user.getUuid());
-
-        if (!(getData().getTeam1().contains(account.getUuid()) || getData().getTeam2().contains(account.getUuid()))) {
+        if (!(getData().getTeam1().contains(user.getUuid()) || getData().getTeam2().contains(user.getUuid()))) {
             user.getPlayer().kickPlayer(ChatColor.RED + "Jogador não faz parte dessa partida");
             return;
         }
 
-        if (getData().getTeam1().contains(account.getUuid())) {
+        if (getData().getTeam1().contains(user.getUuid())) {
             getTeams().get(0).add(user);
         } else {
             getTeams().get(1).add(user);
@@ -83,11 +80,14 @@ public class Arena {
 
         if (getTeams().get(0).getMembers().contains(user)) {
             user.getPlayer().teleport(locationTeam1);
+            user.setTeam(getTeams().get(0));
         } else {
             user.getPlayer().teleport(locationTeam2);
+            user.setTeam(getTeams().get(1));
         }
 
         user.setArena(this);
+
 
         int maxUsersExpected = getData().getTeam1().size() + getData().getTeam2().size();
         int actualUsers = getTeams().get(0).getMembers().size() + getTeams().get(1).getMembers().size();

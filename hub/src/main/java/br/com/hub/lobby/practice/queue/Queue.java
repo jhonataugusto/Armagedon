@@ -9,16 +9,15 @@ import br.com.hub.user.User;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
+import java.util.*;
 
 @Getter
 @Setter
 public class Queue {
     private final Map<User, QueueProperties> users;
     private final PriorityQueue<User> queue;
+
+    private static final int ELO_NON_MATCH_CHANGE = 25;
 
     public Queue() {
         users = new HashMap<>();
@@ -54,6 +53,16 @@ public class Queue {
 
     public void search() {
 
+        for (User player : queue) {
+            QueueProperties properties = users.get(player);
+
+            if (properties.isRanked()) {
+                properties.setMinElo(properties.getMinElo() - ELO_NON_MATCH_CHANGE);
+                properties.setMaxElo(properties.getMaxElo() + ELO_NON_MATCH_CHANGE);
+                player.getPlayer().sendMessage("ALCANCE ATUAL DE ELO -> [" + properties.getMinElo() + " - " + properties.getMaxElo() + "]");
+            }
+        }
+
         if (queue.size() < 2) {
             return;
         }
@@ -74,25 +83,15 @@ public class Queue {
         QueueProperties properties2 = users.get(player2);
 
         if (properties1.compareTo(properties2) == 0) {
-
-            QueueProperties properties = users.get(player1);
-            match(player1, player2, properties);
+            match(player1, player2, properties1);
 
         } else {
-
             queue.add(player1);
             queue.add(player2);
         }
     }
 
     public void match(User player1, User player2, QueueProperties properties) {
-        QueueProperties properties1 = users.get(player1);
-        QueueProperties properties2 = users.get(player2);
-
-        if (!properties1.equals(properties2)) {
-            return;
-        }
-
         leave(player1);
         leave(player2);
 

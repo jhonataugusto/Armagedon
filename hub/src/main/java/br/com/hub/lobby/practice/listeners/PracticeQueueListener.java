@@ -64,6 +64,9 @@ public class PracticeQueueListener implements Listener {
             return;
         }
 
+        user1.getPlayer().getInventory().clear();
+        user2.getPlayer().getInventory().clear();
+
         DuelContextData duelContext = new DuelContextData();
 
         duelContext.getTeam1().add(user1.getUuid());
