@@ -7,7 +7,6 @@ import br.com.practice.game.storage.GameStorage;
 import br.com.practice.task.ArenaPulseTask;
 import br.com.practice.user.storage.UserStorage;
 import br.com.practice.util.bungee.BungeeUtils;
-import br.com.practice.util.scheduler.SchedulerUtils;
 import fr.minuskube.inv.InventoryManager;
 import lombok.Getter;
 import me.saiintbrisson.bukkit.command.BukkitFrame;
@@ -16,7 +15,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.reflections.Reflections;
 
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 @Getter
 public class Practice extends JavaPlugin {
@@ -50,11 +48,8 @@ public class Practice extends JavaPlugin {
         registerSchedulers();
 
         userStorage = new UserStorage();
-
         arenaStorage = new ArenaStorage();
-
         gameStorage = new GameStorage();
-
         gameStorage.load();
 
         inventoryManager = new InventoryManager(this);

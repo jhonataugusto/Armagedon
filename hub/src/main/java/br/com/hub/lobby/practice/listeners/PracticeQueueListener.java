@@ -2,7 +2,7 @@ package br.com.hub.lobby.practice.listeners;
 
 import br.com.hub.Hub;
 import br.com.core.crud.redis.DuelContextRedisCRUD;
-import br.com.core.data.DuelContextData;
+import br.com.core.data.DuelData;
 import br.com.core.enums.server.Server;
 import br.com.hub.events.PlayerEnterQueueEvent;
 import br.com.hub.events.PlayerLeaveQueueEvent;
@@ -67,7 +67,7 @@ public class PracticeQueueListener implements Listener {
         user1.getPlayer().getInventory().clear();
         user2.getPlayer().getInventory().clear();
 
-        DuelContextData duelContext = new DuelContextData();
+        DuelData duelContext = new DuelData();
 
         duelContext.getTeam1().add(user1.getUuid());
         duelContext.getTeam2().add(user2.getUuid());
@@ -85,9 +85,10 @@ public class PracticeQueueListener implements Listener {
 
         DuelContextRedisCRUD.save(duelContext);
 
-
-        BungeeUtils.connect(user1.getPlayer(), Server.PRACTICE);
-        BungeeUtils.connect(user2.getPlayer(), Server.PRACTICE);
+        sync(() -> {
+            BungeeUtils.connect(user1.getPlayer(), Server.PRACTICE);
+            BungeeUtils.connect(user2.getPlayer(), Server.PRACTICE);
+        });
     }
 
 

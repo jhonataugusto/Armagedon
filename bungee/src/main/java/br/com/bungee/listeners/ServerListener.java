@@ -4,7 +4,7 @@ import br.com.bungee.Bungee;
 import br.com.core.account.Account;
 import br.com.core.crud.mongo.DuelContextMongoCRUD;
 import br.com.core.crud.redis.ServerRedisCRUD;
-import br.com.core.data.DuelContextData;
+import br.com.core.data.DuelData;
 import br.com.core.data.ServerData;
 import br.com.bungee.events.ProxyPulseEvent;
 import br.com.bungee.server.Server;
@@ -88,7 +88,7 @@ public class ServerListener implements Listener {
         Account account = Account.fetch(event.getPlayer().getUniqueId());
         if (event.getFrom().getName().equals(br.com.core.enums.server.Server.PRACTICE.getName()) && account.getData().getCurrentDuelContextUuid() != null) {
 
-            DuelContextData data = DuelContextMongoCRUD.get(UUID.fromString(account.getData().getCurrentDuelContextUuid()));
+            DuelData data = DuelContextMongoCRUD.get(UUID.fromString(account.getData().getCurrentDuelContextUuid()));
 
             if (data == null) {
                 return;

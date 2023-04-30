@@ -1,6 +1,6 @@
 package br.com.hub.gui;
 
-import br.com.core.data.DuelContextData;
+import br.com.core.data.DuelData;
 import br.com.hub.Hub;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -21,7 +21,7 @@ public class TeamChooseGUI implements InventoryProvider {
     private static final int MAX_ROWS = 3;
     private static final int MAX_COLUMNS = 9;
 
-    private DuelContextData data;
+    private DuelData data;
 
     SlotPos lastPos = new SlotPos(MAX_ROWS - 1, MAX_COLUMNS - 1);
 
@@ -33,7 +33,7 @@ public class TeamChooseGUI implements InventoryProvider {
             .title("Escolha um time")
             .build();
 
-    public TeamChooseGUI(DuelContextData data) {
+    public TeamChooseGUI(DuelData data) {
         this.data = data;
     }
 

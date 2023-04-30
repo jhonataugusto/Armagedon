@@ -34,7 +34,6 @@ public class Hub extends JavaPlugin {
 
     @Override
     public void onEnable() {
-
         instance = this;
 
         userStorage = new UserStorage();
@@ -62,6 +61,7 @@ public class Hub extends JavaPlugin {
             Lobby lobby = (Lobby) LobbyStorage.getLobby(Hub.getInstance().getConfig().getString("lobby.mode")).getConstructor(Hub.class).newInstance(this);
 
             lobby.loadListeners();
+            lobby.registerCommands();
             lobby.registerPluginChannels();
             lobby.removeRecipes();
 
@@ -73,6 +73,4 @@ public class Hub extends JavaPlugin {
         }
         return null;
     }
-
-
 }

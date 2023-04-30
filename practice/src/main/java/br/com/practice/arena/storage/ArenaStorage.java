@@ -2,7 +2,7 @@ package br.com.practice.arena.storage;
 
 import br.com.practice.arena.Arena;
 import br.com.practice.arena.stage.ArenaStage;
-import br.com.core.data.DuelContextData;
+import br.com.core.data.DuelData;
 import br.com.practice.game.Game;
 import br.com.practice.util.file.CompressionUtil;
 import lombok.Getter;
@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static br.com.practice.util.scheduler.SchedulerUtils.async;
 import static br.com.practice.util.scheduler.SchedulerUtils.sync;
 
 @Getter
@@ -48,7 +47,7 @@ public class ArenaStorage {
         return getArenas().entrySet().stream().filter(entry -> entry.getValue().getGame().equals(game)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public Arena getArenaByContextData(DuelContextData data) {
+    public Arena getArenaByContextData(DuelData data) {
         return getArenas().values().stream().filter(value -> value.getData().equals(data)).findFirst().orElse(null);
     }
 

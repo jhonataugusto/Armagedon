@@ -71,6 +71,19 @@ public abstract class Lobby {
         }
     }
 
+    public void registerCommands() {
+        Reflections reflections = new Reflections("br.com.hub.commands");
+        Set<Class<? extends BaseCommand>> commands = reflections.getSubTypesOf(BaseCommand.class);
+
+        for (Class<?> clazz : commands) {
+            try {
+                getInstance().getBukkitCommandManager().registerCommand((BaseCommand) clazz.newInstance());
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+    }
+
     public void removeRecipes() {
         Iterator<Recipe> iterator = Bukkit.getServer().recipeIterator();
 

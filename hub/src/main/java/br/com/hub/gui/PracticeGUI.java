@@ -66,7 +66,7 @@ public class PracticeGUI implements InventoryProvider {
                 boolean inQueue = instance.getQueue().inQueue(user);
 
                 if (!inQueue) {
-                    QueueProperties queueProperties = new QueueProperties(item.getName(), getRankedMap().get(player), user.getAccount().getData().getElo(GameMode.getByName(item.getName())));
+                    QueueProperties queueProperties = new QueueProperties(item.getName(), getRankedMap().get(player), user.getAccount().getData().getElos(item.getName()));
                     instance.getQueue().enter(user, queueProperties);
 
                     getRankedMap().remove(player);

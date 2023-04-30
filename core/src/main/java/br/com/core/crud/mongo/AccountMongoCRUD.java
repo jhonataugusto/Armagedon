@@ -41,6 +41,22 @@ public class AccountMongoCRUD {
         return null;
     }
 
+    public static AccountData get(String name) {
+        try (MongoClient client = MongoClients.create(URI)) {
+
+            Document document = client.getDatabase(MONGO_DATABASE_NAME).getCollection(MONGO_COLLECTION_NAME).find(Filters.eq("name", name)).first();
+
+            if (document != null) {
+                return new AccountData(document.toJson());
+            }
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+
+        return null;
+    }
+
     public static void save(AccountData data) {
         try (MongoClient client = MongoClients.create(URI)) {
             Document filter = new Document("uuid", data.getUuid().toString());

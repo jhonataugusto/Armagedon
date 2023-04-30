@@ -3,21 +3,18 @@ package br.com.practice.listener;
 import br.com.practice.Practice;
 import br.com.core.account.Account;
 import br.com.practice.arena.Arena;
-import br.com.core.data.DuelContextData;
+import br.com.core.data.DuelData;
 import br.com.core.enums.game.GameMode;
 import br.com.practice.game.Game;
 import br.com.practice.spectator.Spectator;
 import br.com.practice.user.User;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-
-import java.util.Random;
 
 public class PlayerListener implements Listener {
 
@@ -46,7 +43,7 @@ public class PlayerListener implements Listener {
             user = newUser;
         }
 
-        DuelContextData duelContextSpectator = DuelContextData.getSpectatorContext(account);
+        DuelData duelContextSpectator = DuelData.getSpectatorContext(account);
 
         if (duelContextSpectator != null && duelContextSpectator.getArenaId() != null) {
             Arena arena = Practice.getInstance().getArenaStorage().getArena(duelContextSpectator.getArenaId());
@@ -55,7 +52,7 @@ public class PlayerListener implements Listener {
             return;
         }
 
-        DuelContextData duelContext = DuelContextData.getContext(account);
+        DuelData duelContext = DuelData.getContext(account);
 
         if (duelContext == null) {
             player.kickPlayer(ChatColor.RED + "Não há nenhum duelo reservado para essa conta");

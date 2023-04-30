@@ -1,4 +1,4 @@
-package br.com.core.crud.redis;
+package br.com.core.crud.redis.account;
 
 import br.com.core.Core;
 import br.com.core.data.AccountData;

@@ -1,8 +1,10 @@
 package br.com.core.data;
 
 import br.com.core.Core;
+import br.com.core.account.rank.Rank;
 import br.com.core.crud.mongo.AccountMongoCRUD;
-import br.com.core.crud.redis.AccountRedisCRUD;
+import br.com.core.crud.redis.account.AccountRedisCRUD;
+import br.com.core.data.object.*;
 import br.com.core.enums.game.GameMode;
 import br.com.core.utils.json.JsonUtils;
 import br.com.core.utils.serialization.GenericSerialization;
@@ -11,10 +13,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.*;
 
 
 @Data
@@ -23,16 +22,28 @@ public class AccountData implements Serializable {
     private String name;
     private UUID uuid;
     private String currentDuelContextUuid;
-    private Map<String, String> inventories = new HashMap<>();
+    private List<RankDAO> ranks = new ArrayList<>();
+    private List<EloDAO> elos = new ArrayList<>();
+    private List<InventoryDAO> inventories = new ArrayList<>();
+    private List<PreferencesDAO> preferences = new ArrayList<>(); //TODO
+    private List<StatisticsDAO> statistics = new ArrayList<>(); //TODO
+    private List<PunishmentDAO> punishments = new ArrayList<>(); //TODO
+    private List<AltDAO> alts = new ArrayList<>(); //TODO: fazer ligação de contas alts vinculadas a essa conta
 
-    private Map<String, Integer> elo = new HashMap<>();
-    private Map<String, Integer> wins = new HashMap<>();
-    private Map<String, Integer> loses = new HashMap<>();
-
+    //DEFAULT CONSTRUCTOR WHEN THE PROGRAM CREATES A NEW ACCOUNT
     public AccountData(UUID uuid) {
         this.uuid = uuid;
+
+        for (GameMode mode : GameMode.values()) {
+            elos.add(new EloDAO(mode.getName(), 1000));
+        }
+
+        if (ranks.isEmpty()) {
+            ranks.add(new RankDAO(Rank.MEMBER.getName(), -1));
+        }
     }
 
+    //DEFAULT CONSTRUCTOR WHEN THE PROGRAM LOAD A ACCOUNT
     public AccountData(String json) {
         JsonParser parser = new JsonParser();
         JsonObject jsonObject = parser.parse(json).getAsJsonObject();
@@ -48,12 +59,6 @@ public class AccountData implements Serializable {
                 JsonUtils.setFieldFromJson(field, value, this);
             } catch (NoSuchFieldException e) {
                 e.printStackTrace();
-            }
-        }
-
-        if(elo.isEmpty()) {
-            for (GameMode mode : GameMode.values()) {
-                elo.put(mode.getName(), 1000);
             }
         }
     }
@@ -108,8 +113,23 @@ public class AccountData implements Serializable {
         return GenericSerialization.serializeToBase64(this);
     }
 
-    public int getElo(GameMode gameMode) {
-        String gameModeName = gameMode.getName();
-        return getElo().entrySet().stream().filter(entry -> entry.getKey().equalsIgnoreCase(gameModeName)).findFirst().map(Map.Entry::getValue).orElse(0);
+    public int getElos(String gameModeName) {
+        return getEloByGameModeName(gameModeName).getElo();
+    }
+
+    public EloDAO getEloByGameModeName(String gameModeName) {
+        return getElos().stream().filter(elo -> elo.getName().equalsIgnoreCase(gameModeName)).findFirst().orElse(null);
+    }
+
+    public InventoryDAO getInventoryByGameModeName(String gameModeName) {
+
+        for (InventoryDAO data : inventories) {
+            if (data.getGamemodeName().equalsIgnoreCase(gameModeName)) {
+                return data;
+            } else {
+                return null;
+            }
+        }
+        return null;
     }
 }

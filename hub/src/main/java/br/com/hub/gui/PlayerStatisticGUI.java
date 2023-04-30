@@ -1,8 +1,7 @@
 package br.com.hub.gui;
 
 
-import br.com.core.account.Account;
-import br.com.core.data.DuelContextData;
+import br.com.core.data.DuelData;
 import br.com.hub.Hub;
 import br.com.hub.util.serializer.SerializerUtils;
 import fr.minuskube.inv.ClickableItem;
@@ -32,13 +31,13 @@ public class PlayerStatisticGUI implements InventoryProvider {
     private static final int MAX_ROWS = 5;
     private static final int MAX_COLUMNS = 9;
 
-    private DuelContextData data;
+    private DuelData data;
 
     SlotPos lastPos = new SlotPos(MAX_ROWS - 1, MAX_COLUMNS - 1);
 
     public SmartInventory INVENTORY;
 
-    public PlayerStatisticGUI(DuelContextData data, UUID uuid, List<UUID> users) {
+    public PlayerStatisticGUI(DuelData data, UUID uuid, List<UUID> users) {
         this.data = data;
         this.uuid = uuid;
         this.users = users;

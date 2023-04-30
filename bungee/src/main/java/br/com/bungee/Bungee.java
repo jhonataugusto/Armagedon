@@ -6,6 +6,8 @@ import br.com.bungee.task.HeartBeatTask;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.BungeeCommandManager;
 import lombok.Getter;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.reflections.Reflections;
 
@@ -47,21 +49,30 @@ public class Bungee extends Plugin {
         Reflections reflections = new Reflections("br.com.bungee.commands");
         Set<Class<? extends BaseCommand>> commands = reflections.getSubTypesOf(BaseCommand.class);
 
-        for (Class<?> clazz : commands) {
+        for (Class<? extends BaseCommand> clazz : commands) {
             try {
-                bungeeCommandManager.registerCommand((BaseCommand) clazz.newInstance());
+                bungeeCommandManager.registerCommand(clazz.newInstance());
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
         }
     }
 
-    public void registerEvents(){
-        this.getProxy().getPluginManager().registerListener(this, new ServerListener());
+    public void registerEvents() {
+        Reflections reflections = new Reflections("br.com.bungee.listeners");
+        Set<Class<? extends Listener>> commands = reflections.getSubTypesOf(Listener.class);
+
+        for (Class<? extends Listener> clazz : commands) {
+            try {
+                ProxyServer.getInstance().getPluginManager().registerListener(this, clazz.newInstance());
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
     }
 
-    public void registerSchedulers(){
-        this.getProxy().getScheduler().schedule(this, new HeartBeatTask(this), 0, 5,TimeUnit.SECONDS);
+    public void registerSchedulers() {
+        this.getProxy().getScheduler().schedule(this, new HeartBeatTask(this), 0, 5, TimeUnit.SECONDS);
     }
 
     public static Bungee getInstance() {

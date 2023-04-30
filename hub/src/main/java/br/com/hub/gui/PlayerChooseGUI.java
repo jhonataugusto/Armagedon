@@ -1,23 +1,17 @@
 package br.com.hub.gui;
 
-import br.com.core.data.DuelContextData;
+import br.com.core.data.DuelData;
 import br.com.hub.Hub;
-import br.com.hub.util.mojang.MojangAPI;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.codec.binary.Base64;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 @Getter
@@ -29,7 +23,7 @@ public class PlayerChooseGUI implements InventoryProvider {
     private static final int MAX_ROWS = 3;
     private static final int MAX_COLUMNS = 9;
 
-    private DuelContextData data;
+    private DuelData data;
 
     SlotPos lastPos = new SlotPos(MAX_ROWS - 1, MAX_COLUMNS - 1);
 
@@ -41,7 +35,7 @@ public class PlayerChooseGUI implements InventoryProvider {
             .title("Escolha um jogador")
             .build();
 
-    public PlayerChooseGUI(List<UUID> users, DuelContextData data) {
+    public PlayerChooseGUI(List<UUID> users, DuelData data) {
         this.users = users;
         this.data = data;
     }

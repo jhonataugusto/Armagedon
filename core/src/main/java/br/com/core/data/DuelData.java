@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
-public class DuelContextData implements Serializable {
+public class DuelData implements Serializable {
     private Object _id;
     private final UUID uuid = UUID.randomUUID();
     private List<UUID> team1 = new ArrayList<>(), team2 = new ArrayList<>();
@@ -28,10 +28,10 @@ public class DuelContextData implements Serializable {
     private Map<String, String> inventories = new HashMap<>();
     private boolean ranked = false;
 
-    public DuelContextData() {
+    public DuelData() {
     }
 
-    public DuelContextData(String json) {
+    public DuelData(String json) {
 
         JsonParser jsonParser = new JsonParser();
         JsonObject jsonObject = jsonParser.parse(json).getAsJsonObject();
@@ -54,7 +54,7 @@ public class DuelContextData implements Serializable {
     public void saveData() {
         DuelContextRedisCRUD.save(this);
 
-        DuelContextData data = DuelContextMongoCRUD.get(this.getUuid());
+        DuelData data = DuelContextMongoCRUD.get(this.getUuid());
 
         if (data == null) {
             DuelContextMongoCRUD.create(this);
@@ -63,7 +63,7 @@ public class DuelContextData implements Serializable {
         }
     }
 
-    public DuelContextData updateData() {
+    public DuelData updateData() {
         return DuelContextRedisCRUD.findByUuid(uuid);
     }
 
@@ -75,20 +75,20 @@ public class DuelContextData implements Serializable {
         return Core.GSON.toJson(this);
     }
 
-    public static DuelContextData fromJson(String json) {
-        return Core.GSON.fromJson(json, DuelContextData.class);
+    public static DuelData fromJson(String json) {
+        return Core.GSON.fromJson(json, DuelData.class);
     }
 
-    public static DuelContextData getContext(Account account) {
+    public static DuelData getContext(Account account) {
         return DuelContextRedisCRUD.getDuels().stream().filter(duel -> duel.getTeam1().contains(account.getUuid()) || duel.getTeam2().contains(account.getUuid())).findFirst().orElse(null);
     }
 
-    public static DuelContextData getSpectatorContext(Account account) {
+    public static DuelData getSpectatorContext(Account account) {
         return DuelContextRedisCRUD.getDuels().stream().filter(duel -> duel.getSpectators().contains(account.getUuid())).findFirst().orElse(null);
     }
 
     public static void removeAllDuelContextsFromAccount(Account account) {
-        List<DuelContextData> duels = DuelContextRedisCRUD.getDuels().stream().filter(duel -> duel.getTeam1().contains(account.getUuid()) || duel.getTeam2().contains(account.getUuid())).collect(Collectors.toList());
+        List<DuelData> duels = DuelContextRedisCRUD.getDuels().stream().filter(duel -> duel.getTeam1().contains(account.getUuid()) || duel.getTeam2().contains(account.getUuid())).collect(Collectors.toList());
         duels.forEach(duel -> {
             duel.saveData();
             duel.deleteData();

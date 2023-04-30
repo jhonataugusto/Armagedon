@@ -1,8 +1,7 @@
 package br.com.core.crud.redis;
 
 import br.com.core.Core;
-import br.com.core.account.Account;
-import br.com.core.data.DuelContextData;
+import br.com.core.data.DuelData;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -15,17 +14,17 @@ public class DuelContextRedisCRUD {
     private static final JedisPool JEDIS_POOL = Core.JEDIS_POOL;
     private static final String DUELS_CACHE = Core.REDIS_CACHE.DUELS_DATABASE_CACHE;
 
-    public static void save(DuelContextData data) {
+    public static void save(DuelData data) {
         try (Jedis jedis = JEDIS_POOL.getResource()) {
             jedis.hset(DUELS_CACHE, data.getUuid().toString(), data.toJson());
         }
     }
 
-    public static DuelContextData findByUuid(UUID uuid) {
+    public static DuelData findByUuid(UUID uuid) {
         try (Jedis jedis = JEDIS_POOL.getResource()) {
             String json = jedis.hget(DUELS_CACHE, uuid.toString());
             if (json != null) {
-                return DuelContextData.fromJson(json);
+                return DuelData.fromJson(json);
             }
             return null;
         }
@@ -37,10 +36,10 @@ public class DuelContextRedisCRUD {
         }
     }
 
-    public static List<DuelContextData> getDuels() {
+    public static List<DuelData> getDuels() {
         try (Jedis jedis = JEDIS_POOL.getResource()) {
             List<String> jsonList = jedis.hvals(DUELS_CACHE);
-            return jsonList.stream().map(DuelContextData::fromJson).collect(Collectors.toList());
+            return jsonList.stream().map(DuelData::fromJson).collect(Collectors.toList());
         }
     }
 }

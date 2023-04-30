@@ -1,7 +1,9 @@
 package br.com.core.account;
 
-import br.com.core.crud.redis.AccountRedisCRUD;
+import br.com.core.account.rank.Rank;
+import br.com.core.crud.redis.account.AccountRedisCRUD;
 import br.com.core.data.AccountData;
+import br.com.core.data.object.RankDAO;
 import lombok.Data;
 
 import java.util.UUID;
@@ -10,12 +12,28 @@ import java.util.UUID;
 public class Account {
     private AccountData data;
 
-    public String getName(){
+    public String getName() {
         return getData().getName();
     }
 
     public UUID getUuid() {
         return getData().getUuid();
+    }
+
+
+    public Rank getRank() {
+        RankDAO rankDAO = getData().getRanks().stream().findFirst().orElse(null);
+
+        if(rankDAO == null) {
+            return null;
+        }
+
+        return Rank.getByName(rankDAO.getName());
+    }
+
+    public void setRank(Rank rank, long expiration) {
+        this.getData().getRanks().clear();
+        getData().getRanks().add(new RankDAO(rank.getName(), expiration));
     }
 
     public Account(UUID uuid) {

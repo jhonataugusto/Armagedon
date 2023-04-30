@@ -1,10 +1,15 @@
 package br.com.hub.listeners;
 
+import br.com.core.account.rank.Rank;
+import br.com.core.data.object.RankDAO;
 import br.com.hub.Hub;
 import br.com.hub.user.User;
+import br.com.hub.util.tag.TagUtil;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.*;
 
 public class PlayerListener implements Listener {
@@ -17,6 +22,18 @@ public class PlayerListener implements Listener {
         User user = new User(player.getUniqueId());
 
         Hub.getInstance().getUserStorage().register(user.getUuid(), user);
+
+        RankDAO rankDAO = user.getAccount().getData().getRanks().get(0);
+
+        boolean rankHasExpired = rankDAO.getExpiration() < System.currentTimeMillis() && rankDAO.getExpiration() != -1;
+
+        if (rankHasExpired) {
+            user.getAccount().setRank(Rank.MEMBER, -1L);
+            user.getAccount().getData().saveData();
+            user.getPlayer().sendMessage(ChatColor.GRAY + "Seu rank expirou, você retornou ao rank padrão.");
+        }
+
+        TagUtil.loadTag(player, user.getAccount().getRank());
     }
 
     @EventHandler
@@ -27,6 +44,13 @@ public class PlayerListener implements Listener {
         User user = User.fetch(player.getUniqueId());
 
         Hub.getInstance().getUserStorage().unregister(user.getUuid());
+
+        TagUtil.unloadTag(player);
+    }
+
+    @EventHandler
+    public void onDamage(EntityDamageByEntityEvent event) {
+        event.setCancelled(true);
     }
 
     @EventHandler

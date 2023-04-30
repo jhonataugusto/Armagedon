@@ -1,7 +1,7 @@
 package br.com.bungee.commands;
 
 import br.com.core.account.Account;
-import br.com.core.data.DuelContextData;
+import br.com.core.data.DuelData;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.Default;
@@ -36,7 +36,7 @@ public class SpecCommand extends BaseCommand {
         }
 
         Account account = Account.fetch(target.getUniqueId());
-        DuelContextData data = DuelContextData.getContext(account);
+        DuelData data = DuelData.getContext(account);
 
         if (data == null || target.getServer().equals(sender.getServer())) {
             sender.sendMessage(ChatColor.RED + "O jogador não está em um duelo.");

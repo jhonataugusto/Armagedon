@@ -4,20 +4,52 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
 public enum Server {
     LOBBY("lobby"),
     LOBBY_PRACTICE("lobby_practice"),
     PRACTICE("practice");
 
-    private String name;
+    private final String name;
+    public HashMap<Server, List<Server>> pairs;
 
+    Server(String name) {
+        this.name = name;
+    }
 
+    static {
+        //COMUNICATION CHAT WITH SELECTED SERVERS
+
+        LOBBY_PRACTICE.pairs = new HashMap<>();
+        LOBBY_PRACTICE.pairs.put(LOBBY_PRACTICE,Arrays.asList(PRACTICE));
+
+        PRACTICE.pairs = new HashMap<>();
+        PRACTICE.pairs.put(PRACTICE, Arrays.asList(LOBBY_PRACTICE));
+    }
+    static {
+        //COMUNICATION CHAT WITH SELECTED SERVERS
+
+        LOBBY_PRACTICE.pairs = new HashMap<>();
+        LOBBY_PRACTICE.pairs.put(LOBBY_PRACTICE,Arrays.asList(PRACTICE));
+
+        PRACTICE.pairs = new HashMap<>();
+        PRACTICE.pairs.put(PRACTICE, Arrays.asList(LOBBY_PRACTICE));
+    }
     public static Server getByName(String name) {
         return Arrays.stream(values()).filter(server -> server.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
+
+    public boolean canSend(Server server) {
+        if (server == this) {
+            return false;
+        }
+
+        return this.pairs.get(this).contains(server);
+    }
 }
+

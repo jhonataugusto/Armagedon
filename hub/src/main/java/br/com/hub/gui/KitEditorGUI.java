@@ -1,5 +1,6 @@
 package br.com.hub.gui;
 
+import br.com.core.data.object.InventoryDAO;
 import br.com.core.enums.game.GameMode;
 import br.com.hub.user.User;
 import br.com.hub.util.serializer.SerializerUtils;
@@ -44,18 +45,22 @@ public class KitEditorGUI implements Listener {
         }
 
         Inventory defaultInventory = SerializerUtils.deserializeInventory(gameMode.getDefaultInventoryEncoded(), player);
-        Inventory customInventory = SerializerUtils.deserializeInventory(user.getAccount().getData().getInventories().get(gameMode.getName()), player);
+
         Inventory kitEditorInventory = Bukkit.createInventory(player, InventoryType.PLAYER, id);
 
-        if(defaultInventory == null) {
+
+        if (defaultInventory == null) {
             return;
         }
 
-        if (customInventory == null) {
+
+        if (user.getAccount().getData().getInventories().isEmpty()) {
             kitEditorInventory.setContents(defaultInventory.getContents());
         } else {
+            Inventory customInventory = SerializerUtils.deserializeInventory(user.getAccount().getData().getInventoryByGameModeName(gameMode.getName()).getInventoryEncoded(), player);
             kitEditorInventory.setContents(customInventory.getContents());
         }
+
         editMode.put(player, gameMode);
         player.openInventory(kitEditorInventory);
     }
@@ -146,7 +151,7 @@ public class KitEditorGUI implements Listener {
         async(() -> {
             String inventorySerialized = SerializerUtils.serializeInventory(event.getInventory());
 
-            user.getAccount().getData().getInventories().put(event.getInventory().getName(), inventorySerialized);
+            user.getAccount().getData().getInventories().add(new InventoryDAO(event.getInventory().getName(), inventorySerialized));
             user.getAccount().getData().saveData();
             editMode.remove(player);
 

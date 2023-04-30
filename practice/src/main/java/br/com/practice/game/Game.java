@@ -5,7 +5,7 @@ import br.com.practice.Practice;
 import br.com.core.account.Account;
 import br.com.practice.arena.Arena;
 import br.com.practice.arena.map.ArenaMap;
-import br.com.core.data.DuelContextData;
+import br.com.core.data.DuelData;
 import br.com.core.enums.game.GameMode;
 import br.com.core.enums.map.Maps;
 import br.com.core.enums.server.Server;
@@ -100,7 +100,7 @@ public abstract class Game implements Listener {
 
         Player player = user.getPlayer();
 
-        DuelContextData.removeAllDuelContextsFromAccount(user.getAccount());
+        DuelData.removeAllDuelContextsFromAccount(user.getAccount());
 
         user.getAccount().getData().setCurrentDuelContextUuid(user.getArena().getData().getUuid().toString());
         user.getAccount().getData().saveData();
@@ -124,10 +124,10 @@ public abstract class Game implements Listener {
         GameMode mode = user.getArena().getGame().getMode();
 
         Inventory customInventory = null;
-        if (!data.getInventories().containsKey(mode.getName())) {
+        if (data.getInventoryByGameModeName(mode.getName()) == null) {
             customInventory = SerializerUtils.deserializeInventory(mode.getDefaultInventoryEncoded(), user.getPlayer());
         } else {
-            customInventory = SerializerUtils.deserializeInventory(data.getInventories().get(mode.getName()), user.getPlayer());
+            customInventory = SerializerUtils.deserializeInventory(data.getInventoryByGameModeName(mode.getName()).getInventoryEncoded(), user.getPlayer());
         }
 
         user.getPlayer().getInventory().setContents(customInventory.getContents());
@@ -161,7 +161,7 @@ public abstract class Game implements Listener {
         user.setMaxRange(0);
     }
 
-    public Arena createArena(DuelContextData data) {
+    public Arena createArena(DuelData data) {
 
         final Arena[] arena = new Arena[1];
 

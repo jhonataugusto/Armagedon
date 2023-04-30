@@ -3,7 +3,7 @@ package br.com.practice.arena;
 import br.com.practice.arena.map.ArenaMap;
 import br.com.practice.arena.stage.ArenaStage;
 import br.com.practice.arena.team.ArenaTeam;
-import br.com.core.data.DuelContextData;
+import br.com.core.data.DuelData;
 import br.com.practice.events.arena.state.ArenaChangeStateEvent;
 import br.com.practice.game.Game;
 import br.com.practice.user.User;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class Arena {
     private final long maxTime = TimeUnit.MINUTES.toMillis(5);
     private long currentTime = TimeUnit.MINUTES.toMillis(0);
-    private DuelContextData data = null;
+    private DuelData data = null;
     private ArenaStage stage = ArenaStage.WAITING;
     private Game game;
     private World world;
@@ -43,7 +43,7 @@ public class Arena {
         this.teams = new ArenaTeam[]{redTeam, blueTeam};
     }
 
-    public Arena(Game game, World world, ArenaMap arenaMap, DuelContextData data) {
+    public Arena(Game game, World world, ArenaMap arenaMap, DuelData data) {
         this.game = game;
         this.world = world;
         this.map = arenaMap;
