@@ -1,7 +1,7 @@
 package br.com.hub.commands;
 
 import br.com.core.account.Account;
-import br.com.core.account.rank.Rank;
+import br.com.core.account.enums.rank.Rank;
 import br.com.core.crud.mongo.AccountMongoCRUD;
 import br.com.core.data.AccountData;
 import br.com.core.data.object.RankDAO;
@@ -61,8 +61,11 @@ public class RankCommand extends BaseCommand {
         } else {
             Account account = Account.fetch(target.getUniqueId());
             accountData = account.getData();
-        }
 
+            if(target.equals(sender)) {
+                return;
+            }
+        }
 
         Rank rank = Rank.getByAliases(rankName);
 

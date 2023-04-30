@@ -19,12 +19,14 @@ import br.com.hub.user.User;
 import br.com.hub.util.bungee.BungeeUtils;
 import de.tr7zw.changeme.nbtapi.NBT;
 import lombok.Getter;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
+import static br.com.hub.util.scheduler.SchedulerUtils.async;
 import static br.com.hub.util.scheduler.SchedulerUtils.sync;
 
 @Getter
@@ -32,7 +34,7 @@ public class PracticeQueueListener implements Listener {
 
     @EventHandler
     public void onQueueEnterEvent(PlayerEnterQueueEvent event) {
-        event.getUser().getPlayer().sendMessage("entrou na queue");
+        event.getUser().getPlayer().sendMessage(ChatColor.YELLOW + "Você entrou na fila! Por favor, aguarde pacientemente enquanto procuramos um oponente para você.");
 
         event.getUser().getPlayer().closeInventory();
 
@@ -46,7 +48,7 @@ public class PracticeQueueListener implements Listener {
 
     @EventHandler
     public void onQueueLeaveEvent(PlayerLeaveQueueEvent event) {
-        event.getUser().getPlayer().sendMessage("saiu da queue");
+        event.getUser().getPlayer().sendMessage(ChatColor.YELLOW + "Você saiu da fila!");
 
         event.getUser().getPlayer().getInventory().clear();
 
@@ -85,7 +87,7 @@ public class PracticeQueueListener implements Listener {
 
         DuelContextRedisCRUD.save(duelContext);
 
-        sync(() -> {
+        async(() -> {
             BungeeUtils.connect(user1.getPlayer(), Server.PRACTICE);
             BungeeUtils.connect(user2.getPlayer(), Server.PRACTICE);
         });

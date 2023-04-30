@@ -1,6 +1,6 @@
 package br.com.core.enums.game;
 
-import br.com.core.enums.elo.Elo;
+import br.com.core.account.enums.elo.Elo;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

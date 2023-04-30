@@ -1,4 +1,4 @@
-package br.com.core.enums.elo;
+package br.com.core.account.enums.elo;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

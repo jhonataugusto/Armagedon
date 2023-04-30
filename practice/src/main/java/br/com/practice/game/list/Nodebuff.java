@@ -1,4 +1,4 @@
-package br.com.practice.game.list.nodebuff;
+package br.com.practice.game.list;
 
 import br.com.core.utils.cooldown.CooldownManager;
 import br.com.practice.Practice;
@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -19,6 +20,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.projectiles.ProjectileSource;
@@ -27,6 +29,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import static br.com.practice.util.scheduler.SchedulerUtils.async;
+import static br.com.practice.util.scheduler.SchedulerUtils.delay;
 
 public class Nodebuff extends Game {
 
@@ -135,7 +140,9 @@ public class Nodebuff extends Game {
             public void run() {
                 long cooldownExpires = enderPearlCooldowns.getOrDefault(user.getUuid(), 0L);
 
-                if (cooldownExpires < System.currentTimeMillis()) {
+                if (cooldownExpires < System.currentTimeMillis() || user.getArena() == null) {
+                    player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 3.5f, 3.5f);
+                    player.sendMessage(ChatColor.GREEN + "Você pode usar sua enderpearl novamente.");
                     cancel();
                     return;
                 }
@@ -239,5 +246,29 @@ public class Nodebuff extends Game {
         });
 
         user.setThrowedPotions(user.getThrowedPotions() + 1);
+    }
+
+    @EventHandler
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+        Item item = event.getItemDrop();
+        Player player = event.getPlayer();
+
+        User user = User.fetch(player.getUniqueId());
+
+        if (user == null) {
+            return;
+        }
+
+        if (user.getArena() == null) {
+            return;
+        }
+
+        if (user.getArena().getGame() != this) {
+            return;
+        }
+
+        delay(() -> {
+            if (item.isValid()) item.remove();
+        }, 3);
     }
 }

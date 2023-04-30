@@ -1,4 +1,4 @@
-package br.com.core.account.punishments;
+package br.com.core.account.enums.punishments;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,6 +1,7 @@
 package br.com.hub.lobby.practice.listeners;
 
 import br.com.hub.gui.KitEditorGUI;
+import br.com.hub.gui.LeaderboardsGUI;
 import br.com.hub.gui.ModeSelectorGUI;
 import br.com.hub.gui.ServerGUI;
 import br.com.hub.items.LobbyItems;
@@ -40,6 +41,10 @@ public class PracticePlayerListener implements Listener {
 
                 if (nbt.getString(PracticeItems.KIT_EDITOR.getKEY()).equals(PracticeItems.KIT_EDITOR.getValue())) {
                     ModeSelectorGUI.INVENTORY.open(event.getPlayer());
+                }
+
+                if (nbt.getString(PracticeItems.LEADERBOARD.getKEY()).equals(PracticeItems.LEADERBOARD.getValue())) {
+                    LeaderboardsGUI.INVENTORY.open(event.getPlayer());
                 }
             }
         });

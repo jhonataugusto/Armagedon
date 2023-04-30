@@ -1,4 +1,4 @@
-package br.com.practice.game.list.skywars;
+package br.com.practice.game.list;
 
 import br.com.practice.Practice;
 import br.com.practice.game.Game;

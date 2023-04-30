@@ -1,6 +1,6 @@
 package br.com.practice.listener;
 
-import br.com.core.account.rank.Rank;
+import br.com.core.account.enums.rank.Rank;
 import br.com.practice.user.User;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;

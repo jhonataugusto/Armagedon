@@ -62,6 +62,7 @@ public class Arena {
         return getGame().getMode() + "-" + getMap().getId();
     }
 
+    //TODO: PLAYERS ESTÃO NASCENDO NO MESMO LOCAL
     public void handleJoin(User user) {
 
         if (!(getData().getTeam1().contains(user.getUuid()) || getData().getTeam2().contains(user.getUuid()))) {

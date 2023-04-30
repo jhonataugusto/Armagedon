@@ -1,6 +1,6 @@
 package br.com.hub.listeners;
 
-import br.com.core.account.rank.Rank;
+import br.com.core.account.enums.rank.Rank;
 import br.com.core.data.object.RankDAO;
 import br.com.hub.Hub;
 import br.com.hub.user.User;

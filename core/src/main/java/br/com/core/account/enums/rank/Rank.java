@@ -1,4 +1,4 @@
-package br.com.core.account.rank;
+package br.com.core.account.enums.rank;
 
 import lombok.Getter;
 
@@ -84,7 +84,14 @@ public enum Rank {
     }
 
     public static List<Rank> getRanksByStafferLevel(StafferLevel stafferLevel) {
-        return Arrays.stream(values()).filter(rank -> rank.getStafferLevel().equals(stafferLevel)).collect(Collectors.toList());
+        return Arrays.stream(values()).filter(rank -> {
+
+            if (rank.getStafferLevel() != null) {
+                return rank.getStafferLevel().equals(stafferLevel);
+            }
+
+            return false;
+        }).collect(Collectors.toList());
     }
 
     public static List<Rank> getPartners() {

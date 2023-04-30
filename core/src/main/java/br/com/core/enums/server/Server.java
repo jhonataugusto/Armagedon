@@ -13,7 +13,8 @@ import java.util.List;
 public enum Server {
     LOBBY("lobby"),
     LOBBY_PRACTICE("lobby_practice"),
-    PRACTICE("practice");
+    PRACTICE("practice"),
+    UNKOWN("unkown");
 
     private final String name;
     public HashMap<Server, List<Server>> pairs;
@@ -23,23 +24,16 @@ public enum Server {
     }
 
     static {
-        //COMUNICATION CHAT WITH SELECTED SERVERS
+        LOBBY.pairs = new HashMap<>();
+        LOBBY.pairs.put(LOBBY, Arrays.asList(UNKOWN));
 
         LOBBY_PRACTICE.pairs = new HashMap<>();
-        LOBBY_PRACTICE.pairs.put(LOBBY_PRACTICE,Arrays.asList(PRACTICE));
+        LOBBY_PRACTICE.pairs.put(LOBBY_PRACTICE, Arrays.asList(PRACTICE));
 
         PRACTICE.pairs = new HashMap<>();
         PRACTICE.pairs.put(PRACTICE, Arrays.asList(LOBBY_PRACTICE));
     }
-    static {
-        //COMUNICATION CHAT WITH SELECTED SERVERS
 
-        LOBBY_PRACTICE.pairs = new HashMap<>();
-        LOBBY_PRACTICE.pairs.put(LOBBY_PRACTICE,Arrays.asList(PRACTICE));
-
-        PRACTICE.pairs = new HashMap<>();
-        PRACTICE.pairs.put(PRACTICE, Arrays.asList(LOBBY_PRACTICE));
-    }
     public static Server getByName(String name) {
         return Arrays.stream(values()).filter(server -> server.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
     }

@@ -50,6 +50,7 @@ public class Hub extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        getUserStorage().getUsers().clear();
     }
 
     public static Hub getInstance() {

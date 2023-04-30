@@ -1,7 +1,7 @@
 package br.com.bungee.listeners;
 
 import br.com.core.account.Account;
-import br.com.core.account.rank.Rank;
+import br.com.core.account.enums.rank.Rank;
 import br.com.core.enums.server.Server;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;

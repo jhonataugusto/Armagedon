@@ -5,10 +5,15 @@ import br.com.core.database.mongo.collections.CollectionProps;
 import br.com.core.data.AccountData;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Projections;
+import com.mongodb.client.model.Sorts;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
-import java.util.UUID;
+import java.util.*;
 
 public class AccountMongoCRUD {
 
@@ -74,6 +79,35 @@ public class AccountMongoCRUD {
         } catch (Exception exception) {
             exception.printStackTrace();
         }
+    }
+
+    public static List<AccountData> getTopAccounts(int limit, String gamemodeName) {
+        try (MongoClient client = MongoClients.create(URI)) {
+            MongoCollection<Document> collection = client.getDatabase(MONGO_DATABASE_NAME).getCollection(MONGO_COLLECTION_NAME);
+
+            List<Bson> pipeline = Arrays.asList(
+                    Aggregates.match(Filters.exists("elos.name")),
+                    Aggregates.unwind("$elos"),
+                    Aggregates.match(Filters.eq("elos.name", gamemodeName)),
+                    Aggregates.sort(Sorts.descending("elos.elo")),
+                    Aggregates.limit(limit),
+                    Aggregates.lookup(CollectionProps.USERS.getName(), "uuid", "uuid", CollectionProps.USERS.getName()),
+                    Aggregates.unwind("$" + CollectionProps.USERS.getName()),
+                    Aggregates.replaceRoot("$" + CollectionProps.USERS.getName())
+            );
+
+            List<AccountData> accounts = new ArrayList<>();
+            List<Document> documents = collection.aggregate(pipeline).into(new ArrayList<>());
+            for (Document document : documents) {
+                accounts.add(new AccountData(document.toJson()));
+            }
+
+            return accounts;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Collections.emptyList();
     }
 }
 

@@ -54,17 +54,14 @@ public class JsonUtils {
                 Type genericType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
 
                 if (genericType.equals(String.class)) {
-
                     List<String> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<List<String>>() {
                     }.getType());
                     field.set(object, listValue);
                 } else if (genericType.equals(UUID.class)) {
-
                     List<UUID> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<List<UUID>>() {
                     }.getType());
                     field.set(object, listValue);
                 } else if (genericType.equals(RankDAO.class)) {
-
                     List<RankDAO> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<List<RankDAO>>() {}.getType());
                     field.set(object, listValue);
                 } else if (genericType.equals(InventoryDAO.class)) {

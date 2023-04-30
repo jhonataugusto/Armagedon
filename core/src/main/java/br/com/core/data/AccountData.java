@@ -1,7 +1,8 @@
 package br.com.core.data;
 
 import br.com.core.Core;
-import br.com.core.account.rank.Rank;
+import br.com.core.account.enums.preferences.Preferences;
+import br.com.core.account.enums.rank.Rank;
 import br.com.core.crud.mongo.AccountMongoCRUD;
 import br.com.core.crud.redis.account.AccountRedisCRUD;
 import br.com.core.data.object.*;
@@ -23,9 +24,9 @@ public class AccountData implements Serializable {
     private UUID uuid;
     private String currentDuelContextUuid;
     private List<RankDAO> ranks = new ArrayList<>();
-    private List<EloDAO> elos = new ArrayList<>();
     private List<InventoryDAO> inventories = new ArrayList<>();
-    private List<PreferencesDAO> preferences = new ArrayList<>(); //TODO
+    private List<EloDAO> elos = new ArrayList<>();
+    private List<PreferencesDAO> preferences = new ArrayList<>();
     private List<StatisticsDAO> statistics = new ArrayList<>(); //TODO
     private List<PunishmentDAO> punishments = new ArrayList<>(); //TODO
     private List<AltDAO> alts = new ArrayList<>(); //TODO: fazer ligação de contas alts vinculadas a essa conta
@@ -36,10 +37,15 @@ public class AccountData implements Serializable {
 
         for (GameMode mode : GameMode.values()) {
             elos.add(new EloDAO(mode.getName(), 1000));
+            statistics.add(new StatisticsDAO(mode.getName(),0,0,0,0,0,0));
         }
 
         if (ranks.isEmpty()) {
             ranks.add(new RankDAO(Rank.MEMBER.getName(), -1));
+        }
+
+        for (Preferences preferencesInfo : Preferences.values()) {
+            preferences.add(new PreferencesDAO(preferencesInfo.getName(), false));
         }
     }
 

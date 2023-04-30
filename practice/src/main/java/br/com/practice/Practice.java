@@ -7,13 +7,16 @@ import br.com.practice.game.storage.GameStorage;
 import br.com.practice.task.ArenaPulseTask;
 import br.com.practice.user.storage.UserStorage;
 import br.com.practice.util.bungee.BungeeUtils;
+import br.com.practice.util.file.CompressionUtil;
 import fr.minuskube.inv.InventoryManager;
 import lombok.Getter;
 import me.saiintbrisson.bukkit.command.BukkitFrame;
+import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.reflections.Reflections;
 
+import java.io.File;
 import java.util.Set;
 
 @Getter
@@ -40,6 +43,8 @@ public class Practice extends JavaPlugin {
     public void onEnable() {
         super.onEnable();
 
+        deleteUncachedArenas();
+
         commandFramework = new BukkitFrame(this);
         registerCommands();
 
@@ -59,6 +64,10 @@ public class Practice extends JavaPlugin {
     @Override
     public void onDisable() {
         super.onDisable();
+        Bukkit.getScheduler().cancelAllTasks();
+        getUserStorage().getUsers().clear();
+        getArenaStorage().getArenas().forEach((id, arena) -> getArenaStorage().unload(id));
+        getGameStorage().unload();
     }
 
     public static Practice getInstance() {
@@ -100,5 +109,23 @@ public class Practice extends JavaPlugin {
     public void registerPluginChannels() {
         getInstance().getServer().getMessenger().registerOutgoingPluginChannel(getInstance(), Core.BUNGEECORD_MESSAGING_CHANNEL);
         getInstance().getServer().getMessenger().registerIncomingPluginChannel(getInstance(), Core.BUNGEECORD_MESSAGING_CHANNEL, new BungeeUtils());
+    }
+
+
+    public void deleteUncachedArenas(){
+        File arenasFolder = new File(getServer().getWorldContainer(), "arenas");
+
+        if (!arenasFolder.exists()) {
+            arenasFolder.mkdirs();
+        }
+
+        for (File file : arenasFolder.listFiles()) {
+            if (file.isDirectory() && !file.getName().equals("presets")) {
+                CompressionUtil.delete(file);
+
+            } else if (file.isFile()) {
+                file.delete();
+            }
+        }
     }
 }

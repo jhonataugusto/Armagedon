@@ -1,6 +1,6 @@
 package br.com.hub.util.tag;
 
-import br.com.core.account.rank.Rank;
+import br.com.core.account.enums.rank.Rank;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
