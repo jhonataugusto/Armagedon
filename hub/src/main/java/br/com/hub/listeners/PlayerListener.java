@@ -46,6 +46,7 @@ public class PlayerListener implements Listener {
         Hub.getInstance().getUserStorage().unregister(user.getUuid());
 
         TagUtil.unloadTag(player);
+        Hub.getInstance().getLobby().removeScoreboard(player);
     }
 
     @EventHandler

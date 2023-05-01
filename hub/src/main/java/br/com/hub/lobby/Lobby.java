@@ -1,22 +1,25 @@
 package br.com.hub.lobby;
 
 import br.com.core.Core;
+import br.com.core.crud.redis.ServerRedisCRUD;
+import br.com.core.data.ServerData;
 import br.com.hub.Hub;
 import br.com.hub.lobby.mode.LobbyMode;
 import br.com.hub.tasks.ServerPulseTask;
+import br.com.hub.user.User;
 import br.com.hub.util.bungee.BungeeUtils;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.BukkitCommandManager;
+import dev.jcsoftware.jscoreboards.JGlobalScoreboard;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.Bukkit;
-import org.bukkit.Difficulty;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.Recipe;
 import org.reflections.Reflections;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -29,6 +32,7 @@ public abstract class Lobby {
     private final World world;
     private Location spawn;
     private BukkitCommandManager bukkitCommandManager;
+    private JGlobalScoreboard scoreboard;
     private ServerPulseTask task;
 
     public Lobby(Hub instance) {
@@ -50,12 +54,39 @@ public abstract class Lobby {
         this.world.setGameRuleValue("doDaylightCycle", "false");
         this.world.setGameRuleValue("logAdminCommands", "false");
         this.world.setGameRuleValue("randomTickSpeed", "0");
+        handleScoreboard();
 
         this.spawn = world.getSpawnLocation();
 
         task = new ServerPulseTask(getInstance());
 
         task.runTaskTimer(getInstance(), 0, 20L);
+    }
+
+    protected void handleScoreboard() {
+
+        int onlinePlayers = (int) ServerRedisCRUD.getServers().stream().mapToLong(ServerData::getCurrentPlayers).sum();
+
+        String lobbyName = this.getMode().getName() + "#" + this.getId();
+
+        setScoreboard(new JGlobalScoreboard(
+                () -> "§lLobby",
+                () -> Arrays.asList(
+                        " ",
+                        ChatColor.AQUA + "Online§r: " + onlinePlayers,
+                        ChatColor.AQUA + "Lobby§r: " + lobbyName,
+                        " ",
+                        " §larmagedon.com.br"
+                )
+        ));
+    }
+
+    public void removeScoreboard(Player player) {
+        getScoreboard().removePlayer(player);
+    }
+
+    public void updateScoreboard() {
+        getScoreboard().updateScoreboard();
     }
 
     public void loadListeners() {

@@ -2,6 +2,8 @@ package br.com.hub.listeners;
 
 import br.com.hub.Hub;
 
+import br.com.hub.events.ServerPulseEvent;
+import br.com.hub.user.User;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.BlockFace;
@@ -12,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
@@ -39,6 +42,9 @@ public class HubListener implements Listener {
 
         PlayerInventory inventory = player.getInventory();
         inventory.setArmorContents(null);
+
+        Hub.getInstance().getLobby().getScoreboard().addPlayer(player);
+
     }
 
     @EventHandler
@@ -62,5 +68,10 @@ public class HubListener implements Listener {
             event.setCancelled(true);
             return;
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onServerPulse(ServerPulseEvent event) {
+        event.getHub().getLobby().updateScoreboard();
     }
 }

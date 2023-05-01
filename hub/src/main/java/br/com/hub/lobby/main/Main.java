@@ -6,6 +6,7 @@ import br.com.hub.util.cuboid.Cuboid;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.WorldBorder;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.reflections.Reflections;
 
@@ -41,5 +42,15 @@ public class Main extends Lobby {
                 exception.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void handleScoreboard() {
+        super.handleScoreboard();
+    }
+
+    @Override
+    public void updateScoreboard() {
+        super.updateScoreboard();
     }
 }

@@ -11,6 +11,7 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.WorldBorder;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.reflections.Reflections;
 
@@ -19,8 +20,8 @@ import java.util.Set;
 @Getter
 public class Practice extends Lobby {
 
-    private Queue queue;
-    private Cuboid cuboid;
+    private final Queue queue;
+    private final Cuboid cuboid;
     private KitEditorGUI kitEditorGUI;
     private ModeSelectorGUI modeSelectorGUI;
 
@@ -67,5 +68,15 @@ public class Practice extends Lobby {
         }
 
         getInstance().getServer().getPluginManager().registerEvents(KitEditorGUI.getInstance(), getInstance());
+    }
+
+    @Override
+    public void handleScoreboard() {
+        super.handleScoreboard();
+    }
+
+    @Override
+    public void updateScoreboard() {
+        super.updateScoreboard();
     }
 }

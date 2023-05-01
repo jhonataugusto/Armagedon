@@ -14,7 +14,7 @@ public class ServerPulseTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        ServerPulseEvent event = new ServerPulseEvent();
+        ServerPulseEvent event = new ServerPulseEvent(Hub.getInstance());
         instance.getServer().getPluginManager().callEvent(event);
     }
 }

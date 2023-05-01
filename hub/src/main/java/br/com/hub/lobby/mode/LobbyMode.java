@@ -9,7 +9,8 @@ import java.util.Arrays;
 @NoArgsConstructor
 public enum LobbyMode {
 
-    MAIN("lobby");
+    MAIN("Main"),
+    PRACTICE("Practice");
 
     private String name;
 

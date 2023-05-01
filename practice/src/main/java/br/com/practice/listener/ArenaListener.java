@@ -74,6 +74,7 @@ public class ArenaListener implements Listener {
             return;
         }
 
+
         if (entity.getLastDamager() == null) {
             entity.setLastDamager(damager);
         }
@@ -98,6 +99,31 @@ public class ArenaListener implements Listener {
         }
 
         damager.setRange(MathUtils.getEuclideanDistance(damager.getPlayer(), entity.getPlayer()));
+
+        if (entity.getPlayer().isBlocking()) {
+            entity.setBlockedHits(entity.getBlockedHits() + 1);
+        }
+
+        if (damager.getPlayer().getFallDistance() > 0) {
+            damager.setCriticalHits(damager.getCriticalHits() + 1);
+        }
+
+        damager.setHits(damager.getHits() + 1);
+
+        if (entity.getCurrentCombo() > 0) {
+            if (entity.getCurrentCombo() > entity.getMaxCombo()) {
+                entity.setMaxCombo(entity.getCurrentCombo());
+            }
+            entity.setCurrentCombo(0);
+        }
+
+        if (damager.getCurrentCombo() > 0) {
+            if (damager.getCurrentCombo() > damager.getMaxCombo()) {
+                damager.setMaxCombo(damager.getCurrentCombo());
+            }
+        }
+        damager.setCurrentCombo(damager.getCurrentCombo() + 1);
+
 
         double finalDamage = event.getFinalDamage();
         double entityHealth = entity.getPlayer().getHealth();

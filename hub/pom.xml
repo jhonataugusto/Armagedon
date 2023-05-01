@@ -20,7 +20,6 @@
 
     <dependencies>
 
-
         <dependency>
             <groupId>br.com.armagedon</groupId>
             <artifactId>core</artifactId>
@@ -92,13 +91,6 @@
             <scope>system</scope>
             <systemPath>D:/projetos/intellij/armagedon/libs/paper.jar</systemPath>
         </dependency>
-
-        <dependency>
-            <groupId>com.mojang</groupId>
-            <artifactId>authlib</artifactId>
-            <version>1.5.25</version>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -120,7 +112,8 @@
                 <version>3.4.1</version>
                 <configuration>
                     <finalName>hub</finalName>
-                    <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
+                    <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml
+                    </dependencyReducedPomLocation>
                     <relocations>
                         <relocation>
                             <pattern>co.aikar.commands</pattern>
@@ -132,7 +125,8 @@
                         </relocation>
                     </relocations>
                     <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <mainClass>br.com.hub.Hub</mainClass>
                         </transformer>
                     </transformers>
@@ -177,7 +171,6 @@
     </build>
 
     <repositories>
-
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
@@ -192,7 +185,6 @@
             <id>aikar</id>
             <url>https://repo.aikar.co/content/groups/aikar/</url>
         </repository>
-
     </repositories>
 
 </project>

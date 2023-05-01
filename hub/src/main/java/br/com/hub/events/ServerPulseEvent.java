@@ -1,5 +1,6 @@
 package br.com.hub.events;
 
+import br.com.hub.Hub;
 import lombok.Getter;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -8,7 +9,10 @@ import org.bukkit.event.HandlerList;
 public class ServerPulseEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
 
-    public ServerPulseEvent() {
+    private final Hub hub;
+
+    public ServerPulseEvent(Hub hub) {
+        this.hub = hub;
     }
 
     @Override

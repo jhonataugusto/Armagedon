@@ -51,6 +51,12 @@ public class Hub extends JavaPlugin {
     @Override
     public void onDisable() {
         getUserStorage().getUsers().clear();
+        Bukkit.getServer().getOnlinePlayers().forEach(player -> {
+
+            if (player.getScoreboard() != null) {
+                getLobby().removeScoreboard(player);
+            }
+        });
     }
 
     public static Hub getInstance() {

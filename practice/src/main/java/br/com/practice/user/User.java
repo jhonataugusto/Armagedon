@@ -22,17 +22,15 @@ public class User {
     private Player player;
     private Arena arena;
     private ArenaTeam team;
-    private Inventory postMatchInventory; //TODO
     private User lastDamager;
-
     private int blockedHits, hits, criticalHits;
     private int maxCombo, currentCombo;
 
-    private int throwedPotions, missedPotions, stealedPotions, successfulPotions; //TODO
-    private double sumAccuracyPotions, averageAccuracyPotions; //TODO
+    private int throwedPotions, missedPotions, stealedPotions, successfulPotions;
+    private double sumAccuracyPotions, averageAccuracyPotions;
 
-    private double range, maxRange; //TODO
-    private double clicksPerSecond, maxClicksPerSecond; //TODO
+    private double range, maxRange;
+    private double clicksPerSecond, maxClicksPerSecond;
 
     public User(UUID uuid, Player player) {
         account = new Account(uuid);
