@@ -21,7 +21,7 @@ public class DuelData implements Serializable {
     private final UUID uuid = UUID.randomUUID();
     private List<UUID> team1 = new ArrayList<>(), team2 = new ArrayList<>();
     private boolean custom = false;
-    private String gameMode = null;
+    private String gameModeName = null;
     private String mapName = null;
     private String arenaId = null;
     private List<UUID> spectators = new ArrayList<>();
@@ -102,11 +102,15 @@ public class DuelData implements Serializable {
             String name = split[0];
             String uniqueId = split[1];
 
-            if(uniqueId.contains(uuid)) {
+            if (uniqueId.contains(uuid)) {
                 return name + "_" + uniqueId;
             }
 
         }
         return null;
+    }
+
+    public boolean is1v1() {
+        return this.getTeam1().size() == 1 && this.getTeam2().size() == 1;
     }
 }

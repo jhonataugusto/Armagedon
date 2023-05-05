@@ -1,11 +1,8 @@
-package br.com.hub.gui;
+package br.com.hub.gui.editor;
 
 import br.com.core.enums.game.GameMode;
 import br.com.hub.Hub;
 import br.com.hub.icons.PracticeIcons;
-import br.com.hub.lobby.practice.Practice;
-import br.com.hub.lobby.practice.queue.properties.QueueProperties;
-import br.com.hub.user.User;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -15,12 +12,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Getter
 @Setter
-public class ModeSelectorGUI implements InventoryProvider {
+public class ModeEditSelectorGUI implements InventoryProvider {
 
     private static final String ID = "MODE_SELECTOR_GUI";
     private static final int MAX_ROWS = 6;
@@ -31,7 +25,7 @@ public class ModeSelectorGUI implements InventoryProvider {
 
     public static final SmartInventory INVENTORY = SmartInventory.builder()
             .id(ID)
-            .provider(new ModeSelectorGUI())
+            .provider(new ModeEditSelectorGUI())
             .manager(Hub.getInstance().getInventoryManager())
             .size(MAX_ROWS, MAX_COLUMNS)
             .title("Escolha o Kit que deseja editar")

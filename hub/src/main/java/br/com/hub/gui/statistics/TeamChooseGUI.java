@@ -1,7 +1,8 @@
-package br.com.hub.gui;
+package br.com.hub.gui.statistics;
 
 import br.com.core.data.DuelData;
 import br.com.hub.Hub;
+import br.com.hub.gui.statistics.PlayerChooseGUI;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;

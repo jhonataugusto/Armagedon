@@ -16,13 +16,13 @@ import java.util.Set;
 public class Cuboid {
     private transient Location teamSpawn1, teamSpawn2;
     private double position1X, position1Y, position1Z;
+    private double spawnX, spawnY, spawnZ, spawnPitch, spawnYaw;
     private double position2X, position2Y, position2Z;
-    private double minX, minY, minZ, maxX, maxY, maxZ;
+    private transient double minX, minY, minZ, maxX, maxY, maxZ;
 
     public Cuboid() {
 
     }
-
 
     public Location getCenter(World world) {
         double centerX = minX + maxX / 2;
@@ -30,6 +30,7 @@ public class Cuboid {
         double centerZ = minZ + maxZ / 2;
         return new Location(world, centerX, centerY, centerZ);
     }
+
     public boolean isInside(Location location) {
 
         int locationX = location.getBlockX();

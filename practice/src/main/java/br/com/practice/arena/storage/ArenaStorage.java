@@ -9,7 +9,9 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static br.com.practice.util.scheduler.SchedulerUtils.sync;
@@ -43,7 +45,7 @@ public class ArenaStorage {
         return getArenas().getOrDefault(id, null);
     }
 
-    public Map<String, Arena> getArenasByGame(Game game) {
+    public Map<String, Arena> getArenasFromGame(Game game) {
         return getArenas().entrySet().stream().filter(entry -> entry.getValue().getGame().equals(game)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
@@ -51,22 +53,21 @@ public class ArenaStorage {
         return getArenas().values().stream().filter(value -> value.getData().equals(data)).findFirst().orElse(null);
     }
 
-    public void loadMoreArenas(Game game) {
-        int arenaSize = getArenas().size();
-        int arenaSizeByFortyPercent = (int) Math.round(arenaSize * 0.4);
+    public Arena getFreeArena(Game game, DuelData data) {
 
-        for (int i = 0; i <= arenaSizeByFortyPercent; i++) {
-            game.createArena(null);
-        }
-    }
+        Arena arena = findFreeArena(game, data.getMapName());
 
-    public Arena getFreeArena(Game game) {
+        int totalArenasFromGameMapSize = getArenasFromGameMap(game, data.getMapName()).size();
+        int freeArenasSize = getFreeArenasFromGameMap(game, data.getMapName()).size();
 
-        Arena arena = findFreeArena(game);
+        if (freeArenasSize <= totalArenasFromGameMapSize * 0.3) {
 
-        if (arena == null) {
-            loadMoreArenas(game);
-            arena = findFreeArena(game);
+            int doubleFreeArena = freeArenasSize * 2;
+
+            for (int i = 0; i <= doubleFreeArena; i++) {
+                game.createArena(data);
+            }
+
         }
 
         return arena;
@@ -74,5 +75,21 @@ public class ArenaStorage {
 
     private Arena findFreeArena(Game game) {
         return getArenas().values().stream().filter(thisArena -> thisArena.getGame().equals(game) && thisArena.getStage() == ArenaStage.WAITING).findFirst().orElse(null);
+    }
+
+    private Arena findFreeArena(Game game, String mapName) {
+        return getArenas().values().stream().filter(thisArena -> thisArena.getGame().equals(game) && thisArena.getStage() == ArenaStage.WAITING && thisArena.getMap().getName().equalsIgnoreCase(mapName)).findFirst().orElse(null);
+    }
+
+    private Map<String, Arena> getArenasFromGameMap(Game game, String mapName) {
+        return getArenas().values().stream()
+                .filter(arena -> arena.getGame().equals(game) && arena.getMap().getName().equalsIgnoreCase(mapName))
+                .collect(Collectors.toMap(Arena::getId, Function.identity()));
+    }
+
+    private Map<String, Arena> getFreeArenasFromGameMap(Game game, String mapName) {
+        return getArenas().values().stream()
+                .filter(arena -> arena.getStage().equals(ArenaStage.WAITING) && arena.getGame().equals(game) && arena.getMap().getName().equalsIgnoreCase(mapName))
+                .collect(Collectors.toMap(Arena::getId, Function.identity()));
     }
 }

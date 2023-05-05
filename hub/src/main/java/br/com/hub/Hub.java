@@ -3,8 +3,10 @@ package br.com.hub;
 import br.com.core.Core;
 import br.com.hub.lobby.Lobby;
 import br.com.hub.lobby.storage.LobbyStorage;
+import br.com.hub.user.User;
 import br.com.hub.user.storage.UserStorage;
 import co.aikar.commands.BukkitCommandManager;
+import dev.jcsoftware.jscoreboards.JGlobalScoreboard;
 import fr.minuskube.inv.InventoryManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -54,7 +56,7 @@ public class Hub extends JavaPlugin {
         Bukkit.getServer().getOnlinePlayers().forEach(player -> {
 
             if (player.getScoreboard() != null) {
-                getLobby().removeScoreboard(player);
+                Hub.getInstance().getLobby().getLobbyScoreboard().removePlayer(player);
             }
         });
     }

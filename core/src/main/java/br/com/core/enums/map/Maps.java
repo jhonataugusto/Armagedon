@@ -14,7 +14,8 @@ import java.util.stream.Collectors;
 public enum Maps {
     GRASS("grass", "Grass", GameMode.NODEBUFF),
     STONE("stone", "Stone", GameMode.NODEBUFF),
-    MUSHROOM("mushroom", "Mushroom",GameMode.SKYWARS),
+    NETHERBRICK("netherbrick", "Netherbrick", GameMode.NODEBUFF),
+    MUSHROOM("mushroom", "Mushroom",GameMode.NODEBUFF),
     CASTLE("castle", "Castle", GameMode.SKYWARS);
     private String name;
     private String displayName;

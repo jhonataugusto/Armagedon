@@ -1,8 +1,9 @@
-package br.com.hub.gui;
+package br.com.hub.gui.statistics;
 
 
 import br.com.core.data.DuelData;
 import br.com.hub.Hub;
+import br.com.hub.gui.statistics.PlayerChooseGUI;
 import br.com.hub.util.serializer.SerializerUtils;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -42,13 +43,14 @@ public class PlayerStatisticGUI implements InventoryProvider {
         this.uuid = uuid;
         this.users = users;
 
+        String namePlayer = data.getNameAndUuidKey(uuid.toString()).split("_")[0];
 
         this.INVENTORY = SmartInventory.builder()
                 .id(ID)
                 .provider(this)
                 .manager(Hub.getInstance().getInventoryManager())
                 .size(MAX_ROWS, MAX_COLUMNS)
-                .title("Estatística do jogador")
+                .title(namePlayer)
                 .build();
     }
 
@@ -62,6 +64,11 @@ public class PlayerStatisticGUI implements InventoryProvider {
         }
 
         Inventory inventory = SerializerUtils.deserializeInventory(data.getInventories().get(key), null);
+
+        if(inventory == null) {
+            return;
+        }
+
         ItemStack[] items = inventory.getContents();
 
         int row = 0;
@@ -78,22 +85,46 @@ public class PlayerStatisticGUI implements InventoryProvider {
             }
         }
 
-        ItemStack redstoneBlock = new ItemStack(Material.REDSTONE_BLOCK);
-        ItemMeta redstoneMeta = redstoneBlock.getItemMeta();
+        if (data.is1v1()) {
 
-        redstoneMeta.setDisplayName("Sair da estatística atual");
-        redstoneBlock.setItemMeta(redstoneMeta);
+            List<UUID> teamOpponent;
 
-        contents.set(lastPos, ClickableItem.of(redstoneBlock, event -> {
-            PlayerChooseGUI playerChooseGUI = new PlayerChooseGUI(users, data);
-            player.updateInventory();
-            playerChooseGUI.INVENTORY.open(player);
-        }));
+            if (data.getTeam1().contains(uuid)) {
+                teamOpponent = data.getTeam2();
+            } else {
+                teamOpponent = data.getTeam1();
+            }
+
+            ItemStack arrow = new ItemStack(Material.ARROW);
+            ItemMeta arrowMeta = arrow.getItemMeta();
+
+            arrowMeta.setDisplayName("Ir para o inventário do oponente");
+            arrow.setItemMeta(arrowMeta);
+
+            contents.set(lastPos, ClickableItem.of(arrow, event -> {
+                PlayerStatisticGUI playerStatisticGUI = new PlayerStatisticGUI(data, teamOpponent.get(0), teamOpponent);
+                player.updateInventory();
+                playerStatisticGUI.getINVENTORY().open(player);
+            }));
+
+        } else {
+
+            ItemStack redstoneBlock = new ItemStack(Material.REDSTONE_BLOCK);
+            ItemMeta redstoneMeta = redstoneBlock.getItemMeta();
+
+            redstoneMeta.setDisplayName("Sair da estatística atual");
+            redstoneBlock.setItemMeta(redstoneMeta);
+
+            contents.set(lastPos, ClickableItem.of(redstoneBlock, event -> {
+                PlayerChooseGUI playerChooseGUI = new PlayerChooseGUI(users, data);
+                player.updateInventory();
+                playerChooseGUI.INVENTORY.open(player);
+            }));
+        }
     }
 
     @Override
     public void update(Player player, InventoryContents contents) {
-
     }
 }
 

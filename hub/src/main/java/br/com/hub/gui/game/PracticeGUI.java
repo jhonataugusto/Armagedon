@@ -1,10 +1,9 @@
-package br.com.hub.gui;
+package br.com.hub.gui.game;
 
-import br.com.core.enums.game.GameMode;
 import br.com.hub.Hub;
 import br.com.hub.icons.PracticeIcons;
 import br.com.hub.lobby.practice.Practice;
-import br.com.hub.lobby.practice.queue.properties.QueueProperties;
+import br.com.hub.lobby.practice.queue.properties.DuelProperties;
 import br.com.hub.user.User;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -21,7 +20,6 @@ import java.util.Map;
 @Getter
 public class PracticeGUI implements InventoryProvider {
     private static final String ID = "PRACTICE_GAMES_GUI";
-
     private static final int MAX_ROWS = 6;
     private static final int MAX_COLUMNS = 9;
 
@@ -66,8 +64,8 @@ public class PracticeGUI implements InventoryProvider {
                 boolean inQueue = instance.getQueue().inQueue(user);
 
                 if (!inQueue) {
-                    QueueProperties queueProperties = new QueueProperties(item.getName(), getRankedMap().get(player), user.getAccount().getData().getElos(item.getName()));
-                    instance.getQueue().enter(user, queueProperties);
+                    DuelProperties duelProperties = new DuelProperties(item.getName(), getRankedMap().get(player), user.getAccount().getData().getElos(item.getName()));
+                    instance.getQueue().enter(user, duelProperties);
 
                     getRankedMap().remove(player);
 
@@ -92,9 +90,9 @@ public class PracticeGUI implements InventoryProvider {
         }
 
         if (ranked) {
-            contents.set(lastPos, ClickableItem.of(PracticeIcons.RANKED_MODE.toItemStack(), event1 -> getRankedMap().put(player, false)));
+            contents.set(5, 4, ClickableItem.of(PracticeIcons.RANKED_MODE.toItemStack(), event1 -> getRankedMap().put(player, false)));
         } else {
-            contents.set(lastPos, ClickableItem.of(PracticeIcons.UNRANKED_MODE.toItemStack(), event2 -> getRankedMap().put(player, true)));
+            contents.set(5, 4, ClickableItem.of(PracticeIcons.UNRANKED_MODE.toItemStack(), event2 -> getRankedMap().put(player, true)));
         }
     }
 
@@ -104,11 +102,11 @@ public class PracticeGUI implements InventoryProvider {
         boolean ranked = rankedMap.get(player);
 
         if (ranked) {
-            contents.set(lastPos, ClickableItem.of(PracticeIcons.RANKED_MODE.toItemStack(), event2 -> {
+            contents.set(5,4, ClickableItem.of(PracticeIcons.RANKED_MODE.toItemStack(), event2 -> {
                 getRankedMap().put(player, false);
             }));
         } else {
-            contents.set(lastPos, ClickableItem.of(PracticeIcons.UNRANKED_MODE.toItemStack(), event2 -> {
+            contents.set(5,4, ClickableItem.of(PracticeIcons.UNRANKED_MODE.toItemStack(), event2 -> {
                 getRankedMap().put(player, true);
             }));
         }

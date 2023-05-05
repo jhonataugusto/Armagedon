@@ -50,7 +50,6 @@ public class SpecCommand extends BaseCommand {
         }
 
         data.saveData();
-
         sender.connect(server.getInfo());
     }
 }

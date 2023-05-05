@@ -1,45 +1,83 @@
 package br.com.hub.lobby.practice;
 
+import br.com.core.Core;
+import br.com.core.crud.redis.DuelContextRedisCRUD;
 import br.com.hub.Hub;
-import br.com.hub.gui.KitEditorGUI;
-import br.com.hub.gui.ModeSelectorGUI;
+import br.com.hub.gui.editor.KitEditorGUI;
 import br.com.hub.lobby.Lobby;
 import br.com.hub.lobby.practice.queue.Queue;
+
 import br.com.hub.util.cuboid.Cuboid;
 import co.aikar.commands.BaseCommand;
+import dev.jcsoftware.jscoreboards.JGlobalScoreboard;
+
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.WorldBorder;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.reflections.Reflections;
 
-import java.util.Set;
+import java.util.*;
 
 @Getter
+@Setter
 public class Practice extends Lobby {
 
     private final Queue queue;
-    private final Cuboid cuboid;
-    private KitEditorGUI kitEditorGUI;
-    private ModeSelectorGUI modeSelectorGUI;
+    private Cuboid cuboid;
 
     public Practice(Hub instance) {
         super(instance);
-
         registerListeners();
         registerCustomCommands();
 
-        setSpawn(new Location(getWorld(), 0.5, 60, 0.5, 0, 0));
+        setCuboid(Cuboid.loadProperties(Bukkit.getWorldContainer()));
+        setSpawn(new Location(getWorld(), getCuboid().getSpawnX(), getCuboid().getSpawnY(), getCuboid().getSpawnZ(), (float) getCuboid().getSpawnYaw(), (float) getCuboid().getSpawnPitch()));
 
-        cuboid = Cuboid.loadProperties(Bukkit.getWorldContainer());
+        createScoreboard();
+
         WorldBorder border = getWorld().getWorldBorder();
-
         border.setCenter(getSpawn());
         border.setSize(450);
 
         queue = new Queue();
+    }
+
+    @Override
+    public void handleScoreboard(Player player) {
+        Hub.getInstance().getLobby().getLobbyScoreboard().addPlayer(player);
+    }
+
+    @Override
+    public void createScoreboard() {
+        setLobbyScoreboard(new JGlobalScoreboard(
+
+                () -> "§l" + "practice".toUpperCase(),
+
+                () -> {
+
+                    int playing = (int) DuelContextRedisCRUD.getDuels()
+                            .stream()
+                            .flatMap(duel -> {
+                                List<UUID> members = new ArrayList<>();
+                                members.addAll(duel.getTeam1());
+                                members.addAll(duel.getTeam2());
+                                return members.stream();
+                            }).count();
+
+                    return Arrays.asList(
+                            "",
+                            "Online: " + ChatColor.AQUA + Bukkit.getOnlinePlayers().size(),
+                            "Jogando: " + ChatColor.AQUA + playing,
+                            "",
+                            Core.SERVER_WEBSITE
+                    );
+                }
+        ));
     }
 
     public void registerCustomCommands() {
@@ -68,15 +106,5 @@ public class Practice extends Lobby {
         }
 
         getInstance().getServer().getPluginManager().registerEvents(KitEditorGUI.getInstance(), getInstance());
-    }
-
-    @Override
-    public void handleScoreboard() {
-        super.handleScoreboard();
-    }
-
-    @Override
-    public void updateScoreboard() {
-        super.updateScoreboard();
     }
 }

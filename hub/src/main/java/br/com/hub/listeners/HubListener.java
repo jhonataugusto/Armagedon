@@ -1,9 +1,14 @@
 package br.com.hub.listeners;
 
+import br.com.core.Core;
+import br.com.core.crud.redis.DuelContextRedisCRUD;
 import br.com.hub.Hub;
 
 import br.com.hub.events.ServerPulseEvent;
 import br.com.hub.user.User;
+import dev.jcsoftware.jscoreboards.JPerPlayerScoreboard;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.BlockFace;
@@ -14,11 +19,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 public class HubListener implements Listener {
 
@@ -42,9 +52,6 @@ public class HubListener implements Listener {
 
         PlayerInventory inventory = player.getInventory();
         inventory.setArmorContents(null);
-
-        Hub.getInstance().getLobby().getScoreboard().addPlayer(player);
-
     }
 
     @EventHandler
@@ -72,6 +79,13 @@ public class HubListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onServerPulse(ServerPulseEvent event) {
-        event.getHub().getLobby().updateScoreboard();
+        Hub.getInstance().getLobby().getLobbyScoreboard().updateScoreboard();
+    }
+
+    @EventHandler
+    public void onWeatherChange(WeatherChangeEvent event) {
+        if(event.toWeatherState()) {
+            event.setCancelled(true);
+        }
     }
 }

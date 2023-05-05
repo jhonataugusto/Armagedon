@@ -1,4 +1,4 @@
-package br.com.hub.gui;
+package br.com.hub.gui.editor;
 
 import br.com.core.data.object.InventoryDAO;
 import br.com.core.enums.game.GameMode;
@@ -17,9 +17,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static br.com.hub.util.scheduler.SchedulerUtils.async;
+import static br.com.hub.util.scheduler.SchedulerUtils.sync;
 
 @Getter
 @Setter
@@ -53,13 +56,19 @@ public class KitEditorGUI implements Listener {
             return;
         }
 
+        sync(() -> {
+            InventoryDAO inventoryDAO = user.getAccount().getData().getInventoryByGameModeName(gameMode.getName());
 
-        if (user.getAccount().getData().getInventories().isEmpty()) {
-            kitEditorInventory.setContents(defaultInventory.getContents());
-        } else {
-            Inventory customInventory = SerializerUtils.deserializeInventory(user.getAccount().getData().getInventoryByGameModeName(gameMode.getName()).getInventoryEncoded(), player);
-            kitEditorInventory.setContents(customInventory.getContents());
-        }
+            if (inventoryDAO == null) {
+                kitEditorInventory.setContents(defaultInventory.getContents());
+
+            } else {
+                Inventory customInventory = SerializerUtils.deserializeInventory(inventoryDAO.getInventoryEncoded(), null);
+
+                kitEditorInventory.setContents(customInventory.getContents());
+            }
+        });
+
 
         editMode.put(player, gameMode);
         player.openInventory(kitEditorInventory);
@@ -151,7 +160,21 @@ public class KitEditorGUI implements Listener {
         async(() -> {
             String inventorySerialized = SerializerUtils.serializeInventory(event.getInventory());
 
-            user.getAccount().getData().getInventories().add(new InventoryDAO(event.getInventory().getName(), inventorySerialized));
+            List<InventoryDAO> inventoriesPerGame = user.getAccount().getData().getInventories().stream().filter(inventoryDAO -> inventoryDAO.getGamemodeName().equalsIgnoreCase(editMode.get(player).getName())).collect(Collectors.toList());
+
+            boolean inventoryExists = inventoriesPerGame.size() > 0;
+
+            if (!inventoryExists) {
+                user.getAccount().getData().getInventories().add(new InventoryDAO(editMode.get(player).getName(), inventorySerialized));
+            } else {
+
+                for (InventoryDAO inventoryDAO : inventoriesPerGame) {
+                    user.getAccount().getData().getInventories().remove(inventoryDAO);
+                }
+
+                user.getAccount().getData().getInventories().add(new InventoryDAO(editMode.get(player).getName(), inventorySerialized));
+            }
+
             user.getAccount().getData().saveData();
             editMode.remove(player);
 

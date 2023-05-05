@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 @Data
 public class Core {
     public static final String SERVER_NAME = System.getProperty("server_name", "Armagedon");
+    public static final String SERVER_VERSION = System.getProperty("server_version", "1.0");
     public static final String SERVER_WEBSITE = System.getProperty("server_website", "armagedon.com.br");
     public static final String SERVER_DISCORD = System.getProperty("server_discord", "discord.io/armagedon");
     public static final String SERVER_STORE = System.getProperty("server_store", "loja.armagedon.com.br");

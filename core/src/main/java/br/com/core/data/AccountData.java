@@ -37,7 +37,7 @@ public class AccountData implements Serializable {
 
         for (GameMode mode : GameMode.values()) {
             elos.add(new EloDAO(mode.getName(), 1000));
-            statistics.add(new StatisticsDAO(mode.getName(),0,0,0,0,0,0));
+            statistics.add(new StatisticsDAO(mode.getName(), 0, 0, 0, 0, 0, 0));
         }
 
         if (ranks.isEmpty()) {
@@ -128,14 +128,6 @@ public class AccountData implements Serializable {
     }
 
     public InventoryDAO getInventoryByGameModeName(String gameModeName) {
-
-        for (InventoryDAO data : inventories) {
-            if (data.getGamemodeName().equalsIgnoreCase(gameModeName)) {
-                return data;
-            } else {
-                return null;
-            }
-        }
-        return null;
+        return getInventories().stream().filter(inventory -> inventory.getGamemodeName().equalsIgnoreCase(gameModeName)).findFirst().orElse(null);
     }
 }

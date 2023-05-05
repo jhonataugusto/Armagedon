@@ -1,14 +1,13 @@
 package br.com.hub.lobby.practice.listeners;
 
-import br.com.hub.gui.KitEditorGUI;
-import br.com.hub.gui.LeaderboardsGUI;
-import br.com.hub.gui.ModeSelectorGUI;
-import br.com.hub.gui.ServerGUI;
-import br.com.hub.items.LobbyItems;
+import br.com.hub.Hub;
+import br.com.hub.gui.rank.LeaderboardsGUI;
+import br.com.hub.gui.editor.ModeEditSelectorGUI;
 import br.com.hub.items.PracticeItems;
-import br.com.hub.user.User;
 import de.tr7zw.changeme.nbtapi.NBT;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,10 +26,18 @@ public class PracticePlayerListener implements Listener {
             player.getInventory().setItem(item.getPosition(), item.toItemStack());
         }
 
+        player.teleport(Hub.getInstance().getLobby().getSpawn());
+        player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 5f, 5f);
+
+        player.sendMessage(ChatColor.GREEN + "Agora você está no servidor de practice.");
     }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
+
+        if (!event.hasItem() || !event.getAction().name().contains("RIGHT_")) {
+            return;
+        }
 
         if (event.getItem() == null || event.getItem().getType() == Material.AIR) {
             return;
@@ -40,7 +47,7 @@ public class PracticePlayerListener implements Listener {
             if (nbt.hasCustomNbtData()) {
 
                 if (nbt.getString(PracticeItems.KIT_EDITOR.getKEY()).equals(PracticeItems.KIT_EDITOR.getValue())) {
-                    ModeSelectorGUI.INVENTORY.open(event.getPlayer());
+                    ModeEditSelectorGUI.INVENTORY.open(event.getPlayer());
                 }
 
                 if (nbt.getString(PracticeItems.LEADERBOARD.getKEY()).equals(PracticeItems.LEADERBOARD.getValue())) {

@@ -11,8 +11,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 @NoArgsConstructor
 public enum PracticeItems {
     RANKED_UNRANKED("Escolha sua partida", Material.COMPASS, 0, 1, "RANKED_UNRANKED"),
-    LEADERBOARD("Leaderboard", Material.NETHER_STAR, 4, 1, "LEADERBOARD"),
-    KIT_EDITOR("Edite seus Kits", Material.FURNACE, 7,1,"KIT_EDITOR"),
+    LEADERBOARD("Leaderboard", Material.EMERALD, 4, 1, "LEADERBOARD"),
+    KIT_EDITOR("Edite seus Kits", Material.ANVIL, 7,1,"KIT_EDITOR"),
     CONFIGURATIONS("Configurações", Material.COMMAND, 8, 1, "CONFIGURATIONS");
 
     private String displayName;

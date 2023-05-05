@@ -1,10 +1,9 @@
 package br.com.hub.lobby.practice.queue.properties;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-public class QueueProperties {
+public class DuelProperties {
     private String mode;
     private boolean ranked;
 
@@ -12,7 +11,7 @@ public class QueueProperties {
     private int maxElo;
     private int minElo;
 
-    public QueueProperties(String mode, boolean ranked, int elo) {
+    public DuelProperties(String mode, boolean ranked, int elo) {
         this.mode = mode;
         this.ranked = ranked;
         this.elo = elo;
@@ -26,9 +25,9 @@ public class QueueProperties {
             return false;
         }
 
-        if (!(obj instanceof QueueProperties)) return false;
+        if (!(obj instanceof DuelProperties)) return false;
 
-        QueueProperties otherProperties = (QueueProperties) obj;
+        DuelProperties otherProperties = (DuelProperties) obj;
 
         if (otherProperties.getMode() == null) return false;
         boolean modeAreEquals = this.getMode().equals(otherProperties.getMode());
@@ -37,7 +36,7 @@ public class QueueProperties {
         return modeAreEquals && isSameRankedMode;
     }
 
-    public int compareTo(QueueProperties otherProperties) {
+    public int compareTo(DuelProperties otherProperties) {
         if (otherProperties == null || otherProperties.getMode() == null) {
             throw new ClassCastException("O objeto a ser comparado não é uma instância de QueueProperties");
         }
@@ -56,7 +55,7 @@ public class QueueProperties {
         return -1;
     }
 
-    public boolean inEloRange(QueueProperties otherProperties) {
+    public boolean inEloRange(DuelProperties otherProperties) {
         return otherProperties.getMaxElo() >= this.getMinElo() && otherProperties.getMinElo() <= this.getMaxElo();
     }
 }

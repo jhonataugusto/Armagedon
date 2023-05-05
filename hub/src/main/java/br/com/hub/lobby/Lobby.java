@@ -1,27 +1,26 @@
 package br.com.hub.lobby;
 
 import br.com.core.Core;
-import br.com.core.crud.redis.ServerRedisCRUD;
-import br.com.core.data.ServerData;
 import br.com.hub.Hub;
 import br.com.hub.lobby.mode.LobbyMode;
 import br.com.hub.tasks.ServerPulseTask;
 import br.com.hub.user.User;
 import br.com.hub.util.bungee.BungeeUtils;
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.BukkitCommandManager;
 import dev.jcsoftware.jscoreboards.JGlobalScoreboard;
+import dev.jcsoftware.jscoreboards.JPerPlayerScoreboard;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.*;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.Recipe;
 import org.reflections.Reflections;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
+
+import static br.com.hub.util.scheduler.SchedulerUtils.sync;
 
 @Getter
 @Setter
@@ -31,9 +30,8 @@ public abstract class Lobby {
     private final int id;
     private final World world;
     private Location spawn;
-    private BukkitCommandManager bukkitCommandManager;
-    private JGlobalScoreboard scoreboard;
     private ServerPulseTask task;
+    private JGlobalScoreboard lobbyScoreboard;
 
     public Lobby(Hub instance) {
 
@@ -54,39 +52,33 @@ public abstract class Lobby {
         this.world.setGameRuleValue("doDaylightCycle", "false");
         this.world.setGameRuleValue("logAdminCommands", "false");
         this.world.setGameRuleValue("randomTickSpeed", "0");
-        handleScoreboard();
+        world.getEntities().forEach(Entity::remove);
+        sync(world::save);
+        setSpawn(world.getSpawnLocation());
 
-        this.spawn = world.getSpawnLocation();
+        createScoreboard();
 
         task = new ServerPulseTask(getInstance());
-
         task.runTaskTimer(getInstance(), 0, 20L);
     }
 
-    protected void handleScoreboard() {
+    public void handleScoreboard(Player player) {
+        getLobbyScoreboard().addPlayer(player);
+    }
 
-        int onlinePlayers = (int) ServerRedisCRUD.getServers().stream().mapToLong(ServerData::getCurrentPlayers).sum();
-
-        String lobbyName = this.getMode().getName() + "#" + this.getId();
-
-        setScoreboard(new JGlobalScoreboard(
-                () -> "§lLobby",
-                () -> Arrays.asList(
-                        " ",
-                        ChatColor.AQUA + "Online§r: " + onlinePlayers,
-                        ChatColor.AQUA + "Lobby§r: " + lobbyName,
-                        " ",
-                        " §larmagedon.com.br"
-                )
+    public void createScoreboard(){
+        setLobbyScoreboard(new JGlobalScoreboard(
+                () -> "§l" + Core.SERVER_NAME.toUpperCase(),
+                () -> {
+                    String lobbyName = this.getMode().getName() + " #" + this.getId();
+                    return Arrays.asList(
+                            "",
+                            "Lobby: " + ChatColor.AQUA + lobbyName,
+                            "",
+                            Core.SERVER_WEBSITE
+                    );
+                }
         ));
-    }
-
-    public void removeScoreboard(Player player) {
-        getScoreboard().removePlayer(player);
-    }
-
-    public void updateScoreboard() {
-        getScoreboard().updateScoreboard();
     }
 
     public void loadListeners() {

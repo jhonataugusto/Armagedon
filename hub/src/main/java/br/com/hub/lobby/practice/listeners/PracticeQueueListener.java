@@ -9,11 +9,11 @@ import br.com.hub.events.PlayerLeaveQueueEvent;
 import br.com.hub.events.QueueMatchEvent;
 import br.com.hub.events.ServerPulseEvent;
 import br.com.core.enums.game.GameMode;
-import br.com.hub.gui.PracticeGUI;
+import br.com.hub.gui.game.PracticeGUI;
 import br.com.hub.items.PracticeItems;
 import br.com.hub.items.QueueItems;
 import br.com.hub.lobby.practice.Practice;
-import br.com.hub.lobby.practice.queue.properties.QueueProperties;
+import br.com.hub.lobby.practice.queue.properties.DuelProperties;
 import br.com.core.enums.map.Maps;
 import br.com.hub.user.User;
 import br.com.hub.util.bungee.BungeeUtils;
@@ -27,7 +27,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 import static br.com.hub.util.scheduler.SchedulerUtils.async;
-import static br.com.hub.util.scheduler.SchedulerUtils.sync;
 
 @Getter
 public class PracticeQueueListener implements Listener {
@@ -74,13 +73,13 @@ public class PracticeQueueListener implements Listener {
         duelContext.getTeam1().add(user1.getUuid());
         duelContext.getTeam2().add(user2.getUuid());
 
-        QueueProperties properties = event.getProperties();
+        DuelProperties properties = event.getProperties();
 
         duelContext.setCustom(false);
         duelContext.setRanked(properties.isRanked());
-        duelContext.setGameMode(properties.getMode());
+        duelContext.setGameModeName(properties.getMode());
 
-        GameMode mode = GameMode.getByName(duelContext.getGameMode());
+        GameMode mode = GameMode.getByName(duelContext.getGameModeName());
         String mapName = Maps.getRandomMap(mode).getName();
 
         duelContext.setMapName(mapName);
@@ -103,6 +102,10 @@ public class PracticeQueueListener implements Listener {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
+
+        if (!event.hasItem() || !event.getAction().name().contains("RIGHT_")) {
+            return;
+        }
 
         Practice instance = (Practice) Hub.getInstance().getLobby();
 

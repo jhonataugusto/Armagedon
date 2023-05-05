@@ -2,7 +2,7 @@ package br.com.hub.lobby.practice.commands;
 
 import br.com.core.crud.mongo.DuelContextMongoCRUD;
 import br.com.core.data.DuelData;
-import br.com.hub.gui.TeamChooseGUI;
+import br.com.hub.gui.statistics.TeamChooseGUI;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.Default;
@@ -18,13 +18,14 @@ import java.util.UUID;
 public class MatchCommand extends BaseCommand {
 
     @Default
-    public void onMatch(Player sender, @Single String uuidString) {
+    public void onMatch(Player sender, @Single String duelUuid) {
 
-        UUID uuid = UUID.fromString(uuidString);
+        UUID uuid = UUID.fromString(duelUuid);
 
         DuelData duelData = DuelContextMongoCRUD.get(uuid);
 
-        if(duelData == null) {
+
+        if (duelData == null) {
             sender.sendMessage(ChatColor.RED + "O duelo que você está procurando não existe.");
             return;
         }

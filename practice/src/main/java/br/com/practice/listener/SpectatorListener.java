@@ -45,12 +45,18 @@ public class SpectatorListener implements Listener {
         for (SpectatorItems items : SpectatorItems.values()) {
             spectator.getInventory().setItem(items.getPosition(), items.toItemStack());
         }
+
+        event.getArena().getSpectators().add(event.getSpectator());
+        event.getArena().handleScoreboard(event.getSpectator());
+
     }
 
     @EventHandler
     public void onSpectatorLeave(SpectatorLeaveArenaEvent event) {
         event.getSpectator().setArena(null);
 
+        event.getArena().getSpectators().remove(event.getSpectator());
+        event.getArena().removeScoreboard(event.getSpectator());
     }
 
 

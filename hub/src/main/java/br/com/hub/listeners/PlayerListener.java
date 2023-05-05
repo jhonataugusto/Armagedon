@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.*;
 
 public class PlayerListener implements Listener {
@@ -24,7 +25,6 @@ public class PlayerListener implements Listener {
         Hub.getInstance().getUserStorage().register(user.getUuid(), user);
 
         RankDAO rankDAO = user.getAccount().getData().getRanks().get(0);
-
         boolean rankHasExpired = rankDAO.getExpiration() < System.currentTimeMillis() && rankDAO.getExpiration() != -1;
 
         if (rankHasExpired) {
@@ -32,6 +32,12 @@ public class PlayerListener implements Listener {
             user.getAccount().getData().saveData();
             user.getPlayer().sendMessage(ChatColor.GRAY + "Seu rank expirou, você retornou ao rank padrão.");
         }
+
+        user.getAccount().getData().setCurrentDuelContextUuid(null);
+
+        user.setLobby(Hub.getInstance().getLobby());
+
+        user.getLobby().handleScoreboard(player);
 
         TagUtil.loadTag(player, user.getAccount().getRank());
     }
@@ -43,14 +49,19 @@ public class PlayerListener implements Listener {
         Player player = event.getPlayer();
         User user = User.fetch(player.getUniqueId());
 
-        Hub.getInstance().getUserStorage().unregister(user.getUuid());
-
         TagUtil.unloadTag(player);
-        Hub.getInstance().getLobby().removeScoreboard(player);
+
+        Hub.getInstance().getLobby().getLobbyScoreboard().removePlayer(player);
+        Hub.getInstance().getUserStorage().unregister(user.getUuid());
     }
 
     @EventHandler
     public void onDamage(EntityDamageByEntityEvent event) {
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onEntityDamage(EntityDamageEvent event) {
         event.setCancelled(true);
     }
 

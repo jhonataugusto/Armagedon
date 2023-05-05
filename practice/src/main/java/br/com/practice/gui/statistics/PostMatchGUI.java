@@ -1,4 +1,4 @@
-package br.com.practice.gui;
+package br.com.practice.gui.statistics;
 
 import br.com.core.enums.game.GameMode;
 import br.com.practice.user.User;

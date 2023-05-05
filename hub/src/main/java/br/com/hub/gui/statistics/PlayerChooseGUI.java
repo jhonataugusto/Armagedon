@@ -1,4 +1,4 @@
-package br.com.hub.gui;
+package br.com.hub.gui.statistics;
 
 import br.com.core.data.DuelData;
 import br.com.hub.Hub;

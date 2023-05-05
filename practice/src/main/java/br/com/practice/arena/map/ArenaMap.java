@@ -5,6 +5,7 @@ import br.com.practice.Practice;
 import br.com.practice.util.cuboid.Cuboid;
 import br.com.practice.util.file.CompressionUtil;
 import lombok.Data;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;

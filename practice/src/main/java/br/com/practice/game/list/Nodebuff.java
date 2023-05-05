@@ -11,15 +11,14 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -27,13 +26,18 @@ import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import static br.com.practice.util.scheduler.SchedulerUtils.async;
 import static br.com.practice.util.scheduler.SchedulerUtils.delay;
 
 public class Nodebuff extends Game {
+
+    private static final long PEARL_COOLDOWN_MILLIS = TimeUnit.SECONDS.toMillis(16);
+    private final Map<UUID, Long> pearlCooldown = new ConcurrentHashMap<>();
 
     public Nodebuff(Practice plugin, Integer min_rooms, String mapDirectory) {
         super(plugin, min_rooms, mapDirectory);
@@ -59,16 +63,16 @@ public class Nodebuff extends Game {
         ItemStack leggings = new ItemStack(Material.DIAMOND_LEGGINGS);
         ItemStack boots = new ItemStack(Material.DIAMOND_BOOTS);
 
-        helmet.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 3);
+        helmet.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 2);
         helmet.addEnchantment(Enchantment.DURABILITY, 3);
 
-        chestplate.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 3);
+        chestplate.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 2);
         chestplate.addEnchantment(Enchantment.DURABILITY, 3);
 
-        leggings.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 3);
+        leggings.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 2);
         leggings.addEnchantment(Enchantment.DURABILITY, 3);
 
-        boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 3);
+        boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 2);
         boots.addEnchantment(Enchantment.PROTECTION_FALL, 4);
         boots.addEnchantment(Enchantment.DURABILITY, 3);
 
@@ -77,12 +81,6 @@ public class Nodebuff extends Game {
         user.getPlayer().getInventory().setLeggings(leggings);
         user.getPlayer().getInventory().setBoots(boots);
     }
-
-    @Override
-    public void handleScoreboard() {
-        super.handleScoreboard();
-    }
-
 
     @EventHandler
     public void onPearlDamageEvent(EntityDamageEvent event) {
@@ -100,49 +98,24 @@ public class Nodebuff extends Game {
         event.setCancelled(true);
     }
 
-    private final HashMap<UUID, Long> enderPearlCooldowns = new HashMap<>();
-    private static final long PEARL_COOLDOWN_MILLIS = TimeUnit.SECONDS.toMillis(16);
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onProjectileLaunch(ProjectileLaunchEvent event) {
 
-    @EventHandler
-    public void onEnderPearlThrowEvent(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        User user = User.fetch(player.getUniqueId());
-
-        if (user == null || user.getArena() == null) {
+        if (event.getEntityType() != EntityType.ENDER_PEARL) {
             return;
         }
 
-        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
-            return;
-        }
+        EnderPearl pearl = (EnderPearl) event.getEntity();
+        Player shooter = (Player) pearl.getShooter();
 
-        ItemStack item = event.getItem();
-
-        if (item == null || item.getType() != Material.ENDER_PEARL) {
-            return;
-        }
-
-        if (enderPearlCooldowns.containsKey(user.getUuid())) {
-            long timeLeft = enderPearlCooldowns.get(user.getUuid()) - System.currentTimeMillis();
-
-            if (timeLeft > 0) {
-                String formattedTime = DurationFormatUtils.formatDurationWords(timeLeft, true, true);
-                player.sendMessage(ChatColor.RED + "Aguarde " + formattedTime + " para usar a enderpearl novamente.");
-                event.setCancelled(true);
-                return;
-            }
-        }
-
-        enderPearlCooldowns.put(user.getUuid(), System.currentTimeMillis() + 16_000);
+        pearlCooldown.put(shooter.getUniqueId(), System.currentTimeMillis() + PEARL_COOLDOWN_MILLIS);
 
         new BukkitRunnable() {
-
             public void run() {
-                long cooldownExpires = enderPearlCooldowns.getOrDefault(user.getUuid(), 0L);
+                long cooldownExpires = pearlCooldown.getOrDefault(shooter.getUniqueId(), 0L);
 
-                if (cooldownExpires < System.currentTimeMillis() || user.getArena() == null) {
-                    player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 3.5f, 3.5f);
-                    player.sendMessage(ChatColor.GREEN + "Você pode usar sua enderpearl novamente.");
+                if (cooldownExpires < System.currentTimeMillis()) {
+                    shooter.getPlayer().playSound(shooter.getLocation(), Sound.ENDERMAN_TELEPORT, 5f, 5f);
                     cancel();
                     return;
                 }
@@ -150,11 +123,34 @@ public class Nodebuff extends Game {
                 int millisLeft = (int) (cooldownExpires - System.currentTimeMillis());
                 float percentLeft = (float) millisLeft / PEARL_COOLDOWN_MILLIS;
 
-                user.getPlayer().setExp(percentLeft);
-                user.getPlayer().setLevel(millisLeft / 1_000);
+                shooter.setExp(percentLeft);
+                shooter.setLevel(millisLeft / 1_000);
             }
 
         }.runTaskTimer(Practice.getInstance(), 1L, 1L);
+    }
+
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        if (!event.hasItem() || event.getItem().getType() != Material.ENDER_PEARL || !event.getAction().name().contains("RIGHT_")) {
+            return;
+        }
+
+        Player player = event.getPlayer();
+        long cooldownExpires = pearlCooldown.getOrDefault(player.getUniqueId(), 0L);
+
+        if (cooldownExpires < System.currentTimeMillis()) {
+            return;
+        }
+
+        int millisLeft = (int) (cooldownExpires - System.currentTimeMillis());
+        double secondsLeft = millisLeft / 1000D;
+        secondsLeft = Math.round(10D * secondsLeft) / 10D;
+
+        event.setCancelled(true);
+        player.sendMessage(ChatColor.RED + "Espere " + secondsLeft + " segundos para usar sua enderpearl novamente.");
+        player.updateInventory();
     }
 
     @EventHandler

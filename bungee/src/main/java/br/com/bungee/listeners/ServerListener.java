@@ -88,20 +88,7 @@ public class ServerListener implements Listener {
         Account account = Account.fetch(event.getPlayer().getUniqueId());
         if (event.getFrom().getName().equals(br.com.core.enums.server.Server.PRACTICE.getName()) && account.getData().getCurrentDuelContextUuid() != null) {
 
-            DuelData data = DuelContextMongoCRUD.get(UUID.fromString(account.getData().getCurrentDuelContextUuid()));
 
-            if (data == null) {
-                return;
-            }
-
-            String command = "match " + data.getUuid();
-
-            TextComponent component = new TextComponent(ChatColor.GREEN + "Clique aqui para ver o resultado da partida!");
-            component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + command));
-            event.getPlayer().sendMessage(component);
-
-            account.getData().setCurrentDuelContextUuid(null);
-            account.getData().saveData();
         }
     }
 }

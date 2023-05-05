@@ -4,10 +4,12 @@ import br.com.practice.Practice;
 import br.com.core.account.Account;
 import br.com.practice.arena.Arena;
 import br.com.practice.arena.team.ArenaTeam;
-import br.com.practice.gui.PostMatchGUI;
+import br.com.practice.gui.statistics.PostMatchGUI;
+import dev.jcsoftware.jscoreboards.JPerPlayerScoreboard;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 @Setter
 public class User {
     private Account account;
+    private JPerPlayerScoreboard scoreboard;
     private Player player;
     private Arena arena;
     private ArenaTeam team;
@@ -53,13 +56,25 @@ public class User {
         return Bukkit.getPlayer(getAccount().getUuid());
     }
 
+    public int getPing(){
+        return ((CraftPlayer) this.getPlayer()).getHandle().ping;
+    }
+
     public boolean isLastMember() {
 
-        List<User> members = getTeam().getMembers().stream()
+        List<User> members = getTeam().getAliveMembers().stream()
                 .map(member -> (User) member)
                 .collect(Collectors.toList());
 
         return members.size() == 1 && members.contains(this);
+    }
+
+    public boolean isSpectating(){
+        if(this.getArena() == null) {
+            return false;
+        }
+
+        return this.getArena().getSpectators().contains(this);
     }
 
     public Inventory createPostMatchInventory() {

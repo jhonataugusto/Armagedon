@@ -2,15 +2,15 @@ package br.com.practice;
 
 import br.com.core.Core;
 import br.com.practice.arena.storage.ArenaStorage;
-import br.com.core.holder.command.ACommand;
 import br.com.practice.game.storage.GameStorage;
 import br.com.practice.task.ArenaPulseTask;
 import br.com.practice.user.storage.UserStorage;
 import br.com.practice.util.bungee.BungeeUtils;
 import br.com.practice.util.file.CompressionUtil;
+import co.aikar.commands.BaseCommand;
+import co.aikar.commands.BukkitCommandManager;
 import fr.minuskube.inv.InventoryManager;
 import lombok.Getter;
-import me.saiintbrisson.bukkit.command.BukkitFrame;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -26,8 +26,7 @@ public class Practice extends JavaPlugin {
     private UserStorage userStorage;
     private ArenaStorage arenaStorage;
     private GameStorage gameStorage;
-
-    private BukkitFrame commandFramework;
+    private BukkitCommandManager commandManager;
     private InventoryManager inventoryManager;
 
     @Override
@@ -45,7 +44,7 @@ public class Practice extends JavaPlugin {
 
         deleteUncachedArenas();
 
-        commandFramework = new BukkitFrame(this);
+        commandManager = new BukkitCommandManager(this);
         registerCommands();
 
         registerEvents();
@@ -91,11 +90,11 @@ public class Practice extends JavaPlugin {
     public void registerCommands() {
         Reflections reflections = new Reflections("br.com.practice.commands");
 
-        Set<Class<? extends ACommand>> commands = reflections.getSubTypesOf(ACommand.class);
+        Set<Class<? extends BaseCommand>> commands = reflections.getSubTypesOf(BaseCommand.class);
 
-        for (Class<? extends ACommand> clazz : commands) {
+        for (Class<? extends BaseCommand> clazz : commands) {
             try {
-                this.getCommandFramework().registerCommands(clazz.newInstance());
+                getCommandManager().registerCommand(clazz.newInstance());
             } catch (Exception exception) {
                 throw new RuntimeException(exception);
             }
@@ -112,7 +111,7 @@ public class Practice extends JavaPlugin {
     }
 
 
-    public void deleteUncachedArenas(){
+    public void deleteUncachedArenas() {
         File arenasFolder = new File(getServer().getWorldContainer(), "arenas");
 
         if (!arenasFolder.exists()) {

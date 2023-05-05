@@ -1,4 +1,4 @@
-package br.com.hub.gui;
+package br.com.hub.gui.rank;
 
 
 import br.com.core.crud.mongo.AccountMongoCRUD;

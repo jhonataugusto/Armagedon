@@ -2,7 +2,10 @@ package br.com.hub.lobby.main;
 
 import br.com.hub.Hub;
 import br.com.hub.lobby.Lobby;
+import br.com.hub.user.User;
 import br.com.hub.util.cuboid.Cuboid;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.WorldBorder;
@@ -12,26 +15,25 @@ import org.reflections.Reflections;
 
 import java.util.Set;
 
+@Getter
+@Setter
 public class Main extends Lobby {
 
-    private final Cuboid cuboid;
-
+    private Cuboid cuboid;
 
     public Main(Hub instance) {
         super(instance);
-
         registerListeners();
 
-        setSpawn(new Location(getWorld(), 0.5, 60, 0.5, 0, 0));
+        setCuboid(Cuboid.loadProperties(Bukkit.getWorldContainer()));
+        setSpawn(new Location(getWorld(), getCuboid().getSpawnX(), getCuboid().getSpawnY(), getCuboid().getSpawnZ(), (float) getCuboid().getSpawnYaw(), (float) getCuboid().getSpawnPitch()));
 
-        cuboid = Cuboid.loadProperties(Bukkit.getWorldContainer());
         WorldBorder border = getWorld().getWorldBorder();
-
         border.setCenter(getSpawn());
         border.setSize(450);
     }
 
-    public void registerListeners(){
+    public void registerListeners() {
         Reflections reflections = new Reflections("br.com.hub.lobby.main");
         Set<Class<? extends Listener>> classes = reflections.getSubTypesOf(Listener.class);
 
@@ -42,15 +44,5 @@ public class Main extends Lobby {
                 exception.printStackTrace();
             }
         }
-    }
-
-    @Override
-    public void handleScoreboard() {
-        super.handleScoreboard();
-    }
-
-    @Override
-    public void updateScoreboard() {
-        super.updateScoreboard();
     }
 }

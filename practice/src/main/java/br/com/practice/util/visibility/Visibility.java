@@ -15,10 +15,15 @@ public class Visibility {
     }
 
     public static void invisible(Player hidden, List<User> observers) {
-        observers.forEach(observer -> {
+        for (User observer : observers) {
+
+            if (hidden == null) {
+                continue;
+            }
+
             hide(observer.getPlayer(), hidden);
             show(hidden, observer.getPlayer());
-        });
+        }
     }
 
     private static void show(Player observer, Player shown) {

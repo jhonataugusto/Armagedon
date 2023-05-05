@@ -14,7 +14,7 @@ import java.util.Set;
 public class ArenaTeam {
     private String name;
     private ChatColor color;
-    private Set<User> members;
+    private Set<User> aliveMembers;
     private Set<User> deadMembers;
     private Arena arena;
     private ArenaTeam opponent;
@@ -24,39 +24,39 @@ public class ArenaTeam {
         this.name = name;
         this.color = color;
         this.arena = arena;
-        this.members = new HashSet<>();
+        this.aliveMembers = new HashSet<>();
         this.deadMembers = new HashSet<>();
     }
 
     public void add(User user) {
-        getMembers().add(user);
+        getAliveMembers().add(user);
     }
 
     public void remove(User user) {
-        getMembers().remove(user);
+        getAliveMembers().remove(user);
     }
 
     public void ressurectDeadMember(User user) {
         if (getDeadMembers().contains(user)) {
             getDeadMembers().remove(user);
-            getMembers().add(user);
+            getAliveMembers().add(user);
         }
     }
 
     public void addDeadMember(User user) {
-        if (getMembers().contains(user)) {
+        if (getAliveMembers().contains(user)) {
             getDeadMembers().add(user);
-            getMembers().remove(user);
+            getAliveMembers().remove(user);
         }
     }
 
     public void clear() {
-        getMembers().clear();
+        getAliveMembers().clear();
         getDeadMembers().clear();
     }
 
     public Set<User> getAllMembers() {
-        Set<User> allMembers = new HashSet<>(getMembers());
+        Set<User> allMembers = new HashSet<>(getAliveMembers());
         allMembers.addAll(getDeadMembers());
         return allMembers;
     }

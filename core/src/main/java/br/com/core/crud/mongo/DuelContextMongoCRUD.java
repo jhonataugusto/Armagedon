@@ -40,6 +40,22 @@ public class DuelContextMongoCRUD {
         return null;
     }
 
+    public static DuelData get(String uuid) {
+        try (MongoClient client = MongoClients.create(URI)) {
+
+            Document document = client.getDatabase(MONGO_DATABASE_NAME).getCollection(MONGO_COLLECTION_NAME).find(Filters.eq("uuid", uuid)).first();
+
+            if (document != null) {
+                return new DuelData(document.toJson());
+            }
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+
+        return null;
+    }
+
     public static void save(DuelData data) {
         try (MongoClient client = MongoClients.create(URI)) {
             Document filter = new Document("uuid", data.getUuid().toString());

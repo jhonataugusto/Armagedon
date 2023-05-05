@@ -1,10 +1,14 @@
 package br.com.practice.util.world;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
 import java.util.Set;
+
+import static br.com.practice.util.scheduler.SchedulerUtils.async;
+import static br.com.practice.util.scheduler.SchedulerUtils.sync;
 
 public class WorldHandler {
     public static void adjust(World world, Set<Chunk> chunks) {
@@ -12,7 +16,7 @@ public class WorldHandler {
         world.setPVP(true);
         world.setGameRuleValue("doMobSpawning", "false");
         world.setGameRuleValue("doDaylightCycle", "false");
-        world.setGameRuleValue("naturalRegeneration", "false");
+        world.setGameRuleValue("naturalRegeneration", "true");
         world.setGameRuleValue("sendCommandFeedback", "false");
         world.setGameRuleValue("logAdminCommands", "false");
 
@@ -35,7 +39,7 @@ public class WorldHandler {
             world.loadChunk(chunk.getX(), chunk.getZ(), true);
         }
 
-
         world.getEntities().forEach(Entity::remove);
+        sync(world::save);
     }
 }
