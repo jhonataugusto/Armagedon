@@ -13,10 +13,11 @@ import java.util.Arrays;
 @Getter
 @NoArgsConstructor
 public enum ServerIcons {
-    LOBBY(Server.LOBBY.getName(), null, false),
-    LOBBY_PRACTICE(Server.LOBBY_PRACTICE.getName(), Material.DIAMOND_SWORD, true);
+    LOBBY(Server.LOBBY.getName(), Server.LOBBY.getDisplayName(), null, false),
+    LOBBY_PRACTICE(Server.LOBBY_PRACTICE.getName(), Server.LOBBY_PRACTICE.getDisplayName(), Material.DIAMOND_SWORD, true);
 
     private String name;
+    private String displayName;
     private Material onlineMaterial;
     private static final Material defaultMaterial = Material.WOOL;
     private final Material offlineMaterial = Material.REDSTONE_BLOCK;
@@ -26,8 +27,9 @@ public enum ServerIcons {
 
     private boolean shown;
 
-    ServerIcons(String name, Material onlineMaterial, boolean shown) {
+    ServerIcons(String name, String displayName, Material onlineMaterial, boolean shown) {
         this.name = name;
+        this.displayName = displayName;
         this.onlineMaterial = onlineMaterial;
         this.shown = shown;
     }
@@ -55,7 +57,7 @@ public enum ServerIcons {
         ItemStack itemStack = new ItemStack(material);
         ItemMeta meta = itemStack.getItemMeta();
 
-        meta.setDisplayName(getName());
+        meta.setDisplayName(getDisplayName());
 
         itemStack.setItemMeta(meta);
         itemStack.setAmount(1);

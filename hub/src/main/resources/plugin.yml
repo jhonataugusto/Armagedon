@@ -4,8 +4,3 @@ version: dev-1.0
 author: Kinoques
 description: Hub Bukkit Plugin based on [game, game-bukkit, game-*]
 website: www.armagedon.com.br
-
-commands:
-  hub:
-    description: Teleports player to the hub.
-    usage: /<command>

@@ -1,5 +1,8 @@
 package br.com.practice.arena.storage;
 
+import br.com.core.enums.game.GameMode;
+import br.com.core.enums.map.Maps;
+import br.com.practice.Practice;
 import br.com.practice.arena.Arena;
 import br.com.practice.arena.stage.ArenaStage;
 import br.com.core.data.DuelData;
@@ -7,14 +10,16 @@ import br.com.practice.game.Game;
 import br.com.practice.util.file.CompressionUtil;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static br.com.practice.util.scheduler.SchedulerUtils.sync;
+import static br.com.practice.util.scheduler.SchedulerUtils.*;
 
 @Getter
 public class ArenaStorage {
@@ -33,10 +38,11 @@ public class ArenaStorage {
         }
 
         sync(() -> {
-            getArenas().remove(arenaId);
-
             Bukkit.unloadWorld(arenaId, false);
+        });
 
+        async(() -> {
+            getArenas().remove(arenaId);
             CompressionUtil.delete(arena.getMap().getDirectory());
         });
     }
@@ -57,20 +63,58 @@ public class ArenaStorage {
 
         Arena arena = findFreeArena(game, data.getMapName());
 
-        int totalArenasFromGameMapSize = getArenasFromGameMap(game, data.getMapName()).size();
-        int freeArenasSize = getFreeArenasFromGameMap(game, data.getMapName()).size();
+        int totalArenas = getArenasFromGameMap(game, data.getMapName()).size();
+        int freeArenas = getFreeArenasFromGameMap(game, data.getMapName()).size();
 
-        if (freeArenasSize <= totalArenasFromGameMapSize * 0.3) {
+        delay(() -> {
 
-            int doubleFreeArena = freeArenasSize * 2;
+            if (freeArenas <= totalArenas * 0.5) {
 
-            for (int i = 0; i <= doubleFreeArena; i++) {
-                game.createArena(data);
+                int freeArenasMultiplier = freeArenas * 2;
+
+                int i = 0;
+                while (i <= freeArenasMultiplier) {
+                    game.createArena(data);
+                    i++;
+                }
+
+                System.out.println("Foram carregadas " + i + " novas arenas do mapa " + data.getMapName());
+                Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(ChatColor.YELLOW + "\nNovas arenas estão sendo geradas! O servidor pode sofrer um pequeno lag, mas voltará ao normal em breve. Obrigado pela compreensão!\n"));
             }
 
-        }
+        }, 10);
+
 
         return arena;
+    }
+
+    public void unloadUnusedArenaMaps() {
+        for (Maps map : Maps.values()) {
+            GameMode mode = map.getMode();
+            Game game = Practice.getInstance().getGameStorage().getGame(mode);
+
+            Map<String, Arena> freeArenas = getFreeArenasFromGameMap(game, map.getName());
+            Map<String, Arena> totalArenas = getArenasFromGameMap(game, map.getName());
+
+            int freeArenasSize = freeArenas.size();
+            int totalArenasSize = totalArenas.size();
+
+            if (freeArenasSize >= totalArenasSize / 2 && freeArenasSize > 0) {
+                int reducedFreeArenasSize = freeArenasSize / 2;
+
+                int i = 0;
+                Iterator<Arena> iterator = freeArenas.values().iterator();
+                while (iterator.hasNext() && i < reducedFreeArenasSize) {
+                    Arena arena = iterator.next();
+
+                    unload(arena.getId());
+                    iterator.remove();
+                    i++;
+                }
+
+                System.out.println("Foram descarregadas " + i + " arenas do mapa" + map.getDisplayName());
+            }
+        }
     }
 
     private Arena findFreeArena(Game game) {

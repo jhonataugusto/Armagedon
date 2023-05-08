@@ -1,5 +1,6 @@
 package br.com.practice.gui.statistics;
 
+import br.com.core.Core;
 import br.com.core.enums.game.GameMode;
 import br.com.practice.user.User;
 import org.bukkit.Bukkit;
@@ -12,10 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class PostMatchGUI implements InventoryHolder {
 
@@ -24,8 +22,17 @@ public class PostMatchGUI implements InventoryHolder {
     public PostMatchGUI(User user) {
         this.inventory = Bukkit.createInventory(user.getPlayer(), 45, user.getPlayer().getName());
 
+        ItemStack potion = new ItemStack(Material.POTION, 1, (short) 16421);
+
+        int potionAmount = 0;
+
         for (int i = 0; i < user.getPlayer().getInventory().getContents().length; i++) {
-            inventory.setItem(i, user.getPlayer().getInventory().getContents()[i]);
+            ItemStack item = user.getPlayer().getInventory().getContents()[i];
+            inventory.setItem(i, item);
+
+            if (user.getArena().getGame().getMode() == GameMode.NODEBUFF && item != null && item.getType() == potion.getType() && item.getDurability() == potion.getDurability()) {
+                potionAmount += item.getAmount();
+            }
         }
 
         Iterator<ItemStack> iterator = Arrays.stream(user.getPlayer().getInventory().getArmorContents()).iterator();
@@ -38,8 +45,6 @@ public class PostMatchGUI implements InventoryHolder {
         }
 
         if (user.getArena().getGame().getMode() == GameMode.NODEBUFF) {
-
-            ItemStack potion = new ItemStack(Material.POTION, 1, (short) 8229);
             ItemMeta potionMeta = potion.getItemMeta();
 
             potionMeta.setDisplayName("Estatísticas com as poções");
@@ -50,6 +55,7 @@ public class PostMatchGUI implements InventoryHolder {
             DecimalFormat df = new DecimalFormat("0.0%");
             String accuracyAveragePercentage = df.format(user.getAverageAccuracyPotions());
 
+            potionLore.add(ChatColor.WHITE + ("Poções totais: " + potionAmount));
             potionLore.add(ChatColor.WHITE + ("Poções jogadas: " + user.getThrowedPotions()));
             potionLore.add(ChatColor.WHITE + ("Poções erradas ao jogar: " + user.getMissedPotions()));
             potionLore.add(ChatColor.WHITE + ("Poções roubadas: " + user.getStealedPotions()));
@@ -74,10 +80,12 @@ public class PostMatchGUI implements InventoryHolder {
         lorePaper.add(ChatColor.WHITE + ("Hits críticos: " + user.getCriticalHits()));
         lorePaper.add(ChatColor.WHITE + ("Hits bloqueados: " + user.getBlockedHits()));
         lorePaper.add(ChatColor.WHITE + ("Combo máximo: " + user.getMaxCombo()));
-        lorePaper.add(ChatColor.WHITE + ("Vida: " + user.getPlayer().getHealth()));
+        lorePaper.add(ChatColor.WHITE + "Vida: " + String.format("%,d", Math.round(user.getPlayer().getHealth())));
 
         lorePaper.add(ChatColor.WHITE + ("CPS máximo: " + user.getMaxClicksPerSecond()));
         lorePaper.add(ChatColor.WHITE + ("Range máximo: " + user.getMaxRange()));
+        lorePaper.add("");
+        lorePaper.add(ChatColor.WHITE + "Data e hora: " + Core.DATE_FORMAT.format(new Date(System.currentTimeMillis())));
 
         meta.setLore(lorePaper);
         paper.setItemMeta(meta);

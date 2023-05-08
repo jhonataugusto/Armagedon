@@ -8,16 +8,18 @@ import java.util.List;
 
 @Getter
 public enum Server {
-    LOBBY("lobby"),
-    LOBBY_PRACTICE("lobby_practice"),
-    PRACTICE("practice"),
-    UNKOWN("unkown");
+    LOBBY("lobby", "Lobby"),
+    LOBBY_PRACTICE("lobby_practice", "Lobby Practice"),
+    PRACTICE("practice", "Practice"),
+    UNKOWN("unkown", "Desconhecido");
 
     private final String name;
+    private final String displayName;
     public HashMap<Server, List<Server>> pairs;
 
-    Server(String name) {
+    Server(String name, String displayName) {
         this.name = name;
+        this.displayName = displayName;
     }
 
     static {

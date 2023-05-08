@@ -1,6 +1,5 @@
 package br.com.practice.listener;
 
-import br.com.core.account.Account;
 import br.com.core.crud.redis.DuelContextRedisCRUD;
 import br.com.core.data.DuelData;
 import br.com.practice.Practice;
@@ -12,6 +11,7 @@ import br.com.practice.events.arena.state.ArenaEndEvent;
 import br.com.practice.events.arena.pulse.ArenaPulseEvent;
 import br.com.practice.events.arena.state.ArenaStartEvent;
 import br.com.practice.events.arena.statistic.ArenaWinEvent;
+import br.com.practice.events.spectator.SpectatorLeaveArenaEvent;
 import br.com.practice.events.user.UserExitArenaBoundsEvent;
 import br.com.practice.events.user.UserDeathEvent;
 import br.com.practice.user.User;
@@ -44,11 +44,13 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
+import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static br.com.practice.util.scheduler.SchedulerUtils.*;
 
@@ -56,6 +58,8 @@ public class ArenaListener implements Listener {
 
     private static final double DECIMAL_NERF_DAMAGE_PER_CLICK = 0.5;
     private static final double DECIMAL_NERF_DAMAGE_PER_RANGE = 0.7;
+
+    private static long REMOVE_UNUSED_ARENAS_DELAY = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1);
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerDamageArena(EntityDamageByEntityEvent event) {
@@ -191,6 +195,17 @@ public class ArenaListener implements Listener {
                 members.setClicksPerSecond(0);
             });
         });
+
+        if (System.currentTimeMillis() > REMOVE_UNUSED_ARENAS_DELAY) {
+            Practice.getInstance().getArenaStorage().unloadUnusedArenaMaps();
+            REMOVE_UNUSED_ARENAS_DELAY = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(5);
+        }
+    }
+
+    @EventHandler
+    public void onWorldInit(WorldInitEvent event) {
+        World world = event.getWorld();
+        world.setKeepSpawnInMemory(false);
     }
 
     @EventHandler
@@ -238,6 +253,11 @@ public class ArenaListener implements Listener {
         Arena arena = user.getArena();
 
         TagUtil.unloadTag(user.getPlayer());
+
+        if (user.getArena().getSpectators().contains(user)) {
+            Practice.getInstance().getServer().getPluginManager().callEvent(new SpectatorLeaveArenaEvent(arena, user));
+            return;
+        }
 
         UserDeathEvent userDeathEvent = new UserDeathEvent(arena, user, user.getLastDamager(), user.isLastMember());
         Practice.getInstance().getServer().getPluginManager().callEvent(userDeathEvent);
@@ -390,6 +410,8 @@ public class ArenaListener implements Listener {
 
         });
 
+        DuelData data = event.getArena().getData();
+
         for (Player player : event.getArena().getWorld().getPlayers()) {
 
             User user = User.fetch(player.getUniqueId());
@@ -397,10 +419,6 @@ public class ArenaListener implements Listener {
             if (user == null) {
                 continue;
             }
-
-            Account account = Account.fetch(user.getUuid());
-
-            DuelData data = DuelContextRedisCRUD.findByUuid(UUID.fromString(account.getData().getCurrentDuelContextUuid()));
 
             if (data == null) {
                 continue;
@@ -467,9 +485,8 @@ public class ArenaListener implements Listener {
                 arena.getGame().handleQuit(members);
             });
 
-            arena.getData().getSpectators().forEach(uuid -> {
-                User user = User.fetch(uuid);
-                user.getArena().getGame().handleQuit(user);
+            arena.getSpectators().forEach(spectators -> {
+                arena.getGame().handleQuit(spectators);
             });
 
             arena.reset();

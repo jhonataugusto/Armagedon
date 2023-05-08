@@ -48,7 +48,6 @@ public class SpectatorListener implements Listener {
 
         event.getArena().getSpectators().add(event.getSpectator());
         event.getArena().handleScoreboard(event.getSpectator());
-
     }
 
     @EventHandler

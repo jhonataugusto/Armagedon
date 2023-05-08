@@ -17,9 +17,9 @@ import java.util.logging.Logger;
 public class Core {
     public static final String SERVER_NAME = System.getProperty("server_name", "Armagedon");
     public static final String SERVER_VERSION = System.getProperty("server_version", "1.0");
-    public static final String SERVER_WEBSITE = System.getProperty("server_website", "armagedon.com.br");
+    public static final String SERVER_WEBSITE = System.getProperty("server_website", "armagedon.games");
     public static final String SERVER_DISCORD = System.getProperty("server_discord", "discord.io/armagedon");
-    public static final String SERVER_STORE = System.getProperty("server_store", "loja.armagedon.com.br");
+    public static final String SERVER_STORE = System.getProperty("server_store", "loja.armagedon.games");
     public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###,###,###,###.##");
     public static final DecimalFormat SIMPLE_DECIMAL_FORMAT = build();
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm");

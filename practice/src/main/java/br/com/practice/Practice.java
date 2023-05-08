@@ -12,11 +12,16 @@ import co.aikar.commands.BukkitCommandManager;
 import fr.minuskube.inv.InventoryManager;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.reflections.Reflections;
 
 import java.io.File;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -43,6 +48,7 @@ public class Practice extends JavaPlugin {
         super.onEnable();
 
         deleteUncachedArenas();
+
 
         commandManager = new BukkitCommandManager(this);
         registerCommands();

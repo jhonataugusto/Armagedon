@@ -1,27 +1,22 @@
 package br.com.practice.listener;
 
-import br.com.core.crud.redis.DuelContextRedisCRUD;
+
 import br.com.practice.Practice;
-import br.com.core.account.Account;
 import br.com.practice.arena.Arena;
 import br.com.core.data.DuelData;
 import br.com.core.enums.game.GameMode;
 import br.com.practice.game.Game;
 import br.com.practice.spectator.Spectator;
 import br.com.practice.user.User;
-import br.com.practice.util.tag.TagUtil;
+
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static br.com.practice.util.scheduler.SchedulerUtils.*;
 
@@ -77,6 +72,7 @@ public class PlayerListener implements Listener {
                 } else {
 
                     duel.setArenaId(newArena.getId());
+                    duel.saveData();
                     newArena.setData(duel);
                     newArena.handleJoin(user);
                 }

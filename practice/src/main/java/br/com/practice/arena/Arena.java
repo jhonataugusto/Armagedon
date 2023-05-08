@@ -1,6 +1,7 @@
 package br.com.practice.arena;
 
 import br.com.core.Core;
+import br.com.core.crud.redis.DuelContextRedisCRUD;
 import br.com.practice.arena.map.ArenaMap;
 import br.com.practice.arena.stage.ArenaStage;
 import br.com.practice.arena.team.ArenaTeam;
@@ -200,6 +201,12 @@ public class Arena {
                                 }
                                 scoreboardContents.add(user2.getTeam().getColor() + "Ping: §r" + user2.getPing());
                                 scoreboardContents.add("");
+
+                                if (getSpectators().size() > 0) {
+                                    scoreboardContents.add("Assistindo: " + ChatColor.YELLOW + getSpectators().size());
+                                    scoreboardContents.add("");
+                                }
+
                                 scoreboardContents.add(ChatColor.WHITE + Core.SERVER_WEBSITE);
 
                                 return scoreboardContents;
@@ -219,7 +226,8 @@ public class Arena {
                                         "",
                                         ChatColor.RED + "Restantes: §r" + teamRed.size(),
                                         ChatColor.RED + "Media ping: §r" + avgPingRed + "ms",
-                                        ""
+                                        "",
+                                        "Assistindo:" + getSpectators().size()
                                 );
                             }
 
@@ -257,6 +265,7 @@ public class Arena {
     }
 
     public void reset() {
+        DuelContextRedisCRUD.delete(this.getData().getUuid());
         setData(null);
         setStage(ArenaStage.WAITING);
         setCurrentTime(0L);

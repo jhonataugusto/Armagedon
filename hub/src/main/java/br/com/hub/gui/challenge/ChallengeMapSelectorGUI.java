@@ -1,12 +1,9 @@
 package br.com.hub.gui.challenge;
 
-import br.com.core.crud.redis.DuelContextRedisCRUD;
-import br.com.core.data.DuelData;
+
 import br.com.core.enums.game.GameMode;
 import br.com.hub.Hub;
-import br.com.hub.events.QueueMatchEvent;
 import br.com.hub.icons.MapIcons;
-import br.com.hub.lobby.practice.queue.properties.DuelProperties;
 import br.com.hub.user.User;
 import br.com.hub.user.request.DuelRequest;
 import fr.minuskube.inv.ClickableItem;
@@ -16,8 +13,6 @@ import fr.minuskube.inv.content.InventoryProvider;
 import fr.minuskube.inv.content.SlotPos;
 import lombok.Getter;
 import lombok.Setter;
-import net.citizensnpcs.npc.ai.speech.Chat;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;

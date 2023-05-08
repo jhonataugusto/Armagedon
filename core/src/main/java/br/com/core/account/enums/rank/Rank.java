@@ -22,7 +22,6 @@ public enum Rank {
     PREMIUM(12, "premium", "Premium", "[Premium]", "§d", true, BenefitLevel.ELITE, null, "elite"),
     SUPERIOR(13, "superior", "Superior", "[Superior]", "§5", true, BenefitLevel.SUPERIOR, null, "superior"),
 
-    HELPER(20, "helper", "Ajudante", "[Help]", "§a", false, null, StafferLevel.JUNIOR, "ajudante", "helper", "ajd", "help"),
     TRIAL_MODERATOR(21, "trial_moderator", "Trial Mod", "[TrialMod]", "§d", false, null, StafferLevel.JUNIOR, "trialmod", "trial"),
     MODERATOR(22, "moderator", "Moderador", "[Mod]", "§5", false, null, StafferLevel.MID, "mod", "moderator", "moderador"),
     SENIOR_MODERATOR(23, "senior_moderator", "Senior Mod", "[SrMod]", "§5", false, null, StafferLevel.MID, "srmod", "modplus", "seniormod", "mod+"),
@@ -32,15 +31,15 @@ public enum Rank {
     OWNER(27, "owner", "Dono", "[Dono]", "§4", false, null, StafferLevel.EXECUTIVE, "dono", "owner", "rei", "chefia"),
     DEVELOPER(28, "developer", "Desenvolvedor", "[Dev]", "§b", false, null, StafferLevel.EXECUTIVE, "desenvolvedor", "dev", "developer", "verdadeirodono");
 
-    private int id;
-    private String name;
-    private String displayName;
-    private String chatDisplay;
-    private String color;
-    private boolean partner;
-    private BenefitLevel benefitLevel;
-    private StafferLevel stafferLevel;
-    private String[] aliases;
+    private final int id;
+    private final String name;
+    private final String displayName;
+    private final String chatDisplay;
+    private final String color;
+    private final boolean partner;
+    private final BenefitLevel benefitLevel;
+    private final StafferLevel stafferLevel;
+    private final String[] aliases;
 
     Rank(int id, String name, String displayName, String chatDisplay, String color, boolean partner, BenefitLevel benefitLevel, StafferLevel stafferLevel, String... aliases) {
         this.id = id;
@@ -52,9 +51,6 @@ public enum Rank {
         this.benefitLevel = benefitLevel;
         this.stafferLevel = stafferLevel;
         this.aliases = aliases;
-    }
-
-    private Rank() {
     }
 
     public static final Rank[] values;
@@ -103,7 +99,7 @@ public enum Rank {
     }
 
     public enum BenefitLevel {
-        BASIC, PREMIUM, ELITE, SUPERIOR;
+        BASIC, PREMIUM, ELITE, SUPERIOR
     }
 
     public enum StafferLevel {

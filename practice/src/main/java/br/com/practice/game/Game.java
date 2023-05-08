@@ -14,11 +14,9 @@ import br.com.practice.util.bungee.BungeeUtils;
 import br.com.practice.util.file.CompressionUtil;
 import br.com.practice.util.serializer.SerializerUtils;
 import br.com.practice.util.tag.TagUtil;
-import br.com.practice.util.world.VoidGenerator;
 import br.com.practice.util.world.WorldHandler;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
@@ -173,7 +171,6 @@ public abstract class Game implements Listener {
     }
 
     public void createArena(DuelData data) {
-
         sync(() -> {
             String mapName = data == null ? Maps.getRandomMap(getMode()).getName() : data.getMapName();
             ArenaMap map = new ArenaMap(mapName, getPresetMapDirectory(), getArenaDirectory());
@@ -184,8 +181,7 @@ public abstract class Game implements Listener {
 
             WorldCreator creator = new WorldCreator(map.getDirectory().getPath());
             creator.generateStructures(false);
-            creator.generator(VoidGenerator.getInstance());
-            World world = Bukkit.createWorld(creator);
+            World world = creator.createWorld();
             WorldHandler.adjust(world, map.getArea().getChunks(world));
             Arena arena = new Arena(this, world, map);
             getPlugin().getArenaStorage().load(arena);
