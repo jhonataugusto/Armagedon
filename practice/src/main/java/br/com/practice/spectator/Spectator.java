@@ -16,7 +16,6 @@ import static br.com.practice.util.scheduler.SchedulerUtils.sync;
 public class Spectator {
 
     public static void spectate(Player spectator, Arena arenaSpectated) {
-
         User userSpectator = User.fetch(spectator.getUniqueId());
 
         Bukkit.getServer().getPluginManager().callEvent(new SpectatorEnterArenaEvent(arenaSpectated, userSpectator));

@@ -12,16 +12,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
 public class PlayerChooseGUI implements InventoryProvider {
 
-    private List<UUID> users;
+    private Set<UUID> users;
     private static final String ID = "PLAYER_CHOOSE_GUI";
     private static final int MAX_ROWS = 3;
     private static final int MAX_COLUMNS = 9;
@@ -38,7 +35,7 @@ public class PlayerChooseGUI implements InventoryProvider {
             .title("Escolha um jogador")
             .build();
 
-    public PlayerChooseGUI(List<UUID> users, DuelData data) {
+    public PlayerChooseGUI(Set<UUID> users, DuelData data) {
         this.users = users;
         this.data = data;
     }
@@ -51,7 +48,7 @@ public class PlayerChooseGUI implements InventoryProvider {
         Map<UUID, ItemStack> userItemStackMap = new HashMap<>();
 
         for (UUID userUuid : users) {
-            String[] userNameAndUuid = data.getNameAndUuidKey(userUuid.toString()).split("_");
+            String[] userNameAndUuid = data.getNameAndUuidKey(userUuid.toString()).split(DuelData.REGEX_NAME_UUID_SEPARATOR);
 
             if (userNameAndUuid.length == 0) {
                 return;

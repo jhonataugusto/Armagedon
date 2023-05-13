@@ -32,7 +32,7 @@ public class User {
     private int throwedPotions, missedPotions, stealedPotions, successfulPotions;
     private double sumAccuracyPotions, averageAccuracyPotions;
 
-    private double range, maxRange;
+    private double range, sumOfRanges, averageRange;
     private double clicksPerSecond, maxClicksPerSecond;
 
     public User(UUID uuid, Player player) {
@@ -74,7 +74,7 @@ public class User {
             return false;
         }
 
-        return this.getArena().getSpectators().contains(this);
+        return this.getArena().getCurrentSpectators().contains(this);
     }
 
     public Inventory createPostMatchInventory() {

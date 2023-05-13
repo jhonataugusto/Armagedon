@@ -1,6 +1,5 @@
 package br.com.practice.game;
 
-import br.com.core.Core;
 import br.com.core.data.AccountData;
 import br.com.practice.Practice;
 import br.com.practice.arena.Arena;
@@ -37,12 +36,14 @@ public abstract class Game implements Listener {
     private final Integer MIN_ARENAS;
     private final String presetMapDirectory;
     private final File arenaDirectory = new File("arenas");
+    private boolean allowedBuild;
 
     public Game(Practice plugin, Integer minArenas, String presetMapDirectory) {
         this.mode = GameMode.getByName(this.getClass().getSimpleName());
         this.plugin = plugin;
         this.MIN_ARENAS = minArenas;
         this.presetMapDirectory = presetMapDirectory;
+        this.allowedBuild = false;
 
         getPlugin().getServer().getPluginManager().registerEvents(this, Practice.getInstance());
     }
@@ -58,10 +59,7 @@ public abstract class Game implements Listener {
 
             for (int i = 0; i <= MIN_ARENAS; i++) {
 
-                DuelData data = new DuelData();
-                data.setMapName(map.getName());
-
-                createArena(data);
+                createArena(map.getName());
             }
         }
     }
@@ -155,7 +153,7 @@ public abstract class Game implements Listener {
 
         Arena arena = user.getArena();
 
-        arena.getData().getInventories().put(user.getAccount().getName() + "_" + user.getAccount().getUuid(), base64);
+        arena.getData().getInventories().put(user.getAccount().getName() + DuelData.REGEX_NAME_UUID_SEPARATOR + user.getAccount().getUuid(), base64);
         arena.getData().saveData();
 
         user.setHits(0);
@@ -167,12 +165,14 @@ public abstract class Game implements Listener {
         user.setAverageAccuracyPotions(0);
         user.setMaxClicksPerSecond(0);
         user.setRange(0);
-        user.setMaxRange(0);
+        user.setSumOfRanges(0);
     }
 
     public void createArena(DuelData data) {
         sync(() -> {
+
             String mapName = data == null ? Maps.getRandomMap(getMode()).getName() : data.getMapName();
+
             ArenaMap map = new ArenaMap(mapName, getPresetMapDirectory(), getArenaDirectory());
 
             if (!map.copyTo(map.getDirectory())) {
@@ -191,4 +191,23 @@ public abstract class Game implements Listener {
         });
     }
 
+    public void createArena(String mapName) {
+        sync(() -> {
+            ArenaMap map = new ArenaMap(mapName, getPresetMapDirectory(), getArenaDirectory());
+
+            if (!map.copyTo(map.getDirectory())) {
+                throw new RuntimeException("O mapa não foi copiado a tempo.");
+            }
+
+            WorldCreator creator = new WorldCreator(map.getDirectory().getPath());
+            creator.generateStructures(false);
+            World world = creator.createWorld();
+            WorldHandler.adjust(world, map.getArea().getChunks(world));
+            Arena arena = new Arena(this, world, map);
+            getPlugin().getArenaStorage().load(arena);
+            world.setMetadata("arena", new FixedMetadataValue(Practice.getInstance(), arena));
+
+            Practice.getInstance().getArenaStorage().getArenas().put(arena.getId(), arena);
+        });
+    }
 }

@@ -20,6 +20,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -27,7 +28,7 @@ import java.util.UUID;
 public class PlayerStatisticGUI implements InventoryProvider {
 
     private UUID uuid;
-    private List<UUID> users;
+    private Set<UUID> users;
     private static final String ID = "PLAYER_INVENTORY_GUI";
     private static final int MAX_ROWS = 5;
     private static final int MAX_COLUMNS = 9;
@@ -38,12 +39,12 @@ public class PlayerStatisticGUI implements InventoryProvider {
 
     public SmartInventory INVENTORY;
 
-    public PlayerStatisticGUI(DuelData data, UUID uuid, List<UUID> users) {
+    public PlayerStatisticGUI(DuelData data, UUID uuid, Set<UUID> users) {
         this.data = data;
         this.uuid = uuid;
         this.users = users;
 
-        String namePlayer = data.getNameAndUuidKey(uuid.toString()).split("_")[0];
+        String namePlayer = data.getNameAndUuidKey(uuid.toString()).split(DuelData.REGEX_NAME_UUID_SEPARATOR)[0];
 
         this.INVENTORY = SmartInventory.builder()
                 .id(ID)
@@ -65,7 +66,7 @@ public class PlayerStatisticGUI implements InventoryProvider {
 
         Inventory inventory = SerializerUtils.deserializeInventory(data.getInventories().get(key), null);
 
-        if(inventory == null) {
+        if (inventory == null) {
             return;
         }
 
@@ -87,7 +88,7 @@ public class PlayerStatisticGUI implements InventoryProvider {
 
         if (data.is1v1()) {
 
-            List<UUID> teamOpponent;
+            Set<UUID> teamOpponent;
 
             if (data.getTeam1().contains(uuid)) {
                 teamOpponent = data.getTeam2();
@@ -102,7 +103,7 @@ public class PlayerStatisticGUI implements InventoryProvider {
             arrow.setItemMeta(arrowMeta);
 
             contents.set(lastPos, ClickableItem.of(arrow, event -> {
-                PlayerStatisticGUI playerStatisticGUI = new PlayerStatisticGUI(data, teamOpponent.get(0), teamOpponent);
+                PlayerStatisticGUI playerStatisticGUI = new PlayerStatisticGUI(data, teamOpponent.stream().findFirst().get(), teamOpponent);
                 player.updateInventory();
                 playerStatisticGUI.getINVENTORY().open(player);
             }));

@@ -16,9 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -31,8 +29,6 @@ import java.util.List;
 import java.util.UUID;
 
 public class HubListener implements Listener {
-
-
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
         event.setJoinMessage(null);
@@ -57,23 +53,12 @@ public class HubListener implements Listener {
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.SLIME_BLOCK) {
-            Vector vector = Hub.getInstance().getLobby().getSpawn().clone().getDirection().multiply(3).setY(0.66);
+            Vector vector = event.getPlayer().getEyeLocation().getDirection().clone().multiply(3).setY(0.66);
 
             Player player = event.getPlayer();
 
             player.setVelocity(vector);
             player.playSound(player.getLocation(), Sound.LEVEL_UP, 2.5F, 2.5F);
-        }
-    }
-
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onInteractEvent(PlayerInteractEvent event) {
-        ItemStack item = event.getItem();
-
-        if (item == null || item.getType() == Material.AIR || item.getAmount() == 0) {
-            event.setCancelled(true);
-            return;
         }
     }
 
@@ -84,7 +69,7 @@ public class HubListener implements Listener {
 
     @EventHandler
     public void onWeatherChange(WeatherChangeEvent event) {
-        if(event.toWeatherState()) {
+        if (event.toWeatherState()) {
             event.setCancelled(true);
         }
     }

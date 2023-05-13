@@ -1,9 +1,7 @@
-package br.com.hub.lobby.practice.commands;
+package br.com.hub.lobby.practice.commands.duel;
 
 import br.com.core.crud.redis.DuelContextRedisCRUD;
 import br.com.core.data.DuelData;
-import br.com.core.enums.game.GameMode;
-import br.com.core.enums.map.Maps;
 import br.com.core.enums.server.Server;
 import br.com.hub.user.User;
 import br.com.hub.user.request.DuelRequest;
@@ -20,10 +18,9 @@ import java.util.UUID;
 
 import static br.com.hub.util.scheduler.SchedulerUtils.async;
 
-@CommandAlias("acceptDuel|acceptMatch|acceptX1|acceptChallenge|acceptDuelRequest")
-@Description("Aceita um duelo de um jogador")
-public class AcceptDuelRequestCommand extends BaseCommand {
-
+@CommandAlias("denyduel|denyMatch|denyX1|denyChallenge|denyDuelRequest")
+@Description("Recusa um duelo de um jogador")
+public class DenyDuelRequestCommand extends BaseCommand {
 
     @Default
     public void onAccept(Player requested, String challengerUuid, String requestId) {
@@ -48,31 +45,21 @@ public class AcceptDuelRequestCommand extends BaseCommand {
             return;
         }
 
-        if(requestedUser.getRequestById(requestId).hasExpired()) {
+        if (requestedUser.getRequestById(requestId).hasExpired()) {
             requested.sendMessage(ChatColor.RED + "Esse duelo já expirou");
             return;
         }
 
         DuelRequest request = requestedUser.getRequestById(requestId);
 
-        DuelData duel = new DuelData();
+        request.setExpiration(-1L);
 
-        duel.getTeam1().add(requested.getUniqueId());
-        duel.getTeam2().add(challenger.getUniqueId());
+        challengerUser.getPlayer().sendMessage(" ");
+        challengerUser.getPlayer().sendMessage(ChatColor.RED + requestedUser.getName() + " recusou a sua solicitação de duelo.");
+        challengerUser.getPlayer().sendMessage(" ");
 
-        duel.setCustom(true);
-        duel.setRanked(false);
-        duel.setGameModeName(request.getMode().getName());
-        duel.setMapName(request.getMapName());
-
-        DuelContextRedisCRUD.save(duel);
-
-        requestedUser.getDuelRequests().remove(request);
-
-        async(() -> {
-            BungeeUtils.connect(requested.getPlayer(), Server.PRACTICE);
-            BungeeUtils.connect(challenger.getPlayer(), Server.PRACTICE);
-        });
+        requestedUser.getPlayer().sendMessage(" ");
+        requestedUser.getPlayer().sendMessage(ChatColor.RED + "Você recusou a solicitação de " + challengerUser.getName());
+        requestedUser.getPlayer().sendMessage(" ");
     }
-
 }

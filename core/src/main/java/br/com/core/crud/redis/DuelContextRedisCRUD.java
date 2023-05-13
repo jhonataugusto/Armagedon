@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Interface da classe {@link DuelData} para atualizar,adicionar,remover dados do Redis.
+ */
 public class DuelContextRedisCRUD {
 
     private static final JedisPool JEDIS_POOL = Core.JEDIS_POOL;
@@ -41,5 +44,11 @@ public class DuelContextRedisCRUD {
             List<String> jsonList = jedis.hvals(DUELS_CACHE);
             return jsonList.stream().map(DuelData::fromJson).collect(Collectors.toList());
         }
+    }
+
+    public static void refreshDuels() {
+        DuelContextRedisCRUD.getDuels().forEach(duel -> {
+            DuelContextRedisCRUD.delete(duel.getUuid());
+        });
     }
 }

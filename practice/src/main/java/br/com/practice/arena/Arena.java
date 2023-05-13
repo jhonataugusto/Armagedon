@@ -9,9 +9,7 @@ import br.com.core.data.DuelData;
 import br.com.practice.events.arena.state.ArenaChangeStateEvent;
 import br.com.practice.game.Game;
 import br.com.practice.user.User;
-import br.com.practice.util.tag.TagUtil;
 import dev.jcsoftware.jscoreboards.JGlobalScoreboard;
-import dev.jcsoftware.jscoreboards.JPerPlayerScoreboard;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
@@ -37,7 +35,7 @@ public class Arena {
     private World world;
     private ArenaMap map;
     private ArenaTeam[] teams;
-    private List<User> spectators;
+    private Set<User> currentSpectators;
     private JGlobalScoreboard gameScoreboard;
 
     public Arena(Game game, World world, ArenaMap arenaMap) {
@@ -49,7 +47,7 @@ public class Arena {
         ArenaTeam blueTeam = new ArenaTeam("Azul", ChatColor.BLUE, this);
 
         this.teams = new ArenaTeam[]{redTeam, blueTeam};
-        this.spectators = new ArrayList<>();
+        this.currentSpectators = new HashSet<>();
         createScoreboard();
     }
 
@@ -74,7 +72,6 @@ public class Arena {
         return getGame().getMode() + "-" + getMap().getId();
     }
 
-    //TODO: PLAYERS ESTÃO NASCENDO NO MESMO LOCAL (TALVEZ PROBLEMA DE SYNC)
     public void handleJoin(User user) {
 
         if (!(getData().getTeam1().contains(user.getUuid()) || getData().getTeam2().contains(user.getUuid()))) {
@@ -172,6 +169,9 @@ public class Arena {
                                 List<String> scoreboardContents = new ArrayList<>();
 
                                 scoreboardContents.add("");
+                                scoreboardContents.add("Mapa: " + ChatColor.GRAY + this.getMap().getName());
+                                scoreboardContents.add("Arena: " + ChatColor.GRAY + this.getId());
+                                scoreboardContents.add("");
 
                                 if (user1.getClicksPerSecond() >= 16) {
                                     scoreboardContents.add(ChatColor.GREEN + user1.getName());
@@ -202,8 +202,8 @@ public class Arena {
                                 scoreboardContents.add(user2.getTeam().getColor() + "Ping: §r" + user2.getPing());
                                 scoreboardContents.add("");
 
-                                if (getSpectators().size() > 0) {
-                                    scoreboardContents.add("Assistindo: " + ChatColor.YELLOW + getSpectators().size());
+                                if (getCurrentSpectators().size() > 0) {
+                                    scoreboardContents.add("Assistindo: " + ChatColor.YELLOW + getCurrentSpectators().size());
                                     scoreboardContents.add("");
                                 }
 
@@ -219,6 +219,9 @@ public class Arena {
 
                                 return Arrays.asList(
                                         "",
+                                        "Mapa: " + ChatColor.GRAY + this.getMap().getName(),
+                                        "Arena: " + ChatColor.GRAY + this.getDisplayArenaId(),
+                                        "",
                                         ChatColor.YELLOW + "Party Team",
                                         "",
                                         ChatColor.BLUE + "Restantes: §r" + teamBlue.size(),
@@ -227,7 +230,7 @@ public class Arena {
                                         ChatColor.RED + "Restantes: §r" + teamRed.size(),
                                         ChatColor.RED + "Media ping: §r" + avgPingRed + "ms",
                                         "",
-                                        "Assistindo:" + getSpectators().size()
+                                        "Assistindo:" + getCurrentSpectators().size()
                                 );
                             }
 
@@ -271,7 +274,9 @@ public class Arena {
         setCurrentTime(0L);
         getTeams().forEach(ArenaTeam::clear);
         getWorld().getEntities().forEach(Entity::remove);
-        getSpectators().clear();
+        getCurrentSpectators().clear();
+
+        //TODO: colocar rollback aqui
     }
 
     public String getId() {

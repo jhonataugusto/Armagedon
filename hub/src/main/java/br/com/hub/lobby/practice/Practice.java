@@ -45,6 +45,8 @@ public class Practice extends Lobby {
         border.setSize(450);
 
         queue = new Queue();
+
+        DuelContextRedisCRUD.refreshDuels();
     }
 
     @Override
@@ -69,9 +71,11 @@ public class Practice extends Lobby {
                                 return members.stream();
                             }).count();
 
+                    int totalPlayers = Bukkit.getOnlinePlayers().size() + playing;
+
                     return Arrays.asList(
                             "",
-                            "Online: " + ChatColor.AQUA + Bukkit.getOnlinePlayers().size(),
+                            "Online: " + ChatColor.AQUA + totalPlayers,
                             "Jogando: " + ChatColor.AQUA + playing,
                             "",
                             Core.SERVER_WEBSITE

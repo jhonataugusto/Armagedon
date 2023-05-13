@@ -15,6 +15,8 @@ public class MongoDB {
     private final String MONGO_DATABASE_NAME = Core.SERVER_NAME.toLowerCase();
     private final String DEFAULT_HOST = "localhost";
     private final int DEFAULT_PORT = 27017;
+    private final String DEFAULT_USERNAME = "username";
+    private final String DEFAULT_PASSWORD = "password";
     private File folder = new File("../database");
     private File file = new File(folder + "/mongo_properties.json");
     private String MONGO_URI = load();
@@ -33,14 +35,14 @@ public class MongoDB {
         } else {
             try {
                 file.createNewFile();
-                properties = new MongoProperties(DEFAULT_HOST, DEFAULT_PORT);
+                properties = new MongoProperties(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_USERNAME, DEFAULT_PASSWORD);
                 saveProperties();
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
         }
 
-        return this.MONGO_URI = "mongodb://" + properties.getHost() + ":" + properties.getPort();
+        return this.MONGO_URI = "mongodb://" + properties.getUsername() + ":" + properties.getPassword() + "@" + properties.getHost() + ":" + properties.getPort();
     }
 
     private void saveProperties() {

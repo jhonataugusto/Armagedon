@@ -15,6 +15,10 @@ import org.bson.conversions.Bson;
 
 import java.util.*;
 
+
+/**
+* Interface da classe {@link AccountData} para atualizar,adicionar,remover dados do MongoDB.
+* */
 public class AccountMongoCRUD {
 
     private static final String URI = Core.MONGODB.getMONGO_URI();

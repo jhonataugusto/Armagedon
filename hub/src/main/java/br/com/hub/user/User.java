@@ -4,7 +4,7 @@ import br.com.hub.Hub;
 import br.com.core.account.Account;
 import br.com.hub.lobby.Lobby;
 import br.com.hub.user.request.DuelRequest;
-import dev.jcsoftware.jscoreboards.JPerPlayerScoreboard;
+import dev.jcsoftware.jscoreboards.JGlobalScoreboard;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -23,7 +23,8 @@ public class User {
     private Player player;
     private Lobby lobby;
     private List<DuelRequest> duelRequests;
-    private JPerPlayerScoreboard scoreboard;
+    private JGlobalScoreboard scoreboard;
+    private boolean building = false;
 
     public User(UUID uuid) {
         account = new Account(uuid);
@@ -50,6 +51,7 @@ public class User {
     public DuelRequest getRequestById(String id) {
         return getDuelRequests().stream().filter(duelRequest -> duelRequest.getId().equalsIgnoreCase(id)).findFirst().orElse(null);
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

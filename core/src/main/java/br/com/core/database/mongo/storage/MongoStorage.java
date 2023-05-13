@@ -1,6 +1,7 @@
 package br.com.core.database.mongo.storage;
 
 import br.com.core.Core;
+import br.com.core.data.AccountData;
 import br.com.core.database.mongo.collections.CollectionProps;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -28,6 +29,11 @@ public class MongoStorage {
         }
     }
 
+    /**
+     * Verifica se uma coleção do mongoDB já existe.
+     * @params uma coleção registrada nas enums (caso queira registrar uma nova, vá em {@link CollectionProps} e registre de acordo com as demais.
+     * @return se a coleção existe ou não
+     * */
     private boolean collectionExists(CollectionProps collection) {
         try (MongoClient client = MongoClients.create(Core.MONGODB.getMONGO_URI())) {
             MongoIterable<String> collectionNames = client.getDatabase(MONGO_DATABASE_NAME).listCollectionNames();

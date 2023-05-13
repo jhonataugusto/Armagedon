@@ -1,7 +1,9 @@
 package br.com.bungee.listeners;
 
 import br.com.core.account.Account;
+import br.com.core.account.enums.preferences.Preference;
 import br.com.core.account.enums.rank.Rank;
+import br.com.core.data.object.PreferenceDAO;
 import br.com.core.enums.server.Server;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
@@ -55,6 +57,13 @@ public class ChatListener implements Listener {
             }
 
             if (!isCommand) {
+                Account targetAccount = Account.fetch(targetPlayer.getUniqueId());
+                PreferenceDAO preference = targetAccount.getData().getPreferenceByName(Preference.DISABLE_CHAT);
+
+                if (preference.isActive()) {
+                    return;
+                }
+
                 targetPlayer.sendMessage(message);
             } else {
 

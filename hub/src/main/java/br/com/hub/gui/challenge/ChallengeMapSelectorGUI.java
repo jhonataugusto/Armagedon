@@ -2,6 +2,7 @@ package br.com.hub.gui.challenge;
 
 
 import br.com.core.enums.game.GameMode;
+import br.com.core.enums.map.Maps;
 import br.com.hub.Hub;
 import br.com.hub.icons.MapIcons;
 import br.com.hub.user.User;
@@ -13,11 +14,14 @@ import fr.minuskube.inv.content.InventoryProvider;
 import fr.minuskube.inv.content.SlotPos;
 import lombok.Getter;
 import lombok.Setter;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+
+import java.util.List;
 
 import static br.com.hub.util.scheduler.SchedulerUtils.delay;
 
@@ -54,8 +58,14 @@ public class ChallengeMapSelectorGUI implements InventoryProvider {
         int row = 1;
         int column = 1;
 
-        for (MapIcons mapIcon : MapIcons.values()) {
+        List<Maps> mapsFromMode = Maps.getMapsFromMode(mode);
 
+        for (MapIcons mapIcon : MapIcons.values()) {
+            Maps map = Maps.getMap(mapIcon.getName());
+
+            if (!mapsFromMode.contains(map)) {
+                continue;
+            }
 
             SlotPos pos = new SlotPos(row, column);
 
@@ -83,19 +93,22 @@ public class ChallengeMapSelectorGUI implements InventoryProvider {
 
                 delay(() -> target.getDuelRequests().remove(duelRequest), 60 * 2);
 
-                TextComponent challengeMessageComponent = new TextComponent(ChatColor.YELLOW + player.getName() + ChatColor.GREEN + " te desafiou para um duelo " + ChatColor.YELLOW + mode.getName() + ChatColor.GREEN + " no mapa " + ChatColor.YELLOW + mapIcon.getName() + ChatColor.GREEN + ". Aceita o desafio?");
-                TextComponent challengeClickComponent = new TextComponent(ChatColor.GREEN + "Clique aqui para aceitar o duelo.");
-                String messageExpiresWarning = "§c(você tem 1 minuto para aceitar ou seu convite irá expirar)";
+                TextComponent challengeMessageComponent = new TextComponent(ChatColor.GREEN + "✉" + ChatColor.YELLOW + player.getName() + ChatColor.GREEN + " te desafiou para um duelo " + ChatColor.YELLOW + mode.getName() + ChatColor.GREEN + " no mapa " + ChatColor.YELLOW + mapIcon.getName() + ChatColor.GREEN);
+                TextComponent challengeAcceptComponent = new TextComponent(ChatColor.GREEN + "§lACEITAR");
+                TextComponent separatorComponent = new TextComponent(ChatColor.WHITE + " | ");
+                TextComponent challengeDenyComponent = new TextComponent(ChatColor.RED + "§lRECUSAR");
+                BaseComponent[] challengeComponent = new BaseComponent[]{challengeAcceptComponent, separatorComponent, challengeDenyComponent};
 
-                challengeClickComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/acceptduel " + player.getUniqueId() + " " + duelRequest.getId()));
+                challengeAcceptComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/acceptduel " + player.getUniqueId() + " " + duelRequest.getId()));
+                challengeDenyComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/denyduel " + player.getUniqueId() + " " + duelRequest.getId()));
 
                 target.getPlayer().sendMessage("");
                 target.getPlayer().spigot().sendMessage(challengeMessageComponent);
-                target.getPlayer().spigot().sendMessage(challengeClickComponent);
-                target.getPlayer().sendMessage(messageExpiresWarning);
+                target.getPlayer().sendMessage("");
+                target.getPlayer().spigot().sendMessage(challengeComponent);
                 target.getPlayer().sendMessage("");
 
-                player.sendMessage(ChatColor.GREEN + "✉ §aVocê enviou uma solicitação de duelo para §e" + target.getName() + "§a no modo §e" + mode.getName() + "§a com o mapa " + mapIcon.getName());
+                player.sendMessage(ChatColor.GREEN + "✉ §aVocê enviou uma solicitação de duelo §e" + mode.getName() + "§a para " + target.getName() + "§a no mapa " + mapIcon.getName());
 
                 player.playSound(player.getLocation(), Sound.NOTE_STICKS, 3.5f, 3.5f);
                 target.getPlayer().playSound(target.getPlayer().getLocation(), Sound.NOTE_STICKS, 3.5f, 3.5f);
@@ -115,8 +128,8 @@ public class ChallengeMapSelectorGUI implements InventoryProvider {
                 break;
             }
         }
-
     }
+
 
     @Override
     public void update(Player player, InventoryContents inventoryContents) {

@@ -1,4 +1,4 @@
-package br.com.core.crud.redis.account;
+package br.com.core.crud.redis;
 
 import br.com.core.Core;
 import br.com.core.data.AccountData;
@@ -7,6 +7,9 @@ import redis.clients.jedis.JedisPool;
 
 import java.util.UUID;
 
+/**
+ * Interface da classe {@link AccountData} para atualizar,adicionar,remover dados do Redis.
+ * */
 public class AccountRedisCRUD {
 
     private static final JedisPool JEDIS_POOL = Core.JEDIS_POOL;

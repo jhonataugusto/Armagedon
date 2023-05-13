@@ -1,6 +1,7 @@
 package br.com.core.crud.redis;
 
 import br.com.core.Core;
+import br.com.core.data.AccountData;
 import br.com.core.data.ServerData;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -8,6 +9,9 @@ import redis.clients.jedis.JedisPool;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Interface da classe {@link ServerData} para atualizar,adicionar,remover dados do Redis.
+ * */
 public class ServerRedisCRUD {
     private static final JedisPool JEDIS_POOL = Core.JEDIS_POOL;
     private static final String SERVER_CACHE = Core.REDIS_CACHE.SERVER_DATABASE_CACHE;

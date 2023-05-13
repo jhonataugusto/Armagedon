@@ -33,7 +33,7 @@ public class PlayerListener implements Listener {
         event.setQuitMessage(null);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
         sync(() -> {
             Player player = event.getPlayer();

@@ -1,4 +1,4 @@
-package br.com.hub.lobby.practice.commands;
+package br.com.hub.lobby.practice.commands.duel;
 
 import br.com.core.account.Account;
 import br.com.hub.gui.challenge.ChallengeMapSelectorGUI;

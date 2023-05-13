@@ -2,7 +2,7 @@ package br.com.core.account.storage;
 
 import br.com.core.account.Account;
 import br.com.core.crud.mongo.AccountMongoCRUD;
-import br.com.core.crud.redis.account.AccountRedisCRUD;
+import br.com.core.crud.redis.AccountRedisCRUD;
 import br.com.core.data.AccountData;
 import lombok.Getter;
 

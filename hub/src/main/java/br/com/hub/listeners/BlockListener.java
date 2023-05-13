@@ -1,5 +1,6 @@
 package br.com.hub.listeners;
 
+import br.com.hub.user.User;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
@@ -7,63 +8,26 @@ import org.bukkit.event.block.*;
 public class BlockListener implements Listener {
 
     @EventHandler
-    public void onBlockPlace(BlockPlaceEvent event) {event.setCancelled(true);}
+    public void onBlockPlace(BlockPlaceEvent event) {
 
-    @EventHandler
-    public void onBlockBreak(BlockBreakEvent event) {event.setCancelled(true);}
+        User user = User.fetch(event.getPlayer().getUniqueId());
 
-    @EventHandler
-    public void onBlockBurnEvent(BlockBurnEvent event) {
-        event.setCancelled(true);
+        if (user == null) {
+            return;
+        }
+
+        event.setCancelled(!user.isBuilding());
     }
 
     @EventHandler
-    public void onBlockDamageEvent(BlockDamageEvent event) {
-        event.setCancelled(true);
-    }
+    public void onBlockBreak(BlockBreakEvent event) {
 
-    @EventHandler
-    public void onBlockDispenseEvent(BlockDispenseEvent event) {
-        event.setCancelled(true);
-    }
+        User user = User.fetch(event.getPlayer().getUniqueId());
 
-    @EventHandler
-    public void onBlockExplodeEvent(BlockExplodeEvent event) {
-        event.setCancelled(true);
-    }
+        if (user == null) {
+            return;
+        }
 
-    @EventHandler
-    public void onBlockFormEvent(BlockFormEvent event) {
-        event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onBlockFromToEvent(BlockFromToEvent event) {
-        event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onBlockIgniteEvent(BlockIgniteEvent event) {
-        event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onBlockPhysicsEvent(BlockPhysicsEvent event) {
-        event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onBlockSpreadEvent(BlockSpreadEvent event) {
-        event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onLeavesDecayEvent(LeavesDecayEvent event) {
-        event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onBlockGrow(BlockGrowEvent event) {
-        event.setCancelled(true);
+        event.setCancelled(!user.isBuilding());
     }
 }

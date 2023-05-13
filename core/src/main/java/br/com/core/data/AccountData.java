@@ -1,10 +1,10 @@
 package br.com.core.data;
 
 import br.com.core.Core;
-import br.com.core.account.enums.preferences.Preferences;
+import br.com.core.account.enums.preferences.Preference;
 import br.com.core.account.enums.rank.Rank;
 import br.com.core.crud.mongo.AccountMongoCRUD;
-import br.com.core.crud.redis.account.AccountRedisCRUD;
+import br.com.core.crud.redis.AccountRedisCRUD;
 import br.com.core.data.object.*;
 import br.com.core.enums.game.GameMode;
 import br.com.core.utils.json.JsonUtils;
@@ -23,16 +23,21 @@ public class AccountData implements Serializable {
     private String name;
     private UUID uuid;
     private String currentDuelContextUuid;
-    private List<RankDAO> ranks = new ArrayList<>();
-    private List<InventoryDAO> inventories = new ArrayList<>();
-    private List<EloDAO> elos = new ArrayList<>();
-    private List<PreferencesDAO> preferences = new ArrayList<>();
-    private List<StatisticsDAO> statistics = new ArrayList<>(); //TODO
-    private List<PunishmentDAO> punishments = new ArrayList<>(); //TODO
-    private List<AltDAO> alts = new ArrayList<>(); //TODO: fazer ligação de contas alts vinculadas a essa conta
+    private Set<RankDAO> ranks = new HashSet<>();
+    private Set<InventoryDAO> inventories = new HashSet<>();
+    private Set<EloDAO> elos = new HashSet<>();
+    private Set<PreferenceDAO> preferences = new HashSet<>();
+    private Set<StatisticsDAO> statistics = new HashSet<>(); //TODO
+    private Set<PunishmentDAO> punishments = new HashSet<>(); //TODO
+    private Set<AltDAO> alts = new HashSet<>(); //TODO: fazer ligação de contas alts vinculadas a essa conta
 
-    //DEFAULT CONSTRUCTOR WHEN THE PROGRAM CREATES A NEW ACCOUNT
+    /**
+     * cria uma nova data para o jogador.
+     *
+     * @param uuid id único do jogador.
+     */
     public AccountData(UUID uuid) {
+
         this.uuid = uuid;
 
         for (GameMode mode : GameMode.values()) {
@@ -44,12 +49,20 @@ public class AccountData implements Serializable {
             ranks.add(new RankDAO(Rank.MEMBER.getName(), -1));
         }
 
-        for (Preferences preferencesInfo : Preferences.values()) {
-            preferences.add(new PreferencesDAO(preferencesInfo.getName(), false));
+        for (Preference preferenceInfo : Preference.values()) {
+            if (preferenceInfo.getType() != null) {
+                preferences.add(new PreferenceDAO(preferenceInfo.getName(), preferenceInfo.getType().toLowerCase(), false));
+            } else {
+                preferences.add(new PreferenceDAO(preferenceInfo.getName(), null, false));
+            }
         }
     }
 
-    //DEFAULT CONSTRUCTOR WHEN THE PROGRAM LOAD A ACCOUNT
+    /**
+     * carrega uma nova data para o jogador.
+     *
+     * @param json json da classe {@link AccountData}.
+     */
     public AccountData(String json) {
         JsonParser parser = new JsonParser();
         JsonObject jsonObject = parser.parse(json).getAsJsonObject();
@@ -69,6 +82,9 @@ public class AccountData implements Serializable {
         }
     }
 
+    /**
+     * se não existir nenhuma conta no Redis ou no Mongo, ele cria e salva nos dois bancos de dados.
+     */
     public AccountData createOrGetAccountData() {
         AccountData data = AccountRedisCRUD.findByUuid(getUuid());
 
@@ -89,6 +105,9 @@ public class AccountData implements Serializable {
         return data;
     }
 
+    /**
+     * salva os dados no MongoDB e Redis.
+     */
     public void saveData() {
         AccountData oldData = AccountRedisCRUD.findByUuid(this.getUuid());
 
@@ -103,6 +122,9 @@ public class AccountData implements Serializable {
         }
     }
 
+    /**
+     * Deleta os dados no Redis
+     */
     public void deleteData() {
         AccountRedisCRUD.delete(this.getUuid());
     }
@@ -114,6 +136,12 @@ public class AccountData implements Serializable {
     public static AccountData fromJson(String json) {
         return Core.GSON.fromJson(json, AccountData.class);
     }
+
+    /**
+     * Serializa o {@link AccountData}.
+     *
+     * @return uma string do tipo base64.
+     */
 
     public String tobase64() {
         return GenericSerialization.serializeToBase64(this);
@@ -129,5 +157,9 @@ public class AccountData implements Serializable {
 
     public InventoryDAO getInventoryByGameModeName(String gameModeName) {
         return getInventories().stream().filter(inventory -> inventory.getGamemodeName().equalsIgnoreCase(gameModeName)).findFirst().orElse(null);
+    }
+
+    public PreferenceDAO getPreferenceByName(Preference preference) {
+        return getPreferences().stream().filter(preferences -> preferences.getName().equalsIgnoreCase(preference.getName())).findFirst().orElse(null);
     }
 }

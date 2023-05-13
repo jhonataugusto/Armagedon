@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 @Setter
 public class DuelRequest {
     private final String id = "request#" + UUID.randomUUID().toString().substring(0, 5).replaceAll("-", "").toLowerCase();
-    private final long expiration = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(60);
+    private long expiration = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(60);
     private final GameMode mode;
     private final String mapName;
     private final User challenger;

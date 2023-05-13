@@ -1,8 +1,8 @@
-package br.com.hub.lobby.practice.commands;
+package br.com.hub.lobby.practice.commands.match;
 
 import br.com.core.crud.mongo.DuelContextMongoCRUD;
 import br.com.core.data.DuelData;
-import br.com.hub.gui.statistics.TeamChooseGUI;
+import br.com.hub.gui.statistics.PlayerStatisticGUI;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.Default;
@@ -13,15 +13,13 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-@CommandAlias("match")
-@Description("Veja as estatísticas de um duelo específico")
-public class MatchCommand extends BaseCommand {
 
+@CommandAlias("matchsolo")
+@Description("Veja as estatísticas de um duelo 1v1 específico")
+public class MatchSoloCommand extends BaseCommand {
     @Default
-    public void onMatch(Player sender, @Single String duelUuid) {
-
+    public static void onMatchSolo(Player sender, @Single String duelUuid, @Single String targetUuid) {
         UUID uuid = UUID.fromString(duelUuid);
-
         DuelData duelData = DuelContextMongoCRUD.get(uuid);
 
 
@@ -30,7 +28,7 @@ public class MatchCommand extends BaseCommand {
             return;
         }
 
-        TeamChooseGUI teamChooseGUI = new TeamChooseGUI(duelData);
-        teamChooseGUI.INVENTORY.open(sender.getPlayer());
+        PlayerStatisticGUI statisticGUI = new PlayerStatisticGUI(duelData, UUID.fromString(targetUuid), null);
+        statisticGUI.getINVENTORY().open(sender.getPlayer());
     }
 }

@@ -1,6 +1,7 @@
 package br.com.practice;
 
 import br.com.core.Core;
+import br.com.core.crud.redis.DuelContextRedisCRUD;
 import br.com.practice.arena.storage.ArenaStorage;
 import br.com.practice.game.storage.GameStorage;
 import br.com.practice.task.ArenaPulseTask;
@@ -12,16 +13,11 @@ import co.aikar.commands.BukkitCommandManager;
 import fr.minuskube.inv.InventoryManager;
 import lombok.Getter;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.reflections.Reflections;
 
 import java.io.File;
-import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -64,15 +60,18 @@ public class Practice extends JavaPlugin {
 
         inventoryManager = new InventoryManager(this);
         inventoryManager.init();
+
+        DuelContextRedisCRUD.refreshDuels();
     }
 
     @Override
     public void onDisable() {
         super.onDisable();
-        Bukkit.getScheduler().cancelAllTasks();
-        getUserStorage().getUsers().clear();
         getArenaStorage().getArenas().forEach((id, arena) -> getArenaStorage().unload(id));
+        getUserStorage().getUsers().clear();
         getGameStorage().unload();
+        DuelContextRedisCRUD.refreshDuels();
+        Bukkit.getScheduler().cancelAllTasks();
     }
 
     public static Practice getInstance() {

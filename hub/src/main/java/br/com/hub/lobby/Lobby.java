@@ -64,6 +64,14 @@ public abstract class Lobby {
 
     public void handleScoreboard(Player player) {
         getLobbyScoreboard().addPlayer(player);
+
+        User user = User.fetch(player.getUniqueId());
+
+        if(user == null) {
+            return;
+        }
+
+        user.setScoreboard(getLobbyScoreboard());
     }
 
     public void createScoreboard(){

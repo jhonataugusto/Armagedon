@@ -24,7 +24,7 @@ public class PlayerListener implements Listener {
 
         Hub.getInstance().getUserStorage().register(user.getUuid(), user);
 
-        RankDAO rankDAO = user.getAccount().getData().getRanks().get(0);
+        RankDAO rankDAO = user.getAccount().getData().getRanks().stream().findFirst().get();
         boolean rankHasExpired = rankDAO.getExpiration() < System.currentTimeMillis() && rankDAO.getExpiration() != -1;
 
         if (rankHasExpired) {
@@ -67,12 +67,24 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerPickupItem(PlayerPickupItemEvent event) {
-        event.setCancelled(true);
+        User user = User.fetch(event.getPlayer().getUniqueId());
+
+        if (user == null) {
+            return;
+        }
+
+        event.setCancelled(!user.isBuilding());
     }
 
     @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent event) {
-        event.setCancelled(true);
+        User user = User.fetch(event.getPlayer().getUniqueId());
+
+        if (user == null) {
+            return;
+        }
+
+        event.setCancelled(!user.isBuilding());
     }
 
     @EventHandler
@@ -108,5 +120,27 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerShearEntity(PlayerShearEntityEvent event) {
         event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
+        User user = User.fetch(event.getPlayer().getUniqueId());
+
+        if (user == null) {
+            return;
+        }
+
+        event.setCancelled(!user.isBuilding());
+    }
+
+    @EventHandler
+    public void onPlayerBucketFill(PlayerBucketFillEvent event) {
+        User user = User.fetch(event.getPlayer().getUniqueId());
+
+        if (user == null) {
+            return;
+        }
+
+        event.setCancelled(!user.isBuilding());
     }
 }

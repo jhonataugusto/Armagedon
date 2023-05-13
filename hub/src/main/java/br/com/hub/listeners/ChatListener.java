@@ -1,6 +1,8 @@
 package br.com.hub.listeners;
 
+import br.com.core.account.enums.preferences.Preference;
 import br.com.core.account.enums.rank.Rank;
+import br.com.core.data.object.PreferenceDAO;
 import br.com.hub.user.User;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -21,7 +23,21 @@ public class ChatListener implements Listener {
 
         BaseComponent[] baseComponents = buildChatMessage(player, event.getMessage());
 
-        Bukkit.spigot().broadcast(baseComponents);
+        for (Player recipient : Bukkit.getOnlinePlayers()) {
+            User user = User.fetch(recipient.getUniqueId());
+
+            if (user == null) {
+                continue;
+            }
+
+            PreferenceDAO preference = user.getAccount().getData().getPreferenceByName(Preference.DISABLE_CHAT);
+
+            if (preference.isActive()) {
+                return;
+            }
+
+            recipient.spigot().sendMessage(baseComponents);
+        }
     }
 
     private BaseComponent[] buildChatMessage(Player player, String message) {

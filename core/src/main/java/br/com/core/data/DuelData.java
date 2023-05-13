@@ -19,14 +19,17 @@ import java.util.stream.Collectors;
 public class DuelData implements Serializable {
     private Object _id;
     private final UUID uuid = UUID.randomUUID();
-    private List<UUID> team1 = new ArrayList<>(), team2 = new ArrayList<>();
+    private Set<UUID> team1 = new HashSet<>(), team2 = new HashSet<>();
     private boolean custom = false;
     private String gameModeName = null;
     private String mapName = null;
     private String arenaId = null;
-    private List<UUID> spectators = new ArrayList<>();
+    private Set<UUID> spectators = new HashSet<>();
+    private Set<UUID> registeredSpectators = new HashSet<>();
     private Map<String, String> inventories = new HashMap<>();
     private boolean ranked = false;
+
+    public static final String REGEX_NAME_UUID_SEPARATOR = "#";
 
     public DuelData() {
     }
@@ -84,7 +87,7 @@ public class DuelData implements Serializable {
     }
 
     public static DuelData getSpectatorContext(Account account) {
-        return DuelContextRedisCRUD.getDuels().stream().filter(duel -> duel.getSpectators().contains(account.getUuid())).findFirst().orElse(null);
+        return DuelContextRedisCRUD.getDuels().stream().filter(duel -> duel.getRegisteredSpectators().contains(account.getUuid())).findFirst().orElse(null);
     }
 
     public static void removeAllDuelContextsFromAccount(Account account) {
@@ -98,12 +101,12 @@ public class DuelData implements Serializable {
     public String getNameAndUuidKey(String uuid) {
 
         for (Map.Entry<String, String> entry : getInventories().entrySet()) {
-            String[] split = entry.getKey().split("_");
+            String[] split = entry.getKey().split(REGEX_NAME_UUID_SEPARATOR);
             String name = split[0];
             String uniqueId = split[1];
 
             if (uniqueId.contains(uuid)) {
-                return name + "_" + uniqueId;
+                return name + DuelData.REGEX_NAME_UUID_SEPARATOR + uniqueId;
             }
 
         }

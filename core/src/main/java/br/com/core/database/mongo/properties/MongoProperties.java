@@ -1,19 +1,18 @@
 package br.com.core.database.mongo.properties;
 
+import lombok.Data;
+
+@Data
 public class MongoProperties {
     private String host;
     private int port;
+    private String username;
+    private String password;
 
-    public MongoProperties(String host, int port) {
+    public MongoProperties(String host, int port, String username, String password) {
         this.host = host;
         this.port = port;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public int getPort() {
-        return port;
+        this.username = username;
+        this.password = password;
     }
 }

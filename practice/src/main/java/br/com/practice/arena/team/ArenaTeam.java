@@ -60,6 +60,7 @@ public class ArenaTeam {
         allMembers.addAll(getDeadMembers());
         return allMembers;
     }
+
     public int getAverageRating() {
         int totalRating = 0;
 
@@ -75,14 +76,11 @@ public class ArenaTeam {
         getAllMembers().forEach(member -> {
 
             String gameModeName = getArena().getGame().getMode().getName();
-            List<EloDAO> eloDAOList = member.getAccount().getData().getElos();
+            Set<EloDAO> eloDAOList = member.getAccount().getData().getElos();
 
-            for (int i = 0; i < eloDAOList.size(); i++) {
-
-                EloDAO eloDAO = eloDAOList.get(i);
-
+            for (EloDAO eloDAO : eloDAOList) {
                 if (eloDAO.getName().equals(gameModeName)) {
-                    eloDAOList.set(i, new EloDAO(gameModeName, newRating));
+                    eloDAOList.add(new EloDAO(gameModeName, newRating));
                     break;
                 }
             }

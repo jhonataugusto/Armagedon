@@ -3,6 +3,7 @@ package br.com.core.utils.json;
 import br.com.core.Core;
 import br.com.core.data.object.EloDAO;
 import br.com.core.data.object.InventoryDAO;
+import br.com.core.data.object.PreferenceDAO;
 import br.com.core.data.object.RankDAO;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
@@ -10,8 +11,8 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class JsonUtils {
@@ -50,28 +51,33 @@ public class JsonUtils {
                     field.set(object, mapValue);
                 }
 
-            } else if (field.getType() == List.class) {
+            } else if (field.getType() == Set.class) {
                 Type genericType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
 
                 if (genericType.equals(String.class)) {
-                    List<String> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<List<String>>() {
+                    Set<String> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<Set<String>>() {
                     }.getType());
                     field.set(object, listValue);
                 } else if (genericType.equals(UUID.class)) {
-                    List<UUID> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<List<UUID>>() {
+                    Set<UUID> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<Set<UUID>>() {
                     }.getType());
                     field.set(object, listValue);
                 } else if (genericType.equals(RankDAO.class)) {
-                    List<RankDAO> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<List<RankDAO>>() {}.getType());
+                    Set<RankDAO> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<Set<RankDAO>>() {
+                    }.getType());
                     field.set(object, listValue);
                 } else if (genericType.equals(InventoryDAO.class)) {
 
-                    List<InventoryDAO> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<List<InventoryDAO>>() {
+                    Set<InventoryDAO> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<Set<InventoryDAO>>() {
                     }.getType());
                     field.set(object, listValue);
                 } else if (genericType.equals(EloDAO.class)) {
 
-                    List<EloDAO> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<List<EloDAO>>() {
+                    Set<EloDAO> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<Set<EloDAO>>() {
+                    }.getType());
+                    field.set(object, listValue);
+                } else if (genericType.equals(PreferenceDAO.class)) {
+                    Set<PreferenceDAO> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<Set<PreferenceDAO>>() {
                     }.getType());
                     field.set(object, listValue);
                 }

@@ -12,7 +12,7 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
 
-@CommandAlias("spec|spectar|spectate|assistir")
+@CommandAlias("spec|spectar|spectate|assistir|open")
 @Description("Assista a partida dos jogadores")
 public class SpecCommand extends BaseCommand {
 
@@ -45,8 +45,8 @@ public class SpecCommand extends BaseCommand {
 
         Server server = target.getServer();
 
-        if (!data.getSpectators().contains(sender.getUniqueId())) {
-            data.getSpectators().add(sender.getUniqueId());
+        if (!data.getRegisteredSpectators().contains(sender.getUniqueId())) {
+            data.getRegisteredSpectators().add(sender.getUniqueId());
         }
 
         data.saveData();

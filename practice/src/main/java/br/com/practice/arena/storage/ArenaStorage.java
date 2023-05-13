@@ -37,9 +37,7 @@ public class ArenaStorage {
             return;
         }
 
-        sync(() -> {
-            Bukkit.unloadWorld(arenaId, false);
-        });
+        Bukkit.unloadWorld(arenaId, false);
 
         async(() -> {
             getArenas().remove(arenaId);
@@ -89,32 +87,35 @@ public class ArenaStorage {
     }
 
     public void unloadUnusedArenaMaps() {
-        for (Maps map : Maps.values()) {
-            GameMode mode = map.getMode();
-            Game game = Practice.getInstance().getGameStorage().getGame(mode);
+        async(() -> {
+            for (Maps map : Maps.values()) {
+                GameMode mode = map.getMode();
+                Game game = Practice.getInstance().getGameStorage().getGame(mode);
 
-            Map<String, Arena> freeArenas = getFreeArenasFromGameMap(game, map.getName());
-            Map<String, Arena> totalArenas = getArenasFromGameMap(game, map.getName());
+                Map<String, Arena> freeArenas = getFreeArenasFromGameMap(game, map.getName());
+                Map<String, Arena> totalArenas = getArenasFromGameMap(game, map.getName());
 
-            int freeArenasSize = freeArenas.size();
-            int totalArenasSize = totalArenas.size();
+                int freeArenasSize = freeArenas.size();
+                int totalArenasSize = totalArenas.size();
 
-            if (freeArenasSize >= totalArenasSize / 2 && freeArenasSize > 0) {
-                int reducedFreeArenasSize = freeArenasSize / 2;
+                if (freeArenasSize >= totalArenasSize / 2 && freeArenasSize > 0) {
+                    int reducedFreeArenasSize = freeArenasSize / 2;
 
-                int i = 0;
-                Iterator<Arena> iterator = freeArenas.values().iterator();
-                while (iterator.hasNext() && i < reducedFreeArenasSize) {
-                    Arena arena = iterator.next();
+                    int i = 0;
+                    Iterator<Arena> iterator = freeArenas.values().iterator();
+                    while (iterator.hasNext() && i < reducedFreeArenasSize) {
+                        Arena arena = iterator.next();
+                        sync(() -> {
+                            unload(arena.getId());
+                        });
+                        iterator.remove();
+                        i++;
+                    }
 
-                    unload(arena.getId());
-                    iterator.remove();
-                    i++;
+                    System.out.println("Foram descarregadas " + i + " arenas do mapa" + map.getDisplayName());
                 }
-
-                System.out.println("Foram descarregadas " + i + " arenas do mapa" + map.getDisplayName());
             }
-        }
+        });
     }
 
     private Arena findFreeArena(Game game) {

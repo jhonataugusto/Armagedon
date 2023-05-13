@@ -22,8 +22,10 @@ import lombok.Getter;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
 import static br.com.hub.util.scheduler.SchedulerUtils.async;
@@ -138,5 +140,18 @@ public class PracticeQueueListener implements Listener {
                 }
             }
         });
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Practice instance = (Practice) Hub.getInstance().getLobby();
+
+        User user = User.fetch(event.getPlayer().getUniqueId());
+
+        if (user == null) {
+            return;
+        }
+
+        instance.getQueue().leave(user);
     }
 }

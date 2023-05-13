@@ -1,11 +1,7 @@
 package br.com.hub.icons;
 
 import br.com.core.enums.map.Maps;
-import de.tr7zw.changeme.nbtapi.NBT;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -17,7 +13,8 @@ public enum MapIcons {
     GRASS(Maps.GRASS.getName(), Maps.GRASS.getDisplayName(), Material.GRASS),
     STONE(Maps.STONE.getName(), Maps.STONE.getDisplayName(), Material.STONE),
     MUSHROOM(Maps.MUSHROOM.getName(), Maps.MUSHROOM.getDisplayName(), Material.MUSHROOM_SOUP),
-    NETHERBRICK(Maps.NETHERBRICK.getName(), Maps.NETHERBRICK.getDisplayName(), Material.NETHER_BRICK);
+    NETHERBRICK(Maps.NETHERBRICK.getName(), Maps.NETHERBRICK.getDisplayName(), Material.NETHER_BRICK),
+    CASTLE(Maps.CASTLE.getName(), Maps.CASTLE.getDisplayName(), Material.STONE_PLATE);
 
     private final String name, displayName;
     private int column, row;
@@ -34,7 +31,7 @@ public enum MapIcons {
         this.material = material;
     }
 
-    public MapIcons findByName(String name) {
+    public static MapIcons getByName(String name) {
         return Arrays.stream(values).filter(map -> map.getName().equals(name)).findFirst().orElse(null);
     }
 
