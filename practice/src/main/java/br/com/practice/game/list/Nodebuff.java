@@ -25,13 +25,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.HashMap;
+
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import static br.com.practice.util.scheduler.SchedulerUtils.async;
 import static br.com.practice.util.scheduler.SchedulerUtils.delay;
 
 public class Nodebuff extends Game {

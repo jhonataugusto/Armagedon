@@ -39,7 +39,7 @@ public class ArenaStorage {
 
         Bukkit.unloadWorld(arenaId, false);
 
-        async(() -> {
+        sync(() -> {
             getArenas().remove(arenaId);
             CompressionUtil.delete(arena.getMap().getDirectory());
         });
@@ -119,11 +119,14 @@ public class ArenaStorage {
     }
 
     private Arena findFreeArena(Game game) {
-        return getArenas().values().stream().filter(thisArena -> thisArena.getGame().equals(game) && thisArena.getStage() == ArenaStage.WAITING).findFirst().orElse(null);
+        return getArenas().values().stream().filter(thisArena -> thisArena.getGame().equals(game) && thisArena.getStage() == ArenaStage.FREE).findFirst().orElse(null);
     }
 
     private Arena findFreeArena(Game game, String mapName) {
-        return getArenas().values().stream().filter(thisArena -> thisArena.getGame().equals(game) && thisArena.getStage() == ArenaStage.WAITING && thisArena.getMap().getName().equalsIgnoreCase(mapName)).findFirst().orElse(null);
+        return getArenas().values().stream().filter(thisArena ->
+                thisArena.getGame().equals(game)
+                        && thisArena.getStage() == ArenaStage.FREE
+                        && thisArena.getMap().getName().equalsIgnoreCase(mapName)).findFirst().orElse(null);
     }
 
     private Map<String, Arena> getArenasFromGameMap(Game game, String mapName) {
@@ -134,7 +137,7 @@ public class ArenaStorage {
 
     private Map<String, Arena> getFreeArenasFromGameMap(Game game, String mapName) {
         return getArenas().values().stream()
-                .filter(arena -> arena.getStage().equals(ArenaStage.WAITING) && arena.getGame().equals(game) && arena.getMap().getName().equalsIgnoreCase(mapName))
+                .filter(arena -> arena.getStage().equals(ArenaStage.FREE) && arena.getGame().equals(game) && arena.getMap().getName().equalsIgnoreCase(mapName))
                 .collect(Collectors.toMap(Arena::getId, Function.identity()));
     }
 }

@@ -33,7 +33,7 @@ public class PlayerListener implements Listener {
             user.getPlayer().sendMessage(ChatColor.GRAY + "Seu rank expirou, você retornou ao rank padrão.");
         }
 
-        user.getAccount().getData().setCurrentDuelContextUuid(null);
+        user.getAccount().getData().setCurrentDuelUuid(null);
 
         user.setLobby(Hub.getInstance().getLobby());
 

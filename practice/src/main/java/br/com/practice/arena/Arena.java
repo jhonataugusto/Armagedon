@@ -1,7 +1,7 @@
 package br.com.practice.arena;
 
 import br.com.core.Core;
-import br.com.core.crud.redis.DuelContextRedisCRUD;
+import br.com.core.crud.redis.DuelRedisCRUD;
 import br.com.practice.arena.map.ArenaMap;
 import br.com.practice.arena.stage.ArenaStage;
 import br.com.practice.arena.team.ArenaTeam;
@@ -24,13 +24,15 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static br.com.practice.util.scheduler.SchedulerUtils.sync;
+
 @Getter
 @Setter
 public class Arena {
     private final long maxTime = TimeUnit.MINUTES.toMillis(5);
     private long currentTime = TimeUnit.MINUTES.toMillis(0);
-    private DuelData data = null;
-    private ArenaStage stage = ArenaStage.WAITING;
+    private DuelData data;
+    private ArenaStage stage = ArenaStage.FREE;
     private Game game;
     private World world;
     private ArenaMap map;
@@ -48,6 +50,10 @@ public class Arena {
 
         this.teams = new ArenaTeam[]{redTeam, blueTeam};
         this.currentSpectators = new HashSet<>();
+
+        teams[0].setOpponent(teams[1]);
+        teams[1].setOpponent(teams[0]);
+
         createScoreboard();
     }
 
@@ -60,6 +66,7 @@ public class Arena {
         ArenaTeam blueTeam = new ArenaTeam("Azul", ChatColor.BLUE, this);
 
         this.teams = new ArenaTeam[]{redTeam, blueTeam};
+        this.currentSpectators = new HashSet<>();
         this.data = data;
 
         teams[0].setOpponent(teams[1]);
@@ -73,6 +80,8 @@ public class Arena {
     }
 
     public void handleJoin(User user) {
+
+        setStage(ArenaStage.WAITING);
 
         if (!(getData().getTeam1().contains(user.getUuid()) || getData().getTeam2().contains(user.getUuid()))) {
             user.getPlayer().kickPlayer(ChatColor.RED + "Jogador não faz parte dessa partida");
@@ -101,11 +110,9 @@ public class Arena {
         int maxUsersExpected = getData().getTeam1().size() + getData().getTeam2().size();
         int actualUsers = getTeams().get(0).getAliveMembers().size() + getTeams().get(1).getAliveMembers().size();
 
-        setStage(actualUsers == maxUsersExpected ? ArenaStage.STARTING : ArenaStage.WAITING);
-        if (getStage() == ArenaStage.STARTING) {
-            Bukkit.getServer().getPluginManager().callEvent(new ArenaChangeStateEvent(this, this.getStage()));
-        }
+        setStage(actualUsers >= maxUsersExpected ? ArenaStage.STARTING : ArenaStage.WAITING);
 
+        Bukkit.getServer().getPluginManager().callEvent(new ArenaChangeStateEvent(this, this.getStage()));
         game.handleJoin(user.getPlayer());
     }
 
@@ -133,6 +140,13 @@ public class Arena {
                 () -> {
 
                     switch (getStage()) {
+                        case FREE:
+                            return Arrays.asList(
+                                    "",
+                                    ChatColor.GREEN + "ARENA LIVRE"
+                                    , "id: " + ChatColor.GRAY + getMap().getId()
+                            );
+
                         case WAITING:
                             return Arrays.asList(
                                     "",
@@ -165,7 +179,6 @@ public class Arena {
                                 int user1Elo = user1.getAccount().getData().getEloByGameModeName(gameModeName).getElo();
                                 int user2Elo = user2.getAccount().getData().getEloByGameModeName(gameModeName).getElo();
 
-
                                 List<String> scoreboardContents = new ArrayList<>();
 
                                 scoreboardContents.add("");
@@ -173,28 +186,17 @@ public class Arena {
                                 scoreboardContents.add("Arena: " + ChatColor.GRAY + this.getId());
                                 scoreboardContents.add("");
 
-                                if (user1.getClicksPerSecond() >= 16) {
-                                    scoreboardContents.add(ChatColor.GREEN + user1.getName());
-                                } else if (user1.getRange() >= 4.75) {
-                                    scoreboardContents.add(ChatColor.LIGHT_PURPLE + user1.getName());
-                                } else {
-                                    scoreboardContents.add(user1.getTeam().getColor() + user1.getName());
-                                }
+                                scoreboardContents.add(user1.getTeam().getColor() + user1.getName());
 
                                 if (getData().isRanked()) {
                                     scoreboardContents.add(user1.getTeam().getColor() + "ELO: §r" + user1Elo);
                                 }
+
                                 scoreboardContents.add(user1.getTeam().getColor() + "Ping: §r" + user1.getPing());
 
                                 scoreboardContents.add("");
 
-                                if (user2.getClicksPerSecond() >= 16) {
-                                    scoreboardContents.add(ChatColor.GREEN + user2.getName());
-                                } else if (user2.getRange() >= 4.75) {
-                                    scoreboardContents.add(ChatColor.LIGHT_PURPLE + user2.getName());
-                                } else {
-                                    scoreboardContents.add(user2.getTeam().getColor() + user2.getName());
-                                }
+                                scoreboardContents.add(user2.getTeam().getColor() + user2.getName());
 
                                 if (getData().isRanked()) {
                                     scoreboardContents.add(user2.getTeam().getColor() + "ELO: §r" + user2Elo);
@@ -264,19 +266,31 @@ public class Arena {
             totalPing += player.ping;
         }
 
+        if (count == 0) return 0;
+
         return totalPing / count;
     }
 
     public void reset() {
-        DuelContextRedisCRUD.delete(this.getData().getUuid());
-        setData(null);
-        setStage(ArenaStage.WAITING);
-        setCurrentTime(0L);
-        getTeams().forEach(ArenaTeam::clear);
-        getWorld().getEntities().forEach(Entity::remove);
-        getCurrentSpectators().clear();
+        sync(() -> {
+            setStage(ArenaStage.RESETTING);
 
-        //TODO: colocar rollback aqui
+            //TODO: colocar rollback aqui
+
+            setCurrentTime(0L);
+            getTeams().forEach(ArenaTeam::clear);
+            getWorld().getEntities().forEach(Entity::remove);
+            getCurrentSpectators().clear();
+
+            getWorld().save();
+
+            if (getData() != null) {
+                setData(null);
+            }
+
+            setStage(ArenaStage.FREE);
+            Bukkit.getServer().getPluginManager().callEvent(new ArenaChangeStateEvent(this, this.getStage()));
+        });
     }
 
     public String getId() {

@@ -6,11 +6,9 @@ import br.com.practice.events.spectator.SpectatorEnterArenaEvent;
 import br.com.practice.events.spectator.SpectatorLeaveArenaEvent;
 import br.com.practice.user.User;
 import br.com.practice.util.bungee.BungeeUtils;
-import br.com.practice.util.scheduler.SchedulerUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import static br.com.practice.util.scheduler.SchedulerUtils.async;
 import static br.com.practice.util.scheduler.SchedulerUtils.sync;
 
 public class Spectator {

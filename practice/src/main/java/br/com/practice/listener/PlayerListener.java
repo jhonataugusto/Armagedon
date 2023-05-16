@@ -60,16 +60,22 @@ public class PlayerListener implements Listener {
 
             Arena loadedArena = Practice.getInstance().getArenaStorage().getArena(duel.getArenaId());
 
-            if (loadedArena != null) {
+            if (loadedArena != null && loadedArena.getData().getArenaId().equalsIgnoreCase(duel.getArenaId())) {
                 loadedArena.handleJoin(user);
 
             } else {
                 Arena newArena = Practice.getInstance().getArenaStorage().getFreeArena(game, duel);
 
                 if (newArena == null) {
+
                     player.kickPlayer(ChatColor.RED + "Não há salas disponíveis no momento, tente novamente.");
 
                 } else {
+
+                    if (newArena.getData() != null) {
+                        player.kickPlayer(ChatColor.RED + "Esse duelo já está sendo utilizado");
+                        return;
+                    }
 
                     duel.setArenaId(newArena.getId());
                     duel.saveData();

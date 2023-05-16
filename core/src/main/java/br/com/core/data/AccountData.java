@@ -22,7 +22,7 @@ public class AccountData implements Serializable {
     private Object _id = null;
     private String name;
     private UUID uuid;
-    private String currentDuelContextUuid;
+    private String currentDuelUuid;
     private Set<RankDAO> ranks = new HashSet<>();
     private Set<InventoryDAO> inventories = new HashSet<>();
     private Set<EloDAO> elos = new HashSet<>();

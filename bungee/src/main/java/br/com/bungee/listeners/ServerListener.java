@@ -4,28 +4,22 @@ import br.com.bungee.Bungee;
 import br.com.bungee.util.motd.Motd;
 import br.com.core.Core;
 import br.com.core.account.Account;
-import br.com.core.crud.mongo.DuelContextMongoCRUD;
 import br.com.core.crud.redis.ServerRedisCRUD;
-import br.com.core.data.DuelData;
 import br.com.core.data.ServerData;
 import br.com.bungee.events.ProxyPulseEvent;
 import br.com.bungee.server.Server;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ProxyPingEvent;
-import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
-import net.md_5.bungee.protocol.packet.Chat;
 
 import java.util.Random;
-import java.util.UUID;
 
 public class ServerListener implements Listener {
 

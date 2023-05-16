@@ -1,7 +1,5 @@
 package br.com.hub.lobby.practice.commands.duel;
 
-import br.com.core.account.Account;
-import br.com.hub.gui.challenge.ChallengeMapSelectorGUI;
 import br.com.hub.gui.challenge.ChallengeModeSelectorGUI;
 import br.com.hub.user.User;
 import co.aikar.commands.BaseCommand;
@@ -36,7 +34,7 @@ public class DuelCommand extends BaseCommand {
 
 
 
-        if(targetUser.getAccount().getData().getCurrentDuelContextUuid() != null) {
+        if(targetUser.getAccount().getData().getCurrentDuelUuid() != null) {
             sender.sendMessage(ChatColor.RED + "O jogador já está em um duelo.");
             return;
         }

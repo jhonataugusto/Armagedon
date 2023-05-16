@@ -79,7 +79,7 @@ public class ChallengeMapSelectorGUI implements InventoryProvider {
                     return;
                 }
 
-                if (target.getAccount().getData().getCurrentDuelContextUuid() != null) {
+                if (target.getAccount().getData().getCurrentDuelUuid() != null) {
                     player.closeInventory();
                     player.sendMessage(ChatColor.RED + "O jogador já está em um duelo.");
                     return;

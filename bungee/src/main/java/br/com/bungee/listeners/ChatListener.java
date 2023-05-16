@@ -1,5 +1,6 @@
 package br.com.bungee.listeners;
 
+import br.com.bungee.Bungee;
 import br.com.core.account.Account;
 import br.com.core.account.enums.preferences.Preference;
 import br.com.core.account.enums.rank.Rank;
@@ -18,6 +19,11 @@ public class ChatListener implements Listener {
 
     @EventHandler
     public void onChat(ChatEvent event) {
+
+
+        Bungee.getInstance().getProxy().getServerInfo(Server.PRACTICE.getName()).getPlayers();
+
+
         if (!(event.getSender() instanceof ProxiedPlayer)) {
             return;
         }

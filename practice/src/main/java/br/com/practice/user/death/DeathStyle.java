@@ -13,6 +13,10 @@ public enum DeathStyle {
 
     MEOW(PreferenceType.CUSTOM_DEATH_MEOW, (player) -> {
 
+        if(player == null) {
+            return;
+        }
+
         int numParticles = 10;
         double speed = 0.2;
         double maxOffset = 2.0;
@@ -32,6 +36,11 @@ public enum DeathStyle {
         player.getWorld().playSound(playerLocation, Sound.CAT_MEOW, 5f, 5f);
     }),
     BLOOD(PreferenceType.CUSTOM_DEATH_BLOOD, (player) -> {
+
+        if(player == null) {
+            return;
+        }
+
         int numParticles = 10;
         double speed = 0.2;
         double maxOffset = 4.0;
@@ -51,11 +60,21 @@ public enum DeathStyle {
         player.getWorld().playSound(playerLocation, Sound.SLIME_ATTACK, 5f, 5f);
     }),
     EXPLOSION(PreferenceType.CUSTOM_DEATH_EXPLOSION, (player -> {
+
+        if(player == null) {
+            return;
+        }
+
         Location playerLocation = player.getLocation();
         player.getWorld().playEffect(playerLocation, Effect.EXPLOSION_HUGE, 0);
         player.getWorld().playSound(playerLocation, Sound.EXPLODE, 5f, 5f);
     })),
     DEFAULT(PreferenceType.CUSTOM_DEATH_DEFAULT, (player -> {
+
+        if(player == null) {
+            return;
+        }
+
         player.getWorld().strikeLightningEffect(player.getLocation());
     }));
 

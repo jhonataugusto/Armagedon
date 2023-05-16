@@ -97,28 +97,32 @@ public abstract class Game implements Listener {
 
         TagUtil.loadTag(user, user.getTeam());
 
-        user.getAccount().getData().setCurrentDuelContextUuid(user.getArena().getData().getUuid().toString());
-        user.getAccount().getData().saveData();
+        user.getAccount().getData().setCurrentDuelUuid(user.getArena().getData().getUuid().toString());
+
+        async(() -> {
+            user.getAccount().getData().saveData();
+        });
     }
 
     public void handleQuit(User user) {
 
-        if (user == null) {
+        if (user == null || user.getPlayer() == null) {
             return;
         }
 
-        Player player = user.getPlayer();
-
         TagUtil.unloadTag(user.getPlayer());
-
-        DuelData.removeAllDuelContextsFromAccount(user.getAccount());
 
         user.setArena(null);
         user.setTeam(null);
         user.setLastDamager(null);
-        if (user.getScoreboard() != null) user.getScoreboard().removePlayer(player);
 
-        BungeeUtils.connect(player, Server.LOBBY_PRACTICE);
+        if (user.getScoreboard() != null) {
+            user.getScoreboard().removePlayer(user.getPlayer());
+        }
+
+        DuelData.removeDuelsFromAccount(user.getAccount());
+
+        BungeeUtils.connect(user.getPlayer(), Server.LOBBY_PRACTICE);
     }
 
     public void handleInventory(User user) {

@@ -3,6 +3,7 @@ package br.com.core.crud.redis;
 import br.com.core.Core;
 import br.com.core.data.AccountData;
 import br.com.core.data.ServerData;
+import br.com.core.enums.server.Server;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -19,6 +20,17 @@ public class ServerRedisCRUD {
     public static void save(ServerData data) {
         try (Jedis jedis = JEDIS_POOL.getResource()) {
             jedis.hset(SERVER_CACHE, data.getName(), data.toJson());
+        }
+    }
+
+    public static ServerData findByName(Server server) {
+        String name = server.getName();
+        try (Jedis jedis = JEDIS_POOL.getResource()) {
+            String json = jedis.hget(SERVER_CACHE, name);
+            if (json != null) {
+                return ServerData.fromJson(json);
+            }
+            return null;
         }
     }
 

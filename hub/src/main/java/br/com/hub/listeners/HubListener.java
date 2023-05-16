@@ -1,14 +1,8 @@
 package br.com.hub.listeners;
 
-import br.com.core.Core;
-import br.com.core.crud.redis.DuelContextRedisCRUD;
 import br.com.hub.Hub;
 
 import br.com.hub.events.ServerPulseEvent;
-import br.com.hub.user.User;
-import dev.jcsoftware.jscoreboards.JPerPlayerScoreboard;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.BlockFace;
@@ -18,15 +12,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 import org.bukkit.event.weather.WeatherChangeEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
 
 public class HubListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)

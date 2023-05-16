@@ -1,7 +1,7 @@
 package br.com.hub.lobby.practice;
 
 import br.com.core.Core;
-import br.com.core.crud.redis.DuelContextRedisCRUD;
+import br.com.core.crud.redis.DuelRedisCRUD;
 import br.com.hub.Hub;
 import br.com.hub.gui.editor.KitEditorGUI;
 import br.com.hub.lobby.Lobby;
@@ -46,7 +46,7 @@ public class Practice extends Lobby {
 
         queue = new Queue();
 
-        DuelContextRedisCRUD.refreshDuels();
+        DuelRedisCRUD.refreshDuels();
     }
 
     @Override
@@ -62,7 +62,7 @@ public class Practice extends Lobby {
 
                 () -> {
 
-                    int playing = (int) DuelContextRedisCRUD.getDuels()
+                    int playing = (int) DuelRedisCRUD.getDuels()
                             .stream()
                             .flatMap(duel -> {
                                 List<UUID> members = new ArrayList<>();

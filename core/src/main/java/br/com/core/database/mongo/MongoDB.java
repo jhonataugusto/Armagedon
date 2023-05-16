@@ -35,11 +35,16 @@ public class MongoDB {
         } else {
             try {
                 file.createNewFile();
-                properties = new MongoProperties(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_USERNAME, DEFAULT_PASSWORD);
+                properties = new MongoProperties(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_USERNAME, DEFAULT_PASSWORD); //credencial VPS
+                //properties = new MongoProperties(DEFAULT_HOST, DEFAULT_PORT); //testings
                 saveProperties();
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
+        }
+
+        if (properties.getUsername() == null) {
+            return this.MONGO_URI = "mongodb://" + properties.getHost() + ":" + properties.getPort();
         }
 
         return this.MONGO_URI = "mongodb://" + properties.getUsername() + ":" + properties.getPassword() + "@" + properties.getHost() + ":" + properties.getPort();

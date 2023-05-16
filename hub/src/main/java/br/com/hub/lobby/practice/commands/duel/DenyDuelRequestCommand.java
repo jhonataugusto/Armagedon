@@ -1,11 +1,7 @@
 package br.com.hub.lobby.practice.commands.duel;
 
-import br.com.core.crud.redis.DuelContextRedisCRUD;
-import br.com.core.data.DuelData;
-import br.com.core.enums.server.Server;
 import br.com.hub.user.User;
 import br.com.hub.user.request.DuelRequest;
-import br.com.hub.util.bungee.BungeeUtils;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.Default;
@@ -15,8 +11,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
-
-import static br.com.hub.util.scheduler.SchedulerUtils.async;
 
 @CommandAlias("denyduel|denyMatch|denyX1|denyChallenge|denyDuelRequest")
 @Description("Recusa um duelo de um jogador")

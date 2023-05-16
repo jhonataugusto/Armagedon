@@ -27,10 +27,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_8_R3.*;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -51,16 +48,15 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.concurrent.TimeUnit;
-
 import static br.com.practice.util.scheduler.SchedulerUtils.*;
 
 public class ArenaListener implements Listener {
 
     private final int HIT_BLOCK_LIMIT = 30;
     private final int HIT_CRITICAL_LIMIT = 50;
-
-    private static long REMOVE_UNUSED_ARENAS_DELAY = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(5);
+    private final int MAX_CPS = 15;
+    private final double MAX_RANGE = 3.3;
+    private final int MAX_PING_TRIGGER = 100;
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerDamageArena(EntityDamageByEntityEvent event) {
@@ -93,16 +89,30 @@ public class ArenaListener implements Listener {
             entity.setLastDamager(damager);
         }
 
-        if (damager.getClicksPerSecond() >= 16) {
+        if (damager.getClicksPerSecond() >= MAX_CPS) {
             double reductionFactor = 0.8;
             double newCpsDamage = event.getDamage() - (event.getDamage() * reductionFactor);
             event.setDamage(newCpsDamage);
         }
 
-        if (damager.getRange() >= 3.2) {
+        if (damager.getRange() >= MAX_RANGE && damager.getPing() <= MAX_PING_TRIGGER) {
             double reductionFactor = 1;
             double newRangeDamage = event.getDamage() - (event.getDamage() * reductionFactor);
+
             event.setDamage(newRangeDamage);
+        }
+
+        if (entity.getRange() >= MAX_RANGE && damager.getPing() <= MAX_PING_TRIGGER) {
+            double reductionFactor = 1;
+            double newDamage = event.getDamage() + (event.getDamage() * reductionFactor);
+            event.setDamage(newDamage);
+        }
+
+        if (entity.getClicksPerSecond() >= MAX_CPS) {
+            double reductionFactor = 1;
+            double newDamage = event.getDamage() + (event.getDamage() * reductionFactor);
+            event.getEntity().sendMessage("aconteceu cps");
+            event.setDamage(newDamage);
         }
 
         damager.setRange(MathUtils.getEuclideanDistance(damager.getPlayer(), entity.getPlayer()));
@@ -156,7 +166,6 @@ public class ArenaListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onOtherDeathCauseEvents(EntityDamageEvent event) {
         Player entity = (Player) event.getEntity();
-        EntityDamageEvent.DamageCause cause = event.getCause();
         double finalDamage = event.getFinalDamage();
         double entityHealth = entity.getHealth();
 
@@ -166,19 +175,19 @@ public class ArenaListener implements Listener {
             return;
         }
 
+        Arena arena = entityUser.getArena();
 
-        if (entityUser.getArena().getStage().equals(ArenaStage.STARTING) || entityUser.getArena().getStage().equals(ArenaStage.ENDING)) {
+        if (!arena.getStage().equals(ArenaStage.PLAYING)) {
             event.setCancelled(true);
         }
 
-        if ((cause == EntityDamageEvent.DamageCause.FALL || cause == EntityDamageEvent.DamageCause.FIRE_TICK) && finalDamage >= entityHealth) {
+        if (finalDamage >= entityHealth) {
             event.setCancelled(true);
-
 
             if (entityUser.getLastDamager() != null) {
                 User lastDamager = entityUser.getLastDamager();
                 lastDamager.getPlayer().setHealth(20);
-                UserDeathEvent userDeathEvent = new UserDeathEvent(entityUser.getArena(), entityUser, lastDamager, entityUser.isLastMember());
+                UserDeathEvent userDeathEvent = new UserDeathEvent(arena, entityUser, lastDamager, entityUser.isLastMember());
                 Practice.getInstance().getServer().getPluginManager().callEvent(userDeathEvent);
                 return;
             }
@@ -191,17 +200,28 @@ public class ArenaListener implements Listener {
     @EventHandler
     public void onArenaPulse(ArenaPulseEvent event) {
         event.getArenas().forEach((id, arena) -> {
+
+            if (arena.getData() == null || arena.getAllTeamMembers().isEmpty()) {
+
+                if (arena.getStage().equals(ArenaStage.PLAYING)) {
+                    arena.reset();
+                }
+
+                return;
+            }
+
             arena.getGameScoreboard().updateScoreboard();
 
-            arena.getAllTeamMembers().forEach(members -> {
-                members.setClicksPerSecond(0);
-            });
-        });
+            for (User members : arena.getAllTeamMembers()) {
 
-        if (System.currentTimeMillis() > REMOVE_UNUSED_ARENAS_DELAY) {
-            Practice.getInstance().getArenaStorage().unloadUnusedArenaMaps();
-            REMOVE_UNUSED_ARENAS_DELAY = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(5);
-        }
+                if (members == null) {
+                    continue;
+                }
+
+                members.setClicksPerSecond(0);
+
+            }
+        });
     }
 
     @EventHandler
@@ -244,11 +264,7 @@ public class ArenaListener implements Listener {
 
         User user = User.fetch(event.getPlayer().getUniqueId());
 
-        if (user == null) {
-            return;
-        }
-
-        if (user.getArena() == null) {
+        if (user == null || user.getArena() == null) {
             return;
         }
 
@@ -263,42 +279,41 @@ public class ArenaListener implements Listener {
 
         UserDeathEvent userDeathEvent = new UserDeathEvent(arena, user, user.getLastDamager(), user.isLastMember());
         Practice.getInstance().getServer().getPluginManager().callEvent(userDeathEvent);
-
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler
     public void onArenaChangeState(ArenaChangeStateEvent event) {
 
-        if (event.getArena() == null) {
+        Arena arena = event.getArena();
+
+        if (arena == null) {
             return;
         }
 
-        switch (event.getStage()) {
+        ArenaStage stage = event.getStage();
 
+        switch (stage) {
             case STARTING:
-
-                int duration = 5 * 20;
-                int amplifier = 5;
-
                 new BukkitRunnable() {
                     int seconds = 5;
 
                     @Override
                     public void run() {
-                        for (User members : event.getArena().getAllTeamMembers()) {
+                        for (User members : arena.getAllTeamMembers()) {
 
                             if (members == null) continue;
 
-                            if (seconds == 5) {
-                                event.getArena().getGame().handleInventory(members);
+                            if (members.getPlayer() == null) continue;
+
+                            if (seconds == 4) {
+                                members.getPlayer().sendMessage("Arena : " + arena.getId());
+                                arena.getGame().handleInventory(members);
                             }
 
                             if (seconds != 0) {
                                 members.getPlayer().playSound(members.getPlayer().getLocation(), Sound.CLICK, 3.5F, 3.5F);
                                 members.getPlayer().sendMessage("Iniciando o combate em " + seconds + " segundos.");
                             } else {
-                                members.getPlayer().setWalkSpeed(0.2f);
-                                members.getPlayer().removePotionEffect(PotionEffectType.JUMP);
                                 members.getPlayer().playSound(members.getPlayer().getLocation(), Sound.NOTE_PLING, 3F, 3F);
                                 members.getPlayer().sendMessage("O duelo começou!");
                             }
@@ -306,8 +321,8 @@ public class ArenaListener implements Listener {
 
                         if (seconds == 0) {
 
-                            event.getArena().setStage(ArenaStage.PLAYING);
-                            Bukkit.getServer().getPluginManager().callEvent(new ArenaStartEvent(event.getArena()));
+                            arena.setStage(ArenaStage.PLAYING);
+                            Bukkit.getServer().getPluginManager().callEvent(new ArenaStartEvent(arena));
 
                             this.cancel();
                             Bukkit.getScheduler().cancelTask(this.getTaskId());
@@ -321,23 +336,19 @@ public class ArenaListener implements Listener {
 
             case ENDING:
 
-                ArenaTeam team1 = event.getArena().getTeams().get(0);
-                ArenaTeam team2 = event.getArena().getTeams().get(1);
+                ArenaTeam team1 = arena.getTeams().get(0);
+                ArenaTeam team2 = arena.getTeams().get(1);
 
                 if (team1.getAliveMembers().size() == 0) {
-                    Bukkit.getServer().getPluginManager().callEvent(new ArenaEndEvent(event.getArena(), team2, team1));
-
-                    team2.getAliveMembers().forEach(members -> {
-
-                    });
+                    Bukkit.getServer().getPluginManager().callEvent(new ArenaEndEvent(arena, team2, team1));
                 } else {
-                    Bukkit.getServer().getPluginManager().callEvent(new ArenaEndEvent(event.getArena(), team1, team2));
+                    Bukkit.getServer().getPluginManager().callEvent(new ArenaEndEvent(arena, team1, team2));
                 }
                 break;
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler
     public void onMoveEvent(PlayerMoveEvent event) {
         Player player = event.getPlayer();
 
@@ -361,7 +372,7 @@ public class ArenaListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler
     public void onPlayerTeleport(PlayerTeleportEvent event) {
         if (event.getCause() == PlayerTeleportEvent.TeleportCause.ENDER_PEARL) {
             Location to = event.getTo();
@@ -377,51 +388,38 @@ public class ArenaListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler
     public void onUserExitBounds(UserExitArenaBoundsEvent event) {
 
-        if (event.getArena().getStage() == ArenaStage.PLAYING) {
-            Practice.getInstance().getServer().getPluginManager().callEvent(new UserDeathEvent(event.getArena(), event.getUser(), event.getUser().getLastDamager(), event.getUser().isLastMember()));
-            event.getUser().getPlayer().teleport(event.getArena().getMap().getArea().getTeamSpawn1());
-        } else if (event.getArena().getStage() == ArenaStage.ENDING) {
-            event.getUser().getPlayer().teleport(event.getArena().getMap().getArea().getTeamSpawn1());
+        User user = event.getUser();
+
+        Arena arena = event.getArena();
+
+        if (user == null || arena == null) {
+            return;
         }
 
-    }
+        if (arena.getStage() == ArenaStage.PLAYING) {
+            Practice.getInstance().getServer().getPluginManager().callEvent(new UserDeathEvent(arena, user, user.getLastDamager(), user.isLastMember()));
+            user.getPlayer().teleport(arena.getMap().getArea().getTeamSpawn1());
+        } else if (arena.getStage() == ArenaStage.ENDING) {
+            user.getPlayer().teleport(arena.getMap().getArea().getTeamSpawn1());
+        }
 
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onArenaStart(ArenaStartEvent event) {
-//        event.getArena().getTeams().forEach(team -> {
-//            team.getAllMembers().forEach(members -> {
-//                event.getArena().getGame().handleInventory(members);
-//            });
-//        });
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onArenaEnd(ArenaEndEvent event) {
 
-        if (event.getArena() == null) {
+        Arena arena = event.getArena();
+
+        if (arena == null || arena.getData() == null) {
             return;
         }
 
-        Arena arena = event.getArena();
+        DuelData data = arena.getData();
 
-        event.getArena().getAllTeamMembers().forEach(members -> {
-
-            if (arena.getAllLiveMembers().contains(members)) {
-                arena.getGame().handlePostMatchInventory(members);
-            }
-
-            members.getPlayer().getInventory().clear();
-            members.getPlayer().getInventory().setArmorContents(null);
-
-        });
-
-        DuelData data = event.getArena().getData();
-
-        for (Player player : event.getArena().getWorld().getPlayers()) {
+        for (Player player : arena.getWorld().getPlayers()) {
 
             User user = User.fetch(player.getUniqueId());
 
@@ -429,8 +427,10 @@ public class ArenaListener implements Listener {
                 continue;
             }
 
-            if (data == null) {
-                continue;
+            if (arena.getAllLiveMembers().contains(user)) {
+                arena.getGame().handlePostMatchInventory(user);
+                user.getPlayer().getInventory().clear();
+                user.getPlayer().getInventory().setArmorContents(null);
             }
 
             if (arena.is1v1()) {
@@ -484,29 +484,30 @@ public class ArenaListener implements Listener {
 
             }
 
-            user.getAccount().getData().setCurrentDuelContextUuid(null);
-            user.getAccount().getData().saveData();
+            user.getAccount().getData().setCurrentDuelUuid(null);
+            async(() -> user.getAccount().getData().saveData());
         }
 
         delay(() -> {
+            for (Player player : arena.getWorld().getPlayers()) {
 
-            arena.getAllTeamMembers().forEach(members -> {
-                arena.getGame().handleQuit(members);
-            });
+                User user = User.fetch(player.getUniqueId());
 
-            arena.getCurrentSpectators().forEach(spectators -> {
-                arena.getGame().handleQuit(spectators);
-            });
+                if (user == null) {
+                    continue;
+                }
+
+                arena.getGame().handleQuit(user);
+            }
 
             arena.reset();
-
         }, 4);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onUserDeath(UserDeathEvent event) {
 
-        if (event.getArena() == null || event.getDead().getTeam() == null) {
+        if (event.getArena() == null || event.getDead() == null || event.getDead().getTeam() == null) {
             return;
         }
 
@@ -552,14 +553,22 @@ public class ArenaListener implements Listener {
         if (event.getKiller() == null) {
 
             for (User members : arena.getAllTeamMembers()) {
-                if (members == null) continue;
+
+                if (members == null) {
+                    continue;
+                }
+
                 members.getPlayer().sendMessage(dead.getName() + " morreu.");
             }
 
         } else {
 
             for (User members : arena.getAllTeamMembers()) {
-                if (members == null) continue;
+
+                if (members == null) {
+                    continue;
+                }
+
                 members.getPlayer().sendMessage(dead.getPlayer().getName() + " foi morto por " + event.getKiller().getPlayer().getName());
             }
         }
@@ -572,13 +581,14 @@ public class ArenaListener implements Listener {
             return;
         }
 
-        async(() -> deathStyle.getExecutor().execute(dead.getPlayer()));
+        deathStyle.getExecutor().execute(dead.getPlayer());
 
         dead.getTeam().addDeadMember(event.getDead());
 
         if (event.isLastMember()) {
 
             ArenaTeam winnersTeam;
+
             if (event.getKiller() == null) {
                 winnersTeam = event.getDead().getTeam().getOpponent();
             } else {
@@ -595,16 +605,20 @@ public class ArenaListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler
     public void onArenaWin(ArenaWinEvent event) {
-
-        if (event.getArena() == null) {
-            return;
-        }
 
         Arena arena = event.getArena();
 
-        if (event.getWinnerTeam() == null || event.getLoserTeam() == null) {
+        if (arena == null) {
+            return;
+        }
+
+        ArenaTeam winnerTeam = event.getWinnerTeam();
+        ArenaTeam loserTeam = event.getLoserTeam();
+
+        if (winnerTeam == null || loserTeam == null || (winnerTeam.getAllMembers().isEmpty() && loserTeam.getAllMembers().isEmpty())) {
+            arena.reset();
             return;
         }
 
@@ -616,10 +630,8 @@ public class ArenaListener implements Listener {
             int newRatingWinnerTeam = RatingUtil.calculateRating(event.getWinnerTeam().getAverageRating(), event.getLoserTeam().getAverageRating(), 1);
             int newRatingLoserTeam = RatingUtil.calculateRating(event.getLoserTeam().getAverageRating(), event.getWinnerTeam().getAverageRating(), 0);
 
-            async(() -> {
-                event.getWinnerTeam().setAverageRating(newRatingWinnerTeam);
-                event.getLoserTeam().setAverageRating(newRatingLoserTeam);
-            });
+            event.getWinnerTeam().setAverageRating(newRatingWinnerTeam);
+            event.getLoserTeam().setAverageRating(newRatingLoserTeam);
 
             int differenceRatingWinnerTeam = newRatingWinnerTeam - oldRatingWinnerTeam;
             int differenceRatingLoserTeam = oldRatingLoserTeam - newRatingLoserTeam;

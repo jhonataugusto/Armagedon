@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 /**
  * Interface da classe {@link DuelData} para atualizar,adicionar,remover dados do Redis.
  */
-public class DuelContextRedisCRUD {
+public class DuelRedisCRUD {
 
     private static final JedisPool JEDIS_POOL = Core.JEDIS_POOL;
     private static final String DUELS_CACHE = Core.REDIS_CACHE.DUELS_DATABASE_CACHE;
@@ -47,8 +47,8 @@ public class DuelContextRedisCRUD {
     }
 
     public static void refreshDuels() {
-        DuelContextRedisCRUD.getDuels().forEach(duel -> {
-            DuelContextRedisCRUD.delete(duel.getUuid());
+        DuelRedisCRUD.getDuels().forEach(duel -> {
+            DuelRedisCRUD.delete(duel.getUuid());
         });
     }
 }

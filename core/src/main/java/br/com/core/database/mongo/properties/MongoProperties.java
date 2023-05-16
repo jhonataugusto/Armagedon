@@ -15,4 +15,11 @@ public class MongoProperties {
         this.username = username;
         this.password = password;
     }
+
+    public MongoProperties(String host, int port) {
+        this.host = host;
+        this.port = port;
+        this.username = username;
+        this.password = password;
+    }
 }

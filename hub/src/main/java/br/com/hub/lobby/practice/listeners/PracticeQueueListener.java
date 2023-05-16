@@ -1,7 +1,9 @@
 package br.com.hub.lobby.practice.listeners;
 
+import br.com.core.crud.redis.ServerRedisCRUD;
+import br.com.core.data.ServerData;
 import br.com.hub.Hub;
-import br.com.core.crud.redis.DuelContextRedisCRUD;
+import br.com.core.crud.redis.DuelRedisCRUD;
 import br.com.core.data.DuelData;
 import br.com.core.enums.server.Server;
 import br.com.hub.events.PlayerEnterQueueEvent;
@@ -29,6 +31,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
 import static br.com.hub.util.scheduler.SchedulerUtils.async;
+import static br.com.hub.util.scheduler.SchedulerUtils.sync;
 
 @Getter
 public class PracticeQueueListener implements Listener {
@@ -70,25 +73,25 @@ public class PracticeQueueListener implements Listener {
         user1.getPlayer().getInventory().clear();
         user2.getPlayer().getInventory().clear();
 
-        DuelData duelContext = new DuelData();
+        DuelData duel = new DuelData();
 
-        duelContext.getTeam1().add(user1.getUuid());
-        duelContext.getTeam2().add(user2.getUuid());
+        duel.getTeam1().add(user1.getUuid());
+        duel.getTeam2().add(user2.getUuid());
 
         DuelProperties properties = event.getProperties();
 
-        duelContext.setCustom(false);
-        duelContext.setRanked(properties.isRanked());
-        duelContext.setGameModeName(properties.getMode());
+        duel.setCustom(false);
+        duel.setRanked(properties.isRanked());
+        duel.setGameModeName(properties.getMode());
 
-        GameMode mode = GameMode.getByName(duelContext.getGameModeName());
+        GameMode mode = GameMode.getByName(duel.getGameModeName());
         String mapName = Maps.getRandomMap(mode).getName();
 
-        duelContext.setMapName(mapName);
+        duel.setMapName(mapName);
 
-        DuelContextRedisCRUD.save(duelContext);
+        DuelRedisCRUD.save(duel);
 
-        async(() -> {
+        sync(() -> {
             BungeeUtils.connect(user1.getPlayer(), Server.PRACTICE);
             BungeeUtils.connect(user2.getPlayer(), Server.PRACTICE);
         });
@@ -133,10 +136,21 @@ public class PracticeQueueListener implements Listener {
 
                 if (nbt.getString(PracticeItems.RANKED_UNRANKED.getKEY()).equals(PracticeItems.RANKED_UNRANKED.getValue())) {
                     User user = User.fetch(event.getPlayer().getUniqueId());
+
+                    ServerData practiceServer = ServerRedisCRUD.findByName(Server.PRACTICE);
+
+                    if (practiceServer == null) {
+                        return;
+                    }
+
+                    if (!practiceServer.isOnline()) {
+                        user.getPlayer().sendMessage(org.bukkit.ChatColor.RED + "As arenas estão desligadas.");
+                        return;
+                    }
+
                     if (!instance.getQueue().inQueue(user)) {
                         PracticeGUI.INVENTORY.open(user.getPlayer());
                     }
-
                 }
             }
         });

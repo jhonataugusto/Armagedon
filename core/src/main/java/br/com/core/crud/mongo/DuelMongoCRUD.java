@@ -1,7 +1,6 @@
 package br.com.core.crud.mongo;
 
 import br.com.core.Core;
-import br.com.core.data.AccountData;
 import br.com.core.data.DuelData;
 import br.com.core.database.mongo.collections.CollectionProps;
 import com.mongodb.client.MongoClient;
@@ -14,7 +13,7 @@ import java.util.UUID;
 /**
  * Interface da classe {@link DuelData} para atualizar,adicionar,remover dados do MongoDB.
  * */
-public class DuelContextMongoCRUD {
+public class DuelMongoCRUD {
     private static final String URI = Core.MONGODB.getMONGO_URI();
     private static final String MONGO_DATABASE_NAME = Core.MONGODB.getMONGO_DATABASE_NAME();
     private static final String MONGO_COLLECTION_NAME = CollectionProps.DUELS.getName();

@@ -1,7 +1,7 @@
 package br.com.practice;
 
 import br.com.core.Core;
-import br.com.core.crud.redis.DuelContextRedisCRUD;
+import br.com.core.crud.redis.DuelRedisCRUD;
 import br.com.practice.arena.storage.ArenaStorage;
 import br.com.practice.game.storage.GameStorage;
 import br.com.practice.task.ArenaPulseTask;
@@ -61,7 +61,7 @@ public class Practice extends JavaPlugin {
         inventoryManager = new InventoryManager(this);
         inventoryManager.init();
 
-        DuelContextRedisCRUD.refreshDuels();
+        DuelRedisCRUD.refreshDuels();
     }
 
     @Override
@@ -70,7 +70,7 @@ public class Practice extends JavaPlugin {
         getArenaStorage().getArenas().forEach((id, arena) -> getArenaStorage().unload(id));
         getUserStorage().getUsers().clear();
         getGameStorage().unload();
-        DuelContextRedisCRUD.refreshDuels();
+        DuelRedisCRUD.refreshDuels();
         Bukkit.getScheduler().cancelAllTasks();
     }
 

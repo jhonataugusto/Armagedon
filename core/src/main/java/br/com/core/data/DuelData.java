@@ -2,8 +2,8 @@ package br.com.core.data;
 
 import br.com.core.Core;
 import br.com.core.account.Account;
-import br.com.core.crud.mongo.DuelContextMongoCRUD;
-import br.com.core.crud.redis.DuelContextRedisCRUD;
+import br.com.core.crud.mongo.DuelMongoCRUD;
+import br.com.core.crud.redis.DuelRedisCRUD;
 import br.com.core.utils.json.JsonUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -55,23 +55,23 @@ public class DuelData implements Serializable {
     }
 
     public void saveData() {
-        DuelContextRedisCRUD.save(this);
+        DuelRedisCRUD.save(this);
 
-        DuelData data = DuelContextMongoCRUD.get(this.getUuid());
+        DuelData data = DuelMongoCRUD.get(this.getUuid());
 
         if (data == null) {
-            DuelContextMongoCRUD.create(this);
+            DuelMongoCRUD.create(this);
         } else {
-            DuelContextMongoCRUD.save(this);
+            DuelMongoCRUD.save(this);
         }
     }
 
     public DuelData updateData() {
-        return DuelContextRedisCRUD.findByUuid(uuid);
+        return DuelRedisCRUD.findByUuid(uuid);
     }
 
     public void deleteData() {
-        DuelContextRedisCRUD.delete(getUuid());
+        DuelRedisCRUD.delete(getUuid());
     }
 
     public String toJson() {
@@ -83,15 +83,15 @@ public class DuelData implements Serializable {
     }
 
     public static DuelData getContext(Account account) {
-        return DuelContextRedisCRUD.getDuels().stream().filter(duel -> duel.getTeam1().contains(account.getUuid()) || duel.getTeam2().contains(account.getUuid())).findFirst().orElse(null);
+        return DuelRedisCRUD.getDuels().stream().filter(duel -> duel.getTeam1().contains(account.getUuid()) || duel.getTeam2().contains(account.getUuid())).findFirst().orElse(null);
     }
 
     public static DuelData getSpectatorContext(Account account) {
-        return DuelContextRedisCRUD.getDuels().stream().filter(duel -> duel.getRegisteredSpectators().contains(account.getUuid())).findFirst().orElse(null);
+        return DuelRedisCRUD.getDuels().stream().filter(duel -> duel.getSpectators().contains(account.getUuid())).findFirst().orElse(null);
     }
 
-    public static void removeAllDuelContextsFromAccount(Account account) {
-        List<DuelData> duels = DuelContextRedisCRUD.getDuels().stream().filter(duel -> duel.getTeam1().contains(account.getUuid()) || duel.getTeam2().contains(account.getUuid())).collect(Collectors.toList());
+    public static void removeDuelsFromAccount(Account account) {
+        List<DuelData> duels = DuelRedisCRUD.getDuels().stream().filter(duel -> duel.getTeam1().contains(account.getUuid()) || duel.getTeam2().contains(account.getUuid())).collect(Collectors.toList());
         duels.forEach(duel -> {
             duel.saveData();
             duel.deleteData();

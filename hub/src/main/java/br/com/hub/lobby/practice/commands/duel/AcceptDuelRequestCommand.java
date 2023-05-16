@@ -1,9 +1,9 @@
 package br.com.hub.lobby.practice.commands.duel;
 
-import br.com.core.crud.redis.DuelContextRedisCRUD;
+import br.com.core.crud.redis.DuelRedisCRUD;
+import br.com.core.crud.redis.ServerRedisCRUD;
 import br.com.core.data.DuelData;
-import br.com.core.enums.game.GameMode;
-import br.com.core.enums.map.Maps;
+import br.com.core.data.ServerData;
 import br.com.core.enums.server.Server;
 import br.com.hub.user.User;
 import br.com.hub.user.request.DuelRequest;
@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 
 import static br.com.hub.util.scheduler.SchedulerUtils.async;
+import static br.com.hub.util.scheduler.SchedulerUtils.sync;
 
 @CommandAlias("acceptduel|acceptMatch|acceptX1|acceptChallenge|acceptDuelRequest")
 @Description("Aceita um duelo de um jogador")
@@ -48,8 +49,24 @@ public class AcceptDuelRequestCommand extends BaseCommand {
             return;
         }
 
-        if(requestedUser.getRequestById(requestId).hasExpired()) {
+        if (requestedUser.getRequestById(requestId).hasExpired()) {
             requested.sendMessage(ChatColor.RED + "Esse duelo já expirou");
+            return;
+        }
+
+        ServerData practiceServer = ServerRedisCRUD.findByName(Server.PRACTICE);
+
+        if (practiceServer == null) {
+            String serverNotExistsMessage = ChatColor.RED + "O servidor não existe";
+            requested.sendMessage(serverNotExistsMessage);
+            challengerUser.getPlayer().sendMessage(serverNotExistsMessage);
+            return;
+        }
+
+        if (!practiceServer.isOnline()) {
+            String offlineServerMessage = ChatColor.RED + "O servidor não está ligado.";
+            requested.sendMessage(offlineServerMessage);
+            challengerUser.getPlayer().sendMessage(offlineServerMessage);
             return;
         }
 
@@ -65,11 +82,11 @@ public class AcceptDuelRequestCommand extends BaseCommand {
         duel.setGameModeName(request.getMode().getName());
         duel.setMapName(request.getMapName());
 
-        DuelContextRedisCRUD.save(duel);
+        DuelRedisCRUD.save(duel);
 
         requestedUser.getDuelRequests().remove(request);
 
-        async(() -> {
+        sync(() -> {
             BungeeUtils.connect(requested.getPlayer(), Server.PRACTICE);
             BungeeUtils.connect(challenger.getPlayer(), Server.PRACTICE);
         });

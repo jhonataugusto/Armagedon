@@ -7,7 +7,6 @@ import org.bukkit.entity.Entity;
 
 import java.util.Set;
 
-import static br.com.practice.util.scheduler.SchedulerUtils.async;
 import static br.com.practice.util.scheduler.SchedulerUtils.sync;
 
 public class WorldHandler {

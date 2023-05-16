@@ -1,6 +1,8 @@
 package br.com.bungee.commands;
 
 import br.com.bungee.Bungee;
+import br.com.core.account.Account;
+import br.com.core.account.enums.rank.Rank;
 import br.com.core.crud.redis.ServerRedisCRUD;
 import br.com.core.data.ServerData;
 import br.com.core.enums.server.Server;
@@ -15,6 +17,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 
 @CommandAlias("close|fechar")
@@ -23,6 +26,15 @@ public class CloseCommand extends BaseCommand {
 
     @Default
     public void onClose(ProxiedPlayer player, @Single String serverName) {
+        Account account = Account.fetch(player.getUniqueId());
+
+        Rank accountRank = account.getRank();
+
+        List<Rank> executiveStaff = Rank.getRanksByStafferLevel(Rank.StafferLevel.EXECUTIVE);
+
+        if (!executiveStaff.contains(accountRank)) {
+            return;
+        }
 
         if (Server.getByName(serverName) == null && !serverName.equalsIgnoreCase("bungee")) {
             player.sendMessage(ChatColor.RED + "Esse servidor não existe.");

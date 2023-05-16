@@ -1,6 +1,6 @@
 package br.com.hub.lobby.practice.commands.match;
 
-import br.com.core.crud.mongo.DuelContextMongoCRUD;
+import br.com.core.crud.mongo.DuelMongoCRUD;
 import br.com.core.data.DuelData;
 import br.com.hub.gui.statistics.TeamChooseGUI;
 import co.aikar.commands.BaseCommand;
@@ -22,7 +22,7 @@ public class MatchCommand extends BaseCommand {
 
         UUID uuid = UUID.fromString(duelUuid);
 
-        DuelData duelData = DuelContextMongoCRUD.get(uuid);
+        DuelData duelData = DuelMongoCRUD.get(uuid);
 
 
         if (duelData == null) {

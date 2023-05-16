@@ -23,15 +23,14 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 import static br.com.practice.util.scheduler.SchedulerUtils.async;
-import static br.com.practice.util.scheduler.SchedulerUtils.delay;
 
 public class SpectatorListener implements Listener {
     @EventHandler
     public void onSpectatorEnter(SpectatorEnterArenaEvent event) {
-        Player spectator = event.getSpectator().getPlayer();
+        User spectator = event.getSpectator();
         Arena arena = event.getArena();
 
-        event.getSpectator().setArena(arena);
+        spectator.setArena(arena);
 
         boolean isPresent = arena.getAllTeamMembers().stream().findAny().isPresent();
 
@@ -41,40 +40,46 @@ public class SpectatorListener implements Listener {
 
         User anyUserOnThisArena = arena.getAllTeamMembers().stream().findAny().get();
 
-        spectator.teleport(anyUserOnThisArena.getPlayer().getLocation());
+        spectator.getPlayer().teleport(anyUserOnThisArena.getPlayer().getLocation());
 
-        Visibility.invisible(spectator, arena.getAllTeamMembers());
+        Visibility.invisible(spectator.getPlayer(), arena.getAllTeamMembers());
 
-        spectator.setAllowFlight(true);
-        spectator.setFlying(true);
-        spectator.setHealth(20);
-        spectator.getInventory().clear();
-        spectator.getInventory().setArmorContents(null);
-        spectator.getActivePotionEffects().forEach(potionEffect -> spectator.getPlayer().removePotionEffect(potionEffect.getType()));
+        spectator.getPlayer().setAllowFlight(true);
+        spectator.getPlayer().setFlying(true);
+        spectator.getPlayer().setHealth(20);
+        spectator.getPlayer().setFireTicks(0);
+        spectator.getPlayer().getInventory().clear();
+        spectator.getPlayer().getInventory().setArmorContents(null);
+        spectator.getPlayer().getActivePotionEffects().forEach(potionEffect -> spectator.getPlayer().removePotionEffect(potionEffect.getType()));
 
 
-        spectator.sendMessage("Assistindo a arena: " + ChatColor.GRAY + arena.getDisplayArenaId());
+        spectator.getPlayer().sendMessage("Assistindo a arena: " + ChatColor.GRAY + arena.getDisplayArenaId());
 
         for (SpectatorItems items : SpectatorItems.values()) {
-            spectator.getInventory().setItem(items.getPosition(), items.toItemStack());
+            spectator.getPlayer().getInventory().setItem(items.getPosition(), items.toItemStack());
         }
 
-        event.getArena().getCurrentSpectators().add(event.getSpectator());
+        arena.getCurrentSpectators().add(spectator);
+        arena.getData().getRegisteredSpectators().add(spectator.getUuid());
 
-        event.getArena().getData().getRegisteredSpectators().add(event.getSpectator().getUuid());
-        event.getArena().getData().getSpectators().remove(event.getSpectator().getUuid());
+        async(() -> arena.getData().saveData());
 
-        async(() -> event.getArena().getData().saveData());
-
-        event.getArena().handleScoreboard(event.getSpectator());
+        arena.handleScoreboard(spectator);
     }
 
     @EventHandler
     public void onSpectatorLeave(SpectatorLeaveArenaEvent event) {
-        event.getSpectator().setArena(null);
+        User spectator = event.getSpectator();
+        Arena arena = event.getArena();
 
-        event.getArena().getCurrentSpectators().remove(event.getSpectator());
-        event.getArena().removeScoreboard(event.getSpectator());
+        spectator.setArena(null);
+
+        arena.getCurrentSpectators().remove(spectator);
+        arena.getData().getSpectators().remove(spectator.getUuid());
+
+        async(() -> arena.getData().saveData());
+
+        arena.removeScoreboard(spectator);
     }
 
     @EventHandler

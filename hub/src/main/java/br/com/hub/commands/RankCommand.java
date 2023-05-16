@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,10 +25,10 @@ import java.util.regex.Pattern;
 import static br.com.hub.util.scheduler.SchedulerUtils.async;
 
 @CommandAlias("rank|r|cargo")
+@Description("Atualiza cargos de jogadores")
 public class RankCommand extends BaseCommand {
 
     @Default
-    @Description("Atualiza cargos de jogadores")
     public void onAdd(Player sender, String name, String rankName, String duration) {
 
         User userSender = User.fetch(sender.getUniqueId());
@@ -37,7 +38,10 @@ public class RankCommand extends BaseCommand {
             return;
         }
 
-        if (!Rank.getRanksByStafferLevel(Rank.StafferLevel.MANAGERIAL).contains(rankSender)) {
+        List<Rank> managerialStaff = Rank.getRanksByStafferLevel(Rank.StafferLevel.MANAGERIAL);
+        List<Rank> executiveStaff = Rank.getRanksByStafferLevel(Rank.StafferLevel.EXECUTIVE);
+
+        if (!managerialStaff.contains(rankSender) && !executiveStaff.contains(rankSender)) {
             return;
         }
 
@@ -62,7 +66,7 @@ public class RankCommand extends BaseCommand {
             Account account = Account.fetch(target.getUniqueId());
             accountData = account.getData();
 
-            if(target.equals(sender)) {
+            if (target.equals(sender)) {
                 return;
             }
         }
