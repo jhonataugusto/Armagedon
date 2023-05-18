@@ -11,7 +11,8 @@ import java.util.UUID;
 
 @Getter
 public class AccountStorage {
-    public HashMap<UUID, Account> accounts = new HashMap<>();
+    private HashMap<UUID, Account> accounts = new HashMap<>();
+
     public void register(UUID uuid, Account account) {
         getAccounts().put(uuid, account);
     }
@@ -19,16 +20,15 @@ public class AccountStorage {
     public void unregister(UUID uuid) {
         getAccounts().remove(uuid);
         AccountData accountData = AccountRedisCRUD.findByUuid(uuid);
-        if(accountData != null) {
+        if (accountData != null) {
             AccountMongoCRUD.save(accountData);
+            accountData.deleteData();
         }
-        AccountRedisCRUD.delete(uuid);
     }
 
     public Account getAccount(UUID uuid) {
         return getAccounts().get(uuid);
     }
-
 
     public HashMap<UUID, Account> getAccounts() {
         return accounts;

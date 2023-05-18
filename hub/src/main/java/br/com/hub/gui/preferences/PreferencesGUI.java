@@ -89,9 +89,7 @@ public class PreferencesGUI implements InventoryProvider {
                     preferenceDAO.setActive(!preferenceDAO.isActive());
                 }
 
-                async(() -> {
-                    user.getAccount().getData().saveData();
-                });
+                async(user.getAccount().getData()::saveData);
 
                 player.updateInventory();
                 this.getINVENTORY().open(player);

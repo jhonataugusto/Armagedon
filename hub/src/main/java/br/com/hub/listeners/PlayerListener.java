@@ -1,10 +1,14 @@
 package br.com.hub.listeners;
 
+import br.com.core.Core;
 import br.com.core.account.enums.rank.Rank;
+import br.com.core.data.object.PunishmentDAO;
 import br.com.core.data.object.RankDAO;
 import br.com.hub.Hub;
 import br.com.hub.user.User;
 import br.com.hub.util.tag.TagUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,6 +16,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.*;
+
+import java.util.Date;
+
+import static br.com.hub.util.scheduler.SchedulerUtils.async;
 
 public class PlayerListener implements Listener {
 
@@ -23,17 +31,6 @@ public class PlayerListener implements Listener {
         User user = new User(player.getUniqueId());
 
         Hub.getInstance().getUserStorage().register(user.getUuid(), user);
-
-        RankDAO rankDAO = user.getAccount().getData().getRanks().stream().findFirst().get();
-        boolean rankHasExpired = rankDAO.getExpiration() < System.currentTimeMillis() && rankDAO.getExpiration() != -1;
-
-        if (rankHasExpired) {
-            user.getAccount().setRank(Rank.MEMBER, -1L);
-            user.getAccount().getData().saveData();
-            user.getPlayer().sendMessage(ChatColor.GRAY + "Seu rank expirou, você retornou ao rank padrão.");
-        }
-
-        user.getAccount().getData().setCurrentDuelUuid(null);
 
         user.setLobby(Hub.getInstance().getLobby());
 

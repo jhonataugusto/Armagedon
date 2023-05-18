@@ -4,6 +4,7 @@ import br.com.hub.Hub;
 import br.com.hub.gui.preferences.PreferencesGUI;
 import br.com.hub.gui.rank.LeaderboardsGUI;
 import br.com.hub.gui.editor.ModeEditSelectorGUI;
+import br.com.hub.gui.spectators.ActualDuelsGUI;
 import br.com.hub.items.PracticeItems;
 import de.tr7zw.changeme.nbtapi.NBT;
 import org.bukkit.ChatColor;
@@ -44,19 +45,19 @@ public class PracticePlayerListener implements Listener {
             return;
         }
 
+        Player player = event.getPlayer();
+
         NBT.modify(event.getItem(), nbt -> {
             if (nbt.hasCustomNbtData()) {
 
                 if (nbt.getString(PracticeItems.KIT_EDITOR.getKEY()).equals(PracticeItems.KIT_EDITOR.getValue())) {
-                    ModeEditSelectorGUI.INVENTORY.open(event.getPlayer());
-                }
-
-                if (nbt.getString(PracticeItems.LEADERBOARD.getKEY()).equals(PracticeItems.LEADERBOARD.getValue())) {
-                    LeaderboardsGUI.INVENTORY.open(event.getPlayer());
-                }
-
-                if (nbt.getString(PracticeItems.CONFIGURATIONS.getKEY()).equals(PracticeItems.CONFIGURATIONS.getValue())) {
-                    new PreferencesGUI().getINVENTORY().open(event.getPlayer());
+                    ModeEditSelectorGUI.INVENTORY.open(player);
+                } else if (nbt.getString(PracticeItems.LEADERBOARD.getKEY()).equals(PracticeItems.LEADERBOARD.getValue())) {
+                    LeaderboardsGUI.INVENTORY.open(player);
+                } else if (nbt.getString(PracticeItems.CONFIGURATIONS.getKEY()).equals(PracticeItems.CONFIGURATIONS.getValue())) {
+                    new PreferencesGUI().getINVENTORY().open(player);
+                } else if (nbt.getString(PracticeItems.DUELS.getKEY()).equals(PracticeItems.DUELS.getValue())) {
+                    ActualDuelsGUI.INVENTORY.open(player);
                 }
             }
         });

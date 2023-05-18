@@ -23,6 +23,7 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 import static br.com.practice.util.scheduler.SchedulerUtils.async;
+import static br.com.practice.util.scheduler.SchedulerUtils.sync;
 
 public class SpectatorListener implements Listener {
     @EventHandler
@@ -157,7 +158,7 @@ public class SpectatorListener implements Listener {
 
                 if (nbt.getString(SpectatorItems.BACK_TO_LOBBY.getKey()).equals(SpectatorItems.BACK_TO_LOBBY.getValue())) {
 
-                    BungeeUtils.connect(player, Server.LOBBY_PRACTICE);
+                    sync(() -> BungeeUtils.connect(player, Server.LOBBY_PRACTICE));
                     Spectator.unspectate(player, arena);
                 }
 

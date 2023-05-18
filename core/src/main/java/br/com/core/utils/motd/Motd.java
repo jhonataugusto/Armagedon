@@ -1,7 +1,6 @@
-package br.com.bungee.util.motd;
+package br.com.core.utils.motd;
 
 import br.com.core.Core;
-import net.md_5.bungee.api.ChatColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +9,7 @@ public class Motd {
     public static final List<String> MOTDS = new ArrayList<>();
 
     static {
-        MOTDS.add("     nosso Discord: " + ChatColor.AQUA + Core.SERVER_DISCORD);
+        MOTDS.add("     nosso Discord: §b" + Core.SERVER_DISCORD);
         MOTDS.add("     Mostre a sua habilidade no PVP!");
         MOTDS.add("     Venha lutar no nosso servidor de PVP.");
         MOTDS.add("     Você está pronto para lutar?");

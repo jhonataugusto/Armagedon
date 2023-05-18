@@ -99,9 +99,7 @@ public abstract class Game implements Listener {
 
         user.getAccount().getData().setCurrentDuelUuid(user.getArena().getData().getUuid().toString());
 
-        async(() -> {
-            user.getAccount().getData().saveData();
-        });
+        async(user.getAccount().getData()::saveData);
     }
 
     public void handleQuit(User user) {
@@ -122,7 +120,7 @@ public abstract class Game implements Listener {
 
         DuelData.removeDuelsFromAccount(user.getAccount());
 
-        BungeeUtils.connect(user.getPlayer(), Server.LOBBY_PRACTICE);
+        async(() -> BungeeUtils.connect(user.getPlayer(), Server.LOBBY_PRACTICE));
     }
 
     public void handleInventory(User user) {

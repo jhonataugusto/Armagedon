@@ -282,8 +282,6 @@ public class Arena {
             getWorld().getEntities().forEach(Entity::remove);
             getCurrentSpectators().clear();
 
-            getWorld().save();
-
             if (getData() != null) {
                 setData(null);
             }

@@ -1,5 +1,6 @@
 package br.com.bungee.commands;
 
+import br.com.bungee.Bungee;
 import br.com.core.account.Account;
 import br.com.core.account.enums.preferences.Preference;
 import br.com.core.data.DuelData;
@@ -15,6 +16,8 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
 
 import java.util.UUID;
+
+import static br.com.bungee.util.scheduler.SchedulerUtils.async;
 
 @CommandAlias("spec|spectar|spectate|assistir|open")
 @Description("Assista a partida dos jogadores")
@@ -96,6 +99,6 @@ public class SpecCommand extends BaseCommand {
 
         data.saveData();
 
-        sender.connect(server.getInfo());
+        async(() ->sender.connect(server.getInfo()));
     }
 }

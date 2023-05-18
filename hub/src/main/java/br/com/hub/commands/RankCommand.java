@@ -9,6 +9,7 @@ import br.com.hub.user.User;
 import br.com.hub.util.tag.TagUtil;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
+import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Description;
 import org.bukkit.Bukkit;
@@ -29,6 +30,7 @@ import static br.com.hub.util.scheduler.SchedulerUtils.async;
 public class RankCommand extends BaseCommand {
 
     @Default
+    @CommandCompletion("@players")
     public void onAdd(Player sender, String name, String rankName, String duration) {
 
         User userSender = User.fetch(sender.getUniqueId());
@@ -63,7 +65,8 @@ public class RankCommand extends BaseCommand {
             }
 
         } else {
-            Account account = Account.fetch(target.getUniqueId());
+            User user = User.fetch(target.getUniqueId());
+            Account account = user.getAccount();
             accountData = account.getData();
 
             if (target.equals(sender)) {
@@ -97,11 +100,12 @@ public class RankCommand extends BaseCommand {
                 accountData.getRanks().add(new RankDAO(rank.getName(), expirationTime));
             }
 
-            accountData.saveData();
+            async(accountData::saveData);
         });
 
         if (target != null) {
-            Account account = Account.fetch(target.getUniqueId());
+            User user = User.fetch(target.getUniqueId());
+            Account account = user.getAccount();
             account.setData(accountData);
         }
 

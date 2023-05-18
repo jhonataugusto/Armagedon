@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static br.com.practice.util.scheduler.SchedulerUtils.async;
+
 @Data
 public class ArenaTeam {
     private String name;
@@ -85,7 +87,7 @@ public class ArenaTeam {
                 }
             }
 
-            member.getAccount().getData().saveData();
+            async(member.getAccount().getData()::saveData);
         });
     }
 }

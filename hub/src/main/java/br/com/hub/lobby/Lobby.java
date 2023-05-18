@@ -53,7 +53,6 @@ public abstract class Lobby {
         this.world.setGameRuleValue("logAdminCommands", "false");
         this.world.setGameRuleValue("randomTickSpeed", "0");
         world.getEntities().forEach(Entity::remove);
-        sync(world::save);
         setSpawn(world.getSpawnLocation());
 
         createScoreboard();
@@ -67,14 +66,14 @@ public abstract class Lobby {
 
         User user = User.fetch(player.getUniqueId());
 
-        if(user == null) {
+        if (user == null) {
             return;
         }
 
         user.setScoreboard(getLobbyScoreboard());
     }
 
-    public void createScoreboard(){
+    public void createScoreboard() {
         setLobbyScoreboard(new JGlobalScoreboard(
                 () -> "§l" + Core.SERVER_NAME.toUpperCase(),
                 () -> {

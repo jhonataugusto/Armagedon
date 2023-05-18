@@ -16,6 +16,8 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.List;
 
+import static br.com.bungee.util.scheduler.SchedulerUtils.async;
+
 @CommandAlias("conectar|connect|server|go|ir|")
 @Description("se conectar em qualquer servidor")
 public class ConnectCommand extends BaseCommand {
@@ -42,6 +44,6 @@ public class ConnectCommand extends BaseCommand {
 
         ServerInfo serverInfo = Bungee.getInstance().getProxy().getServerInfo(serverName);
 
-        sender.connect(serverInfo);
+        async(() -> sender.connect(serverInfo));
     }
 }

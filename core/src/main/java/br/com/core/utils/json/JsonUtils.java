@@ -1,10 +1,7 @@
 package br.com.core.utils.json;
 
 import br.com.core.Core;
-import br.com.core.data.object.EloDAO;
-import br.com.core.data.object.InventoryDAO;
-import br.com.core.data.object.PreferenceDAO;
-import br.com.core.data.object.RankDAO;
+import br.com.core.data.object.*;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
@@ -78,6 +75,14 @@ public class JsonUtils {
                     field.set(object, listValue);
                 } else if (genericType.equals(PreferenceDAO.class)) {
                     Set<PreferenceDAO> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<Set<PreferenceDAO>>() {
+                    }.getType());
+                    field.set(object, listValue);
+                } else if (genericType.equals(PunishmentDAO.class)) {
+                    Set<PunishmentDAO> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<Set<PunishmentDAO>>() {
+                    }.getType());
+                    field.set(object, listValue);
+                } else if (genericType.equals(AltDAO.class)) {
+                    Set<AltDAO> listValue = Core.GSON.fromJson(jsonElement, new TypeToken<Set<AltDAO>>() {
                     }.getType());
                     field.set(object, listValue);
                 }

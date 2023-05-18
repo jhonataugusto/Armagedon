@@ -55,7 +55,7 @@ public class ArenaListener implements Listener {
     private final int HIT_BLOCK_LIMIT = 30;
     private final int HIT_CRITICAL_LIMIT = 50;
     private final int MAX_CPS = 15;
-    private final double MAX_RANGE = 3.3;
+    private final double MAX_RANGE = 4;
     private final int MAX_PING_TRIGGER = 100;
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -111,7 +111,6 @@ public class ArenaListener implements Listener {
         if (entity.getClicksPerSecond() >= MAX_CPS) {
             double reductionFactor = 1;
             double newDamage = event.getDamage() + (event.getDamage() * reductionFactor);
-            event.getEntity().sendMessage("aconteceu cps");
             event.setDamage(newDamage);
         }
 
@@ -181,7 +180,7 @@ public class ArenaListener implements Listener {
             event.setCancelled(true);
         }
 
-        if (finalDamage >= entityHealth) {
+        if ((event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK || event.getCause() == EntityDamageEvent.DamageCause.FALL) && finalDamage >= entityHealth) {
             event.setCancelled(true);
 
             if (entityUser.getLastDamager() != null) {
@@ -485,7 +484,7 @@ public class ArenaListener implements Listener {
             }
 
             user.getAccount().getData().setCurrentDuelUuid(null);
-            async(() -> user.getAccount().getData().saveData());
+            async(user.getAccount().getData()::saveData);
         }
 
         delay(() -> {
@@ -515,6 +514,8 @@ public class ArenaListener implements Listener {
         Arena arena = event.getArena();
 
         arena.getGame().handlePostMatchInventory(dead);
+        dead.getPlayer().getInventory().clear();
+        dead.getPlayer().getInventory().setArmorContents(null);
 
         if (event.getKiller() != null) {
 

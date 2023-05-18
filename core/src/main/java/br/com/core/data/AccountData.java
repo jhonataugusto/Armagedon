@@ -85,21 +85,21 @@ public class AccountData implements Serializable {
     /**
      * se não existir nenhuma conta no Redis ou no Mongo, ele cria e salva nos dois bancos de dados.
      */
-    public AccountData createOrGetAccountData() {
-        AccountData data = AccountRedisCRUD.findByUuid(getUuid());
+    public static AccountData fetch(UUID uuid) {
+
+        AccountData data = AccountRedisCRUD.findByUuid(uuid);
 
         if (data == null) {
-            data = AccountMongoCRUD.get(getUuid());
+
+            data = AccountMongoCRUD.get(uuid);
 
             if (data != null) {
                 AccountRedisCRUD.save(data);
+            } else {
+                data = new AccountData(uuid);
+                AccountRedisCRUD.save(data);
+                AccountMongoCRUD.create(data);
             }
-        }
-
-        if (data == null) {
-            data = new AccountData(getUuid());
-            AccountRedisCRUD.save(data);
-            AccountMongoCRUD.create(data);
         }
 
         return data;
@@ -111,13 +111,12 @@ public class AccountData implements Serializable {
     public void saveData() {
         AccountData oldData = AccountRedisCRUD.findByUuid(this.getUuid());
 
-        AccountRedisCRUD.save(this);
-
         if (oldData == null) {
-            return;
+            oldData = AccountMongoCRUD.get(this.getUuid());
         }
 
-        if (oldData.getName() == null) {
+        if (oldData != null && oldData.hashCode() != this.hashCode()) {
+            AccountRedisCRUD.save(this);
             AccountMongoCRUD.save(this);
         }
     }
@@ -162,4 +161,6 @@ public class AccountData implements Serializable {
     public PreferenceDAO getPreferenceByName(Preference preference) {
         return getPreferences().stream().filter(preferences -> preferences.getName().equalsIgnoreCase(preference.getName())).findFirst().orElse(null);
     }
+
+
 }

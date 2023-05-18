@@ -222,7 +222,8 @@ public class KitEditorGUI implements Listener {
                 user.getAccount().getData().getInventories().add(new InventoryDAO(editMode.get(player).getName(), inventorySerialized));
             }
 
-            user.getAccount().getData().saveData();
+
+            async(user.getAccount().getData()::saveData);
             editMode.remove(player);
 
             player.sendMessage(ChatColor.GREEN + "Inventário salvo com sucesso");

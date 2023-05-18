@@ -17,6 +17,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
+import static br.com.hub.util.scheduler.SchedulerUtils.async;
 import static br.com.hub.util.scheduler.SchedulerUtils.sync;
 
 import java.util.*;
@@ -66,7 +67,7 @@ public class ServerGUI implements InventoryProvider {
                 Server server = Server.getByName(item.getName());
 
                 if (online) {
-                    BungeeUtils.connect((Player) event.getWhoClicked(), server);
+                    async(() -> BungeeUtils.connect((Player) event.getWhoClicked(), server));
                 } else {
                     event.getWhoClicked().sendMessage(ChatColor.RED + "Este servidor está desligado.");
                 }
@@ -113,7 +114,7 @@ public class ServerGUI implements InventoryProvider {
                 Server server = Server.getByName(item.getName());
 
                 if (online) {
-                    BungeeUtils.connect((Player) event.getWhoClicked(), server);
+                    async(() -> BungeeUtils.connect((Player) event.getWhoClicked(), server));
                 } else {
                     event.getWhoClicked().sendMessage(ChatColor.RED + "Este servidor está desligado.");
                 }

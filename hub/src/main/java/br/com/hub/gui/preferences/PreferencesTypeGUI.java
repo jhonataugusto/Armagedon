@@ -93,7 +93,7 @@ public class PreferencesTypeGUI implements InventoryProvider {
                         prefDAO.setType(preferenceType.name().toLowerCase());
                     }
 
-                    async(() -> user.getAccount().getData().saveData());
+                    async(user.getAccount().getData()::saveData);
 
                     player.updateInventory();
                     this.getINVENTORY().open(player);

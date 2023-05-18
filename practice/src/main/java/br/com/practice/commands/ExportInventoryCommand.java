@@ -1,5 +1,6 @@
 package br.com.practice.commands;
 
+import br.com.core.account.Account;
 import br.com.core.account.enums.rank.Rank;
 import br.com.practice.user.User;
 import br.com.practice.util.serializer.SerializerUtils;

@@ -41,7 +41,7 @@ public class ServerData {
         }
     }
 
-    public void save(){
+    public void saveData(){
         ServerRedisCRUD.save(this);
     }
 

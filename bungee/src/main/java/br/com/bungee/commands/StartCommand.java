@@ -1,5 +1,6 @@
 package br.com.bungee.commands;
 
+import br.com.bungee.Bungee;
 import br.com.core.account.Account;
 import br.com.core.account.enums.rank.Rank;
 import br.com.core.enums.server.Server;
