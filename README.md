@@ -5,7 +5,7 @@ Core: módulo principal da rede, contendo as configurações globais e comuns a 
 
 Bungee: módulo responsável pelo servidor proxy, gerenciando as conexões dos jogadores aos diferentes servidores da rede;
 
-br.com.bungee.Practice: módulo responsável pela implementação de um sistema de duelos e partidas rápidas;
+Practice: módulo responsável pela implementação de um sistema de duelos e partidas rápidas;
 
 Hub: módulo que implementa um lobby central, onde os jogadores podem se encontrar e se preparar para acessar outros servidores da rede.
 
@@ -13,12 +13,13 @@ Hub: módulo que implementa um lobby central, onde os jogadores podem se encontr
 O projeto depende das seguintes tecnologias e bibliotecas:
 
 Java 11
-BungeeCord API 1.16.5
-Bukkit API 1.16.5
-Jedis 3.6.1
-MongoDB Java Driver 4.3.1
+BungeeCord API 
+Bukkit API 
+Jedis
+MongoDB Java Driver 
+
 # Como executar
-Para executar a rede, é necessário seguir os seguintes passos:
+Para executar a network, é necessário seguir os seguintes passos:
 
 Clonar o repositório para a máquina local;
 Configurar o arquivo de configuração config.yml presente no módulo Core, alterando as configurações de acordo com a necessidade do usuário;
@@ -34,6 +35,3 @@ Implementação de um back-end utilizando Spring.
 
 # Contribuindo
 Contribuições são bem-vindas! Sinta-se à vontade para enviar pull requests, relatar problemas e sugerir melhorias.
-
-Licença
-Este projeto é licenciado sob a Licença MIT. Veja o arquivo LICENSE para mais informações.
