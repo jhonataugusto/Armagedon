@@ -21,7 +21,7 @@ public class HasteBinUtils {
         conn.setRequestMethod("POST");
         conn.setRequestProperty("User-Agent", "Hastebin Java Api");
         conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
-        conn.setRequestProperty("Authorization", "Bearer 8f179fd2eca086106a6f6fe2aa4229059c62526bec0dadb459e421c3ebf762ed24d3ae8852f68cc0de4c5c9eb06654c9fced488ebf9fcbdb555739a1ec0442b2");
+        conn.setRequestProperty("Authorization", "Bearer //coloque seu token aqui -> hastebin API");
         conn.setUseCaches(false);
 
         String response = null;

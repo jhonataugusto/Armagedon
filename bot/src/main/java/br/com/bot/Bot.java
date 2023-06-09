@@ -18,13 +18,13 @@ public class Bot extends ListenerAdapter {
 
     public static void main(String[] args) {
         try {
-            JDA jda = JDABuilder.createDefault("MTEwOTMzMzIwNDI0NDExMTM5MA.GGU95S.GWUgfN8p_oZC9uf98wpqOsGbHpPpa3G_NmPhnc")
+            JDA jda = JDABuilder.createDefault("//INSIRA SEU TOKEN AQUI")
                     .enableIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
                     .addEventListeners(new Bot())
                     .build();
 
             subscribe(((channel, message) -> {
-                TextChannel textChannel = jda.getTextChannelById("1109402411786842154");
+                TextChannel textChannel = jda.getTextChannelById("//INSIRA SEU CANAL DE TEXTO AQUI");
 
                 if (textChannel == null || message == null) {
                     return;
@@ -48,7 +48,7 @@ public class Bot extends ListenerAdapter {
         }
     }
 
-    //TODO: ele mostra comandos, não pode mostrar comandos!
+    //TODO: ele mostra comandos, faça com que ele não mostre os comandos enviados
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
 
