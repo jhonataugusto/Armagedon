@@ -1,8 +1,8 @@
 package br.com.practice.arena;
 
 import br.com.core.Core;
-import br.com.core.crud.redis.DuelRedisCRUD;
 import br.com.practice.arena.map.ArenaMap;
+import br.com.practice.arena.rollback.block.action.BlockAction;
 import br.com.practice.arena.stage.ArenaStage;
 import br.com.practice.arena.team.ArenaTeam;
 import br.com.core.data.DuelData;
@@ -13,10 +13,9 @@ import dev.jcsoftware.jscoreboards.JGlobalScoreboard;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 
@@ -24,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static br.com.practice.util.scheduler.SchedulerUtils.async;
 import static br.com.practice.util.scheduler.SchedulerUtils.sync;
 
 @Getter
@@ -39,38 +39,32 @@ public class Arena {
     private ArenaTeam[] teams;
     private Set<User> currentSpectators;
     private JGlobalScoreboard gameScoreboard;
-
-    public Arena(Game game, World world, ArenaMap arenaMap) {
-        this.game = game;
-        this.world = world;
-        this.map = arenaMap;
-
-        ArenaTeam redTeam = new ArenaTeam("Vermelho", ChatColor.RED, this);
-        ArenaTeam blueTeam = new ArenaTeam("Azul", ChatColor.BLUE, this);
-
-        this.teams = new ArenaTeam[]{redTeam, blueTeam};
-        this.currentSpectators = new HashSet<>();
-
-        teams[0].setOpponent(teams[1]);
-        teams[1].setOpponent(teams[0]);
-
-        createScoreboard();
-    }
+    private List<BlockAction> blockActions;
 
     public Arena(Game game, World world, ArenaMap arenaMap, DuelData data) {
         this.game = game;
         this.world = world;
         this.map = arenaMap;
+        this.blockActions = new ArrayList<>();
 
         ArenaTeam redTeam = new ArenaTeam("Vermelho", ChatColor.RED, this);
         ArenaTeam blueTeam = new ArenaTeam("Azul", ChatColor.BLUE, this);
 
         this.teams = new ArenaTeam[]{redTeam, blueTeam};
         this.currentSpectators = new HashSet<>();
-        this.data = data;
+
+        if (data != null) {
+            this.data = data;
+        }
 
         teams[0].setOpponent(teams[1]);
         teams[1].setOpponent(teams[0]);
+
+        Location locationTeam1 = new Location(getWorld(), getMap().getArea().getTeam1X(), getMap().getArea().getTeam1Y(), getMap().getArea().getTeam1Z(), (int) getMap().getArea().getTeam1Pitch(), (int) getMap().getArea().getTeam1Yaw());
+        Location locationTeam2 = new Location(getWorld(), getMap().getArea().getTeam2X(), getMap().getArea().getTeam2Y(), getMap().getArea().getTeam2Z(), (int) getMap().getArea().getTeam2Pitch(), (int) getMap().getArea().getTeam2Yaw());
+
+        getMap().getArea().setTeamSpawn1(locationTeam1);
+        getMap().getArea().setTeamSpawn2(locationTeam2);
 
         createScoreboard();
     }
@@ -94,8 +88,8 @@ public class Arena {
             getTeams().get(1).add(user);
         }
 
-        Location locationTeam1 = new Location(getWorld(), getMap().getArea().getTeam1X(), getMap().getArea().getTeam1Y(), getMap().getArea().getTeam1Z(), (int) getMap().getArea().getTeam1Pitch(), (int) getMap().getArea().getTeam1Yaw());
-        Location locationTeam2 = new Location(getWorld(), getMap().getArea().getTeam2X(), getMap().getArea().getTeam2Y(), getMap().getArea().getTeam2Z(), (int) getMap().getArea().getTeam2Pitch(), (int) getMap().getArea().getTeam2Yaw());
+        Location locationTeam1 = getMap().getArea().getTeamLocation1(getWorld());
+        Location locationTeam2 = getMap().getArea().getTeamLocation2(getWorld());
 
         if (getTeams().get(0).getAliveMembers().contains(user)) {
             user.getPlayer().teleport(locationTeam1);
@@ -114,10 +108,6 @@ public class Arena {
 
         Bukkit.getServer().getPluginManager().callEvent(new ArenaChangeStateEvent(this, this.getStage()));
         game.handleJoin(user.getPlayer());
-    }
-
-    public void updateScoreboard() {
-        gameScoreboard.updateScoreboard();
     }
 
     public void handleScoreboard(User user) {
@@ -162,6 +152,13 @@ public class Arena {
                             );
                         case PLAYING:
 
+                            long totalSeconds = getCurrentTime() / 1000;
+
+                            long minutes = totalSeconds / 60;
+                            long seconds = totalSeconds % 60;
+
+                            String actualTime = String.format("%02d:%02d", minutes, seconds);
+
                             if (is1v1()) {
 
                                 ArenaTeam team1 = getTeams().get(0);
@@ -179,11 +176,13 @@ public class Arena {
                                 int user1Elo = user1.getAccount().getData().getEloByGameModeName(gameModeName).getElo();
                                 int user2Elo = user2.getAccount().getData().getEloByGameModeName(gameModeName).getElo();
 
+
                                 List<String> scoreboardContents = new ArrayList<>();
 
                                 scoreboardContents.add("");
                                 scoreboardContents.add("Mapa: " + ChatColor.GRAY + this.getMap().getName());
                                 scoreboardContents.add("Arena: " + ChatColor.GRAY + this.getId());
+                                scoreboardContents.add("Tempo: " + ChatColor.GRAY + actualTime);
                                 scoreboardContents.add("");
 
                                 scoreboardContents.add(user1.getTeam().getColor() + user1.getName());
@@ -223,8 +222,9 @@ public class Arena {
                                         "",
                                         "Mapa: " + ChatColor.GRAY + this.getMap().getName(),
                                         "Arena: " + ChatColor.GRAY + this.getDisplayArenaId(),
+                                        "Tempo: " + ChatColor.GRAY + actualTime,
                                         "",
-                                        ChatColor.YELLOW + "Party Team",
+                                        ChatColor.YELLOW + "Partida em equipe",
                                         "",
                                         ChatColor.BLUE + "Restantes: §r" + teamBlue.size(),
                                         ChatColor.BLUE + "Media Ping: §r" + avgPingBlue + "ms",
@@ -272,11 +272,10 @@ public class Arena {
     }
 
     public void reset() {
+
+        setStage(ArenaStage.RESETTING);
+
         sync(() -> {
-            setStage(ArenaStage.RESETTING);
-
-            //TODO: colocar rollback aqui
-
             setCurrentTime(0L);
             getTeams().forEach(ArenaTeam::clear);
             getWorld().getEntities().forEach(Entity::remove);
@@ -286,9 +285,36 @@ public class Arena {
                 setData(null);
             }
 
-            setStage(ArenaStage.FREE);
-            Bukkit.getServer().getPluginManager().callEvent(new ArenaChangeStateEvent(this, this.getStage()));
+            if (getGame().isAllowedBuild()) {
+                rollback();
+            }
         });
+
+        setStage(ArenaStage.FREE);
+        Bukkit.getServer().getPluginManager().callEvent(new ArenaChangeStateEvent(this, this.getStage()));
+    }
+
+    public void rollback() {
+        Iterator<BlockAction> iterator = getBlockActions().iterator();
+
+        while (iterator.hasNext()) {
+            BlockAction action = iterator.next();
+
+            Block block = action.getBlock();
+            BlockState state = action.getState();
+            BlockAction.ActionType type = action.getType();
+
+            if (type.equals(BlockAction.ActionType.PLACE)) {
+                block.setType(Material.AIR);
+            } else {
+                block.setType(state.getType());
+                block.setData(state.getRawData());
+            }
+
+            block.getState().update(true);
+
+            iterator.remove();
+        }
     }
 
     public String getId() {

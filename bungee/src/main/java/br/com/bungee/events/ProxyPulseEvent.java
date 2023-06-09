@@ -11,8 +11,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class
-ProxyPulseEvent extends Event {
+public class ProxyPulseEvent extends Event {
 
     Map<String, ServerInfo> serverInfoMap;
 

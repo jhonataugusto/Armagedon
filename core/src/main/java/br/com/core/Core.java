@@ -2,7 +2,6 @@ package br.com.core;
 
 import br.com.core.database.mongo.MongoDB;
 import br.com.core.database.mongo.storage.MongoStorage;
-import br.com.core.database.redis.RedisCache;
 import com.google.gson.Gson;
 import lombok.Data;
 import redis.clients.jedis.JedisPool;
@@ -31,7 +30,6 @@ public class Core {
     private static final String JEDIS_HOST = "localhost";
     private static final int JEDIS_PORT = 6379;
     public static final JedisPool JEDIS_POOL = new JedisPool(new JedisPoolConfig(), JEDIS_HOST, JEDIS_PORT);
-    public static final RedisCache REDIS_CACHE = new RedisCache();
     public static final String BUNGEECORD_MESSAGING_CHANNEL = "BungeeCord";
 
     private static DecimalFormat build() {

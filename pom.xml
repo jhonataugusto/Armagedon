@@ -13,6 +13,8 @@
         <module>hub</module>
         <module>bungee</module>
         <module>practice</module>
+        <module>bot</module>
+        <module>Otridame</module>
     </modules>
 
     <properties>

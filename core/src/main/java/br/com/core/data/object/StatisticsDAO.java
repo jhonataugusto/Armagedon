@@ -10,13 +10,17 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class StatisticsDAO {
-    private String gameMode_name;
-    private int unranked_matches;
-    private int ranked_matches;
+    private String mode_name = "null";
+    private int unranked_matches = 0;
+    private int ranked_matches = 0;
 
-    private int unranked_wins;
-    private int unranked_losses;
+    private int unranked_wins = 0;
+    private int unranked_losses = 0;
 
-    private int ranked_wins;
-    private int ranked_loses;
+    private int ranked_wins = 0;
+    private int ranked_loses = 0;
+
+    public StatisticsDAO(String mode_name) {
+        this.mode_name = mode_name;
+    }
 }

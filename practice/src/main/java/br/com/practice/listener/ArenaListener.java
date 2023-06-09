@@ -18,7 +18,6 @@ import br.com.practice.events.user.UserDeathEvent;
 import br.com.practice.user.User;
 import br.com.practice.user.death.DeathStyle;
 import br.com.practice.util.cuboid.Cuboid;
-import br.com.practice.util.math.MathUtils;
 import br.com.practice.util.rating.RatingUtil;
 import br.com.practice.util.tag.TagUtil;
 import br.com.practice.util.visibility.Visibility;
@@ -48,6 +47,10 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
+
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
 import static br.com.practice.util.scheduler.SchedulerUtils.*;
 
 public class ArenaListener implements Listener {
@@ -55,7 +58,7 @@ public class ArenaListener implements Listener {
     private final int HIT_BLOCK_LIMIT = 30;
     private final int HIT_CRITICAL_LIMIT = 50;
     private final int MAX_CPS = 15;
-    private final double MAX_RANGE = 4;
+    private final double MAX_RANGE = 3.3;
     private final int MAX_PING_TRIGGER = 100;
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -91,31 +94,40 @@ public class ArenaListener implements Listener {
 
         if (damager.getClicksPerSecond() >= MAX_CPS) {
             double reductionFactor = 0.8;
-            double newCpsDamage = event.getDamage() - (event.getDamage() * reductionFactor);
-            event.setDamage(newCpsDamage);
+            double reducedDamage = event.getDamage() - (event.getDamage() * reductionFactor);
+            event.setDamage(reducedDamage);
         }
 
-        if (damager.getRange() >= MAX_RANGE && damager.getPing() <= MAX_PING_TRIGGER) {
+        if (damager.getRange() >= MAX_RANGE) {
             double reductionFactor = 1;
-            double newRangeDamage = event.getDamage() - (event.getDamage() * reductionFactor);
+            double damageReduced = event.getDamage() - (event.getDamage() * reductionFactor);
 
-            event.setDamage(newRangeDamage);
+            double damageToDamager = event.getDamage() * 2;
+
+            if (damageToDamager >= damager.getPlayer().getHealth()) {
+                UserDeathEvent userDeathEvent = new UserDeathEvent(damager.getArena(), damager, entity, damager.isLastMember());
+                Practice.getInstance().getServer().getPluginManager().callEvent(userDeathEvent);
+            } else {
+                damager.getPlayer().damage(damageToDamager);
+            }
+
+            event.setDamage(damageReduced);
         }
 
-        if (entity.getRange() >= MAX_RANGE && damager.getPing() <= MAX_PING_TRIGGER) {
+        if (entity.getRange() >= MAX_RANGE) {
             double reductionFactor = 1;
-            double newDamage = event.getDamage() + (event.getDamage() * reductionFactor);
-            event.setDamage(newDamage);
+            double buffedDamage = event.getDamage() + (event.getDamage() * reductionFactor);
+            event.setDamage(buffedDamage);
         }
 
         if (entity.getClicksPerSecond() >= MAX_CPS) {
             double reductionFactor = 1;
-            double newDamage = event.getDamage() + (event.getDamage() * reductionFactor);
-            event.setDamage(newDamage);
+            double buffedDamage = event.getDamage() + (event.getDamage() * reductionFactor);
+            event.setDamage(buffedDamage);
         }
 
-        damager.setRange(MathUtils.getEuclideanDistance(damager.getPlayer(), entity.getPlayer()));
-        damager.setSumOfRanges(damager.getSumOfRanges() + damager.getRange());
+        //TODO: tirar os ranges depois
+        //damager.setSumOfRanges(damager.getSumOfRanges() + damager.getRange());
 
         if (entity.getPlayer().isBlocking() && entity.getBlockedHits() >= HIT_BLOCK_LIMIT) {
             double newBlockedHitDamage = event.getDamage() * 2;
@@ -164,6 +176,11 @@ public class ArenaListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onOtherDeathCauseEvents(EntityDamageEvent event) {
+
+        if (!(event.getEntity() instanceof Player)) {
+            return;
+        }
+
         Player entity = (Player) event.getEntity();
         double finalDamage = event.getFinalDamage();
         double entityHealth = entity.getHealth();
@@ -180,7 +197,7 @@ public class ArenaListener implements Listener {
             event.setCancelled(true);
         }
 
-        if ((event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK || event.getCause() == EntityDamageEvent.DamageCause.FALL) && finalDamage >= entityHealth) {
+        if ((event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK || event.getCause() == EntityDamageEvent.DamageCause.FALL || event.getCause() == EntityDamageEvent.DamageCause.CUSTOM) && finalDamage >= entityHealth) {
             event.setCancelled(true);
 
             if (entityUser.getLastDamager() != null) {
@@ -198,27 +215,28 @@ public class ArenaListener implements Listener {
 
     @EventHandler
     public void onArenaPulse(ArenaPulseEvent event) {
+
         event.getArenas().forEach((id, arena) -> {
 
-            if (arena.getData() == null || arena.getAllTeamMembers().isEmpty()) {
-
-                if (arena.getStage().equals(ArenaStage.PLAYING)) {
-                    arena.reset();
-                }
-
+            if ((arena.getStage() != ArenaStage.PLAYING && arena.getWorld().getPlayers().isEmpty())) {
+                arena.reset();
                 return;
+            }
+
+            if (arena.getStage().equals(ArenaStage.PLAYING)) {
+                arena.setCurrentTime(arena.getCurrentTime() + TimeUnit.SECONDS.toMillis(1));
+            }
+
+            if (arena.getStage().equals(ArenaStage.PLAYING) && arena.getCurrentTime() >= arena.getMaxTime()) {
+                arena.setStage(ArenaStage.ENDING);
+                ArenaChangeStateEvent stateEvent = new ArenaChangeStateEvent(arena, arena.getStage(), ArenaChangeStateEvent.ChangeCause.TIME_EXCEED);
+                Bukkit.getServer().getPluginManager().callEvent(stateEvent);
             }
 
             arena.getGameScoreboard().updateScoreboard();
 
-            for (User members : arena.getAllTeamMembers()) {
-
-                if (members == null) {
-                    continue;
-                }
-
-                members.setClicksPerSecond(0);
-
+            for (User user : arena.getAllTeamMembers()) {
+                user.setClicksPerSecond(0);
             }
         });
     }
@@ -271,6 +289,10 @@ public class ArenaListener implements Listener {
 
         TagUtil.unloadTag(user.getPlayer());
 
+        if (user.getArena().getGameScoreboard() != null) {
+            user.getArena().getGameScoreboard().removePlayer(user.getPlayer());
+        }
+
         if (user.getArena().getCurrentSpectators().contains(user)) {
             Practice.getInstance().getServer().getPluginManager().callEvent(new SpectatorLeaveArenaEvent(arena, user));
             return;
@@ -278,6 +300,12 @@ public class ArenaListener implements Listener {
 
         UserDeathEvent userDeathEvent = new UserDeathEvent(arena, user, user.getLastDamager(), user.isLastMember());
         Practice.getInstance().getServer().getPluginManager().callEvent(userDeathEvent);
+
+        user.setArena(null);
+        user.setTeam(null);
+        user.setLastDamager(null);
+
+        async(() -> DuelData.removeDuelsFromAccount(user.getAccount()));
     }
 
     @EventHandler
@@ -338,6 +366,18 @@ public class ArenaListener implements Listener {
                 ArenaTeam team1 = arena.getTeams().get(0);
                 ArenaTeam team2 = arena.getTeams().get(1);
 
+                if (event.getCause() == ArenaChangeStateEvent.ChangeCause.TIME_EXCEED) {
+
+                    Random random = new Random();
+                    int randomNumber = random.nextInt(2);
+
+                    ArenaTeam anyTeamRandomized = randomNumber == 0 ? team1 : team2;
+                    ArenaTeam anyTeamRandomizedOpponent = anyTeamRandomized.getOpponent();
+
+                    Bukkit.getServer().getPluginManager().callEvent(new ArenaEndEvent(arena, anyTeamRandomized, anyTeamRandomizedOpponent));
+                    return;
+                }
+
                 if (team1.getAliveMembers().size() == 0) {
                     Bukkit.getServer().getPluginManager().callEvent(new ArenaEndEvent(arena, team2, team1));
                 } else {
@@ -392,19 +432,24 @@ public class ArenaListener implements Listener {
 
         User user = event.getUser();
 
-        Arena arena = event.getArena();
-
-        if (user == null || arena == null) {
+        if (user == null) {
             return;
         }
 
-        if (arena.getStage() == ArenaStage.PLAYING) {
-            Practice.getInstance().getServer().getPluginManager().callEvent(new UserDeathEvent(arena, user, user.getLastDamager(), user.isLastMember()));
-            user.getPlayer().teleport(arena.getMap().getArea().getTeamSpawn1());
-        } else if (arena.getStage() == ArenaStage.ENDING) {
-            user.getPlayer().teleport(arena.getMap().getArea().getTeamSpawn1());
+        Arena arena = event.getArena();
+
+        if (arena == null) {
+            return;
         }
 
+        Player player = user.getPlayer();
+
+        if (arena.getStage() == ArenaStage.PLAYING) {
+            Practice.getInstance().getServer().getPluginManager().callEvent(new UserDeathEvent(arena, user, user.getLastDamager(), user.isLastMember()));
+            player.teleport(arena.getMap().getArea().getTeamSpawn1());
+        } else if (arena.getStage() == ArenaStage.ENDING) {
+            player.teleport(arena.getMap().getArea().getTeamSpawn1());
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -548,29 +593,24 @@ public class ArenaListener implements Listener {
         dead.getPlayer().playSound(event.getDead().getPlayer().getLocation(), Sound.ZOMBIE_UNFECT, 3.5F, 3.5F);
 
         delay(() -> {
+
+            if (dead.getPlayer() == null) {
+                return;
+            }
+
             Visibility.invisible(dead.getPlayer(), dead.getArena().getAllTeamMembers());
         }, 1);
 
-        if (event.getKiller() == null) {
 
-            for (User members : arena.getAllTeamMembers()) {
-
-                if (members == null) {
-                    continue;
-                }
-
-                members.getPlayer().sendMessage(dead.getName() + " morreu.");
+        for (User user : arena.getAllTeamMembers()) {
+            if (user.getPlayer() == null || dead.getPlayer() == null) {
+                return;
             }
 
-        } else {
-
-            for (User members : arena.getAllTeamMembers()) {
-
-                if (members == null) {
-                    continue;
-                }
-
-                members.getPlayer().sendMessage(dead.getPlayer().getName() + " foi morto por " + event.getKiller().getPlayer().getName());
+            if (event.getKiller() == null) {
+                user.getPlayer().sendMessage(dead.getName() + " morreu.");
+            } else {
+                user.getPlayer().sendMessage(dead.getPlayer().getName() + " foi morto por " + event.getKiller().getPlayer().getName());
             }
         }
 

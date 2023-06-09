@@ -85,8 +85,6 @@ public class PunishCommand extends BaseCommand {
         if (target != null) {
 
             TextComponent headerComponent = new TextComponent(ChatColor.RED + "\n§lVocê foi banido\n\n".toUpperCase());
-
-
             TextComponent idComponent = new TextComponent(ChatColor.YELLOW + "Banimento: " + punishment.getId() + "\n");
             TextComponent punishDurationComponent = new TextComponent(ChatColor.YELLOW + "Data de expiração: §r" + ChatColor.RED + (expirationTime > 0 ? Core.DATE_FORMAT.format(new Date(expirationTime)) : "PERMANENTE") + "\n");
             TextComponent reasonComponent = new TextComponent(ChatColor.YELLOW + "Razão: §r" + punishment.getReason() + "\n\n");

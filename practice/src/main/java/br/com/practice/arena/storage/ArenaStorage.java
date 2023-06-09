@@ -11,7 +11,7 @@ import br.com.practice.util.file.CompressionUtil;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
+import org.bukkit.World;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -55,6 +55,11 @@ public class ArenaStorage {
 
     public Arena getArenaByContextData(DuelData data) {
         return getArenas().values().stream().filter(value -> value.getData().equals(data)).findFirst().orElse(null);
+    }
+
+    public Arena getArenaByWorldName(World world) {
+        String worldName = world.getName().replace("arenas\\", "");
+        return getArenas().values().stream().filter(value -> value.getId().equalsIgnoreCase(worldName)).findFirst().orElse(null);
     }
 
     public Arena getFreeArena(Game game, DuelData data) {

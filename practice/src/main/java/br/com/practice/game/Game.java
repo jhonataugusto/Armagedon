@@ -110,17 +110,18 @@ public abstract class Game implements Listener {
 
         TagUtil.unloadTag(user.getPlayer());
 
+        if (user.getArena().getGameScoreboard() != null) {
+            user.getArena().getGameScoreboard().removePlayer(user.getPlayer());
+        }
+
         user.setArena(null);
         user.setTeam(null);
         user.setLastDamager(null);
 
-        if (user.getScoreboard() != null) {
-            user.getScoreboard().removePlayer(user.getPlayer());
-        }
-
-        DuelData.removeDuelsFromAccount(user.getAccount());
-
-        async(() -> BungeeUtils.connect(user.getPlayer(), Server.LOBBY_PRACTICE));
+        async(() -> {
+            DuelData.removeDuelsFromAccount(user.getAccount());
+            BungeeUtils.connect(user.getPlayer(), Server.LOBBY_PRACTICE);
+        });
     }
 
     public void handleInventory(User user) {
@@ -185,7 +186,7 @@ public abstract class Game implements Listener {
             creator.generateStructures(false);
             World world = creator.createWorld();
             WorldHandler.adjust(world, map.getArea().getChunks(world));
-            Arena arena = new Arena(this, world, map);
+            Arena arena = new Arena(this, world, map, null);
             getPlugin().getArenaStorage().load(arena);
             world.setMetadata("arena", new FixedMetadataValue(Practice.getInstance(), arena));
 
@@ -205,7 +206,7 @@ public abstract class Game implements Listener {
             creator.generateStructures(false);
             World world = creator.createWorld();
             WorldHandler.adjust(world, map.getArea().getChunks(world));
-            Arena arena = new Arena(this, world, map);
+            Arena arena = new Arena(this, world, map, null);
             getPlugin().getArenaStorage().load(arena);
             world.setMetadata("arena", new FixedMetadataValue(Practice.getInstance(), arena));
 

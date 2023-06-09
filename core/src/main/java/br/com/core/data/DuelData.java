@@ -4,7 +4,6 @@ import br.com.core.Core;
 import br.com.core.account.Account;
 import br.com.core.crud.mongo.DuelMongoCRUD;
 import br.com.core.crud.redis.DuelRedisCRUD;
-import br.com.core.utils.json.JsonUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -31,27 +30,24 @@ public class DuelData implements Serializable {
 
     public static final String REGEX_NAME_UUID_SEPARATOR = "#";
 
+
     public DuelData() {
     }
 
     public DuelData(String json) {
+        DuelData data = Core.GSON.fromJson(json, DuelData.class);
 
-        JsonParser jsonParser = new JsonParser();
-        JsonObject jsonObject = jsonParser.parse(json).getAsJsonObject();
-
-        for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-            String fieldName = entry.getKey();
-            JsonElement value = entry.getValue();
-
-            try {
-                Field field = getClass().getDeclaredField(fieldName);
-                field.setAccessible(true);
-
-                JsonUtils.setFieldFromJson(field, value, this);
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            }
-        }
+        this._id = data.get_id();
+        this.team1 = data.getTeam1();
+        this.team2 = data.getTeam2();
+        this.custom = data.isCustom();
+        this.gameModeName = data.getGameModeName();
+        this.mapName = data.getMapName();
+        this.arenaId = data.getArenaId();
+        this.spectators = data.getSpectators();
+        this.registeredSpectators = data.getRegisteredSpectators();
+        this.inventories = data.getInventories();
+        this.ranked = data.isRanked();
     }
 
     public void saveData() {
@@ -96,6 +92,9 @@ public class DuelData implements Serializable {
             duel.saveData();
             duel.deleteData();
         });
+
+        account.getData().setCurrentDuelUuid(null);
+        account.getData().saveData();
     }
 
     public String getNameAndUuidKey(String uuid) {

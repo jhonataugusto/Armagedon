@@ -2,6 +2,8 @@ package br.com.hub.lobby.practice;
 
 import br.com.core.Core;
 import br.com.core.crud.redis.DuelRedisCRUD;
+import br.com.core.crud.redis.ServerRedisCRUD;
+import br.com.core.enums.server.Server;
 import br.com.hub.Hub;
 import br.com.hub.gui.editor.KitEditorGUI;
 import br.com.hub.lobby.Lobby;
@@ -62,14 +64,7 @@ public class Practice extends Lobby {
 
                 () -> {
 
-                    int playing = (int) DuelRedisCRUD.getDuels()
-                            .stream()
-                            .flatMap(duel -> {
-                                List<UUID> members = new ArrayList<>();
-                                members.addAll(duel.getTeam1());
-                                members.addAll(duel.getTeam2());
-                                return members.stream();
-                            }).count();
+                    int playing = ServerRedisCRUD.findByName(Server.PRACTICE.getName()).getCurrentPlayers();
 
                     int totalPlayers = Bukkit.getOnlinePlayers().size() + playing;
 

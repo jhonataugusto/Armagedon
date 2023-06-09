@@ -7,14 +7,18 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.reflections.Reflections;
 
+
 import java.util.HashSet;
 import java.util.Set;
 
 public class GameStorage {
 
-    Reflections reflections = new Reflections("br.com.practice.game.list");
-    Set<Class<? extends Game>> gamesList = reflections.getSubTypesOf(Game.class);
-    Set<Game> games = new HashSet<>();
+
+    private final Reflections reflections = new Reflections("br.com.practice.game.list");
+    private final Set<Class<? extends Game>> gamesList = reflections.getSubTypesOf(Game.class);
+
+    private final Set<Game> games = new HashSet<>();
+
 
     public void load() {
 
@@ -61,6 +65,7 @@ public class GameStorage {
     public Class<? extends Game> getGameClass(String name) {
         return gamesList.stream().filter(gameClass -> gameClass.getSimpleName().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
+
 
     public Game getGame(GameMode mode) {
         return games.stream().filter(game -> game.getMode().equals(mode)).findFirst().orElse(null);

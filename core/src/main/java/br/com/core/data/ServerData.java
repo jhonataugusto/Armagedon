@@ -2,7 +2,6 @@ package br.com.core.data;
 
 import br.com.core.Core;
 import br.com.core.crud.redis.ServerRedisCRUD;
-import br.com.core.utils.json.JsonUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -23,25 +22,15 @@ public class ServerData {
 
     public ServerData(String json) {
 
-        JsonParser jsonParser = new JsonParser();
-        JsonObject jsonObject = jsonParser.parse(json).getAsJsonObject();
+        ServerData serverData = Core.GSON.fromJson(json, ServerData.class);
 
-        for(Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-            String fieldName = entry.getKey();
-            JsonElement value = entry.getValue();
-
-            try {
-                Field field = getClass().getDeclaredField(fieldName);
-                field.setAccessible(true);
-
-                JsonUtils.setFieldFromJson(field, value, this);
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            }
-        }
+        this._id = serverData.get_id();
+        this.name = serverData.getName();
+        this.online = serverData.isOnline();
+        this.currentPlayers = serverData.getCurrentPlayers();
     }
 
-    public void saveData(){
+    public void saveData() {
         ServerRedisCRUD.save(this);
     }
 
@@ -49,13 +38,14 @@ public class ServerData {
         return ServerRedisCRUD.findByName(getName());
     }
 
-    public void delete(){
+    public void delete() {
         ServerRedisCRUD.delete(getName());
     }
 
-    public String toJson(){
+    public String toJson() {
         return Core.GSON.toJson(this);
     }
+
     public static ServerData fromJson(String json) {
         return Core.GSON.fromJson(json, ServerData.class);
     }

@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 @Setter
 public class User {
     private Account account;
-    private JPerPlayerScoreboard scoreboard;
     private Player player;
     private Arena arena;
     private ArenaTeam team;

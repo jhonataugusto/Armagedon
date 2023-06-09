@@ -2,6 +2,7 @@ package br.com.core.crud.redis;
 
 import br.com.core.Core;
 import br.com.core.data.DuelData;
+import br.com.core.database.redis.RedisChannels;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 public class DuelRedisCRUD {
 
     private static final JedisPool JEDIS_POOL = Core.JEDIS_POOL;
-    private static final String DUELS_CACHE = Core.REDIS_CACHE.DUELS_DATABASE_CACHE;
+    private static final String DUELS_CACHE = RedisChannels.DUELS_DATABASE_CHANNEL.getChannel();
 
     public static void save(DuelData data) {
         try (Jedis jedis = JEDIS_POOL.getResource()) {

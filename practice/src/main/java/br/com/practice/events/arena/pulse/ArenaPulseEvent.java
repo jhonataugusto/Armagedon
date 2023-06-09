@@ -7,9 +7,7 @@ import lombok.Setter;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Getter
 @Setter

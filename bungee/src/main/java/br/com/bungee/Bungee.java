@@ -1,8 +1,9 @@
 package br.com.bungee;
 
+import br.com.bungee.events.RedisPubSubEvent;
 import br.com.core.account.storage.AccountStorage;
-import br.com.bungee.listeners.ServerListener;
 import br.com.bungee.task.HeartBeatTask;
+import br.com.core.database.redis.RedisChannels;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.BungeeCommandManager;
 import lombok.Getter;
@@ -14,6 +15,9 @@ import org.reflections.Reflections;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import static br.com.bungee.util.scheduler.SchedulerUtils.async;
+import static br.com.core.utils.pubsub.RedisPubSubUtil.subscribe;
+
 @Getter
 public class Bungee extends Plugin {
 
@@ -21,6 +25,7 @@ public class Bungee extends Plugin {
 
     private AccountStorage accountStorage;
     private BungeeCommandManager bungeeCommandManager;
+
 
     @Override
     public void onLoad() {
@@ -36,12 +41,17 @@ public class Bungee extends Plugin {
 
         bungeeCommandManager = new BungeeCommandManager(this);
         registerCommands();
+
+        async(() -> {
+            subscribe((channel, message) -> {
+                new RedisPubSubEvent().setChannel(channel).setMessage(message).call();
+            }, RedisChannels.MINECRAFT_RECEIVE_MESSAGES_CHANNEL.getChannel());
+        });
     }
 
     @Override
     public void onDisable() {
         super.onDisable();
-
         accountStorage.getAccounts().forEach((key, value) -> accountStorage.unregister(value.getUuid()));
     }
 

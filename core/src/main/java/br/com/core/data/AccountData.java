@@ -7,10 +7,9 @@ import br.com.core.crud.mongo.AccountMongoCRUD;
 import br.com.core.crud.redis.AccountRedisCRUD;
 import br.com.core.data.object.*;
 import br.com.core.enums.game.GameMode;
-import br.com.core.utils.json.JsonUtils;
 import br.com.core.utils.serialization.GenericSerialization;
-import com.google.gson.*;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -18,6 +17,7 @@ import java.util.*;
 
 
 @Data
+@Accessors(chain = true)
 public class AccountData implements Serializable {
     private Object _id = null;
     private String name;
@@ -42,7 +42,7 @@ public class AccountData implements Serializable {
 
         for (GameMode mode : GameMode.values()) {
             elos.add(new EloDAO(mode.getName(), 1000));
-            statistics.add(new StatisticsDAO(mode.getName(), 0, 0, 0, 0, 0, 0));
+            statistics.add(new StatisticsDAO(mode.getName()));
         }
 
         if (ranks.isEmpty()) {
@@ -64,22 +64,20 @@ public class AccountData implements Serializable {
      * @param json json da classe {@link AccountData}.
      */
     public AccountData(String json) {
-        JsonParser parser = new JsonParser();
-        JsonObject jsonObject = parser.parse(json).getAsJsonObject();
 
-        for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-            String fieldName = entry.getKey();
-            JsonElement value = entry.getValue();
+        AccountData accountData = Core.GSON.fromJson(json, AccountData.class);
 
-            try {
-                Field field = getClass().getDeclaredField(fieldName);
-                field.setAccessible(true);
-
-                JsonUtils.setFieldFromJson(field, value, this);
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            }
-        }
+        this._id = accountData.get_id();
+        this.name = accountData.getName();
+        this.uuid = accountData.getUuid();
+        this.currentDuelUuid = accountData.getCurrentDuelUuid();
+        this.ranks = accountData.getRanks();
+        this.inventories = accountData.getInventories();
+        this.elos = accountData.getElos();
+        this.preferences = accountData.getPreferences();
+        this.statistics = accountData.getStatistics();
+        this.punishments = accountData.getPunishments();
+        this.alts = accountData.getAlts();
     }
 
     /**

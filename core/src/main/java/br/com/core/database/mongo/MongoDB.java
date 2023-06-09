@@ -54,6 +54,7 @@ public class MongoDB {
         try (FileWriter writer = new FileWriter(file)) {
             Gson gson = new Gson();
             gson.toJson(properties, writer);
+
         } catch (IOException e) {
             System.out.println("Error saving properties file");
             e.printStackTrace();

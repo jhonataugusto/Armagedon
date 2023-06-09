@@ -1,7 +1,6 @@
 package br.com.bungee.util.scheduler;
 
 import br.com.bungee.Bungee;
-import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.TaskScheduler;
 
 import java.util.concurrent.TimeUnit;

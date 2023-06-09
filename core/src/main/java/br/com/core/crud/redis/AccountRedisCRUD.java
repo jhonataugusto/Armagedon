@@ -2,6 +2,7 @@ package br.com.core.crud.redis;
 
 import br.com.core.Core;
 import br.com.core.data.AccountData;
+import br.com.core.database.redis.RedisChannels;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -13,7 +14,7 @@ import java.util.UUID;
 public class AccountRedisCRUD {
 
     private static final JedisPool JEDIS_POOL = Core.JEDIS_POOL;
-    private static final String ACCOUNT_CACHE = Core.REDIS_CACHE.ACCOUNT_DATABASE_CACHE;
+    private static final String ACCOUNT_CACHE = RedisChannels.ACCOUNT_DATABASE_CHANNEL.getChannel();
 
     public static void save(AccountData data) {
         try (Jedis jedis = JEDIS_POOL.getResource()) {

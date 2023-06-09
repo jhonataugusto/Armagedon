@@ -2,9 +2,13 @@ package br.com.practice;
 
 import br.com.core.Core;
 import br.com.core.crud.redis.DuelRedisCRUD;
+import br.com.core.data.object.PlayerCheckDAO;
+import br.com.core.database.redis.RedisChannels;
+import br.com.core.utils.pubsub.RedisPubSubUtil;
 import br.com.practice.arena.storage.ArenaStorage;
 import br.com.practice.game.storage.GameStorage;
 import br.com.practice.task.ArenaPulseTask;
+import br.com.practice.user.User;
 import br.com.practice.user.storage.UserStorage;
 import br.com.practice.util.bungee.BungeeUtils;
 import br.com.practice.util.file.CompressionUtil;
@@ -13,12 +17,16 @@ import co.aikar.commands.BukkitCommandManager;
 import fr.minuskube.inv.InventoryManager;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.reflections.Reflections;
 
 import java.io.File;
 import java.util.Set;
+import java.util.UUID;
+
+import static br.com.practice.util.scheduler.SchedulerUtils.async;
 
 @Getter
 public class Practice extends JavaPlugin {
@@ -62,6 +70,29 @@ public class Practice extends JavaPlugin {
         inventoryManager.init();
 
         DuelRedisCRUD.refreshDuels();
+
+        async(() -> {
+            RedisPubSubUtil.subscribe((channel, message) -> {
+
+                String minecraftAntiCheatChannel = RedisChannels.MINECRAFT_ANTICHEAT_MESSAGES_CHANNEL.getChannel();
+                if (!channel.equalsIgnoreCase(minecraftAntiCheatChannel)) {
+                    return;
+                }
+
+                PlayerCheckDAO playerCheck = Core.GSON.fromJson(message, PlayerCheckDAO.class);
+
+                User user = User.fetch(UUID.fromString(playerCheck.getUuid()));
+
+                if (user == null) {
+                    return;
+                }
+
+                user.setRange(playerCheck.getRange());
+                user.getPlayer().getWorld().playSound(user.getPlayer().getLocation(), Sound.BAT_DEATH, 3.5f, 3.5f);
+                Bukkit.broadcastMessage(playerCheck.getRange() + "");
+
+            }, RedisChannels.MINECRAFT_ANTICHEAT_MESSAGES_CHANNEL.getChannel());
+        });
     }
 
     @Override
